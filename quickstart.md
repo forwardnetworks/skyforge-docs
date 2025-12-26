@@ -32,11 +32,12 @@ Secrets are file-backed and gitignored. See
 `k8s/overlays/k3s-traefik-secrets/kustomization.yaml` for the full list. At
 minimum you need:
 - `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_session_secret`
-- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_password`
-- `k8s/overlays/k3s-traefik-secrets/secrets/gitea_admin_password`
-- `k8s/overlays/k3s-traefik-secrets/secrets/semaphore_admin_password`
+- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_shared_password`
 - Postgres + object storage secrets
 - TLS certs under `k8s/overlays/k3s-traefik-secrets/certs/`
+
+The shared admin password is used to seed Skyforge, Gitea, Semaphore, NetBox, Nautobot,
+and the code-server sync job. LDAP credentials are separate and only required if you enable LDAP.
 
 
 ## 4) Deploy

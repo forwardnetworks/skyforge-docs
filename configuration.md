@@ -36,6 +36,12 @@ fall back to local admin authentication only.
 - `SKYFORGE_PROVISIONER_EMAIL`: email for the provisioner user.
 - `SKYFORGE_ADMIN_USERS`: comma-separated admin usernames for Skyforge access control.
 
+## 3a) Shared admin secret (k3s overlay)
+The local admin password is stored in a single secret file and reused across Skyforge,
+Gitea, Semaphore, NetBox, Nautobot, and the code-server sync job:
+- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_shared_password`
+LDAP credentials live in separate secrets and are only required if you enable LDAP.
+
 ## 4) Integration endpoints (optional)
 - `SKYFORGE_GITEA_URL`: base URL for Git provider (e.g. `http://gitea:3000`).
 - `SKYFORGE_GITEA_API_URL`: API base URL for Git provider (e.g. `http://gitea:3000/api/v1`).
@@ -48,6 +54,8 @@ fall back to local admin authentication only.
 - `SKYFORGE_EVE_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing EVE-NG servers.
 - `SKYFORGE_EVE_SERVERS_FILE`: file path containing the same JSON.
 - `SKYFORGE_EVE_API_URL`: fallback single EVE API URL (used if no servers JSON is provided).
+- `SKYFORGE_LABPP_API_URL`: optional LabPP API base URL (defaults to `<eve web>/labpp` when unset).
+- `SKYFORGE_LABPP_SKIP_TLS_VERIFY`: `true` or `false` for LabPP API TLS verification.
 - `SKYFORGE_NETLAB_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing Netlab servers.
 - `SKYFORGE_NETLAB_SERVERS_FILE`: file path containing the same JSON.
 
