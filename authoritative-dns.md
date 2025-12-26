@@ -10,7 +10,7 @@ kubectl apply -k k8s/infra/technitium-dns
 ```
 
 ## Access
-- Web UI (authenticated via Skyforge forward-auth):
+- Web UI (authenticated via Skyforge SSO gate):
   - `https://<hostname>/dns/`
 - DNS service (NodePort on the k3s node):
   - UDP/53 on node port `30053`

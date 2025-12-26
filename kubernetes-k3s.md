@@ -4,7 +4,7 @@ This repo includes a Kubernetes manifest set under `k8s/kompose/` that mirrors t
 
 ## Goals / assumptions
 - Target: a host running **k3s**
-- Edge: Traefik is the only edge (TLS + routing + forward-auth to Skyforge Server).
+- Edge: Traefik is the only edge (TLS + routing + SSO gate to Skyforge Server).
 - No *edge* nginx in Kubernetes: Traefik is the only edge. We still run small internal `nginx` helper pods where upstream apps require it (e.g., Nautobot static and `/logout` wiring).
 - Secrets: do **not** commit secrets; create Kubernetes Secrets from `k8s/overlays/k3s-traefik-secrets/secrets/` and `k8s/overlays/k3s-traefik-secrets/certs/`
 
