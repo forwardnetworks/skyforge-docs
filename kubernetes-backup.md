@@ -12,7 +12,7 @@ This is a pragmatic backup plan for a **single-node** host running **k3s** with 
 - Default directory: `/var/lib/rancher/k3s/storage/`
 
 3) **Skyforge runtime secrets and TLS**
-- `./secrets/` (gitignored)
+- `k8s/overlays/k3s-traefik-secrets/secrets/` (gitignored)
 - `./certs/` (gitignored)
 
 ## Backup procedure (single node)

@@ -6,7 +6,7 @@ This repo includes a Kubernetes manifest set under `k8s/kompose/` that mirrors t
 - Target: a host running **k3s**
 - Edge: Traefik is the only edge (TLS + routing + forward-auth to Skyforge Server).
 - No *edge* nginx in Kubernetes: Traefik is the only edge. We still run small internal `nginx` helper pods where upstream apps require it (e.g., Nautobot static and `/logout` wiring).
-- Secrets: do **not** commit secrets; create Kubernetes Secrets from `./secrets/` and `./certs/`
+- Secrets: do **not** commit secrets; create Kubernetes Secrets from `k8s/overlays/k3s-traefik-secrets/secrets/` and `k8s/overlays/k3s-traefik-secrets/certs/`
 
 ## 1) Install k3s
 Follow your standard k3s process. Minimal example:
@@ -25,10 +25,10 @@ Dex (OIDC) uses the issuer hostname and the object storage console validates it.
 - Ensure `./certs/skyforge.crt` has a SAN for that hostname
 
 ## 3) Prepare secrets
-Populate local secret files under `./secrets/` and TLS certs under `./certs/`.
+Populate local secret files under `k8s/overlays/k3s-traefik-secrets/secrets/` and TLS certs under `k8s/overlays/k3s-traefik-secrets/certs/`.
 
 Required inputs (gitignored):
-- `./secrets/*` (LDAP, DB passwords, admin passwords, etc.)
+- `k8s/overlays/k3s-traefik-secrets/secrets/*` (LDAP, DB passwords, admin passwords, etc.)
 - `./certs/skyforge.crt` + `./certs/skyforge.key` (for `proxy-tls`)
 
 Note: the secrets overlay reads from local files. If you are skipping optional integrations, create empty placeholder files so `kustomize` can render the Secret manifests.

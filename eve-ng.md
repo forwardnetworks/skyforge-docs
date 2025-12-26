@@ -4,9 +4,9 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 
 ## Configuration (k3s)
 
-1. Create a secrets file (not committed; `secrets/` is gitignored):
+1. Create a secrets file (not committed; `k8s/overlays/k3s-traefik-secrets/secrets/` is gitignored):
 
-   - Path: `secrets/skyforge_eve_servers.json`
+   - Path: `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_eve_servers.json`
    - Format:
 
      ```json
@@ -52,7 +52,7 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 
 ## UI
 
-- The Toolchain “EVE-NG Labs” card launches via `GET /labs/?project_id=<semaphoreProjectId>` which redirects to the project’s configured EVE server web UI.
+- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<semaphoreProjectId>` which redirects to the project’s configured EVE server web UI.
 - Set the EVE server on the Projects page (“Set EVE” button), which updates `eveServer` for that project in Postgres.
 - Projects use a per-owner lab path: `/Users/<owner>/<project-slug>.unl`. Editors/viewers link to the owner’s lab.
 - Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Projects page to view/create the lab file via SSH.
@@ -62,7 +62,7 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 - Prefer SSH key auth (no EVE web/API credentials required) by setting:
   - `SKYFORGE_EVE_SSH_KEY_FILE` (k3s uses `/run/secrets/eve-runner-ssh-key`)
   - `SKYFORGE_EVE_SSH_USER` (defaults to `root`)
-- The k3s secret for `SKYFORGE_EVE_SSH_KEY_FILE` comes from the local file `secrets/eve_runner_ssh_key` (gitignored) applied via `k8s/overlays/k3s-traefik-secrets`.
+- The k3s secret for `SKYFORGE_EVE_SSH_KEY_FILE` comes from the local file `k8s/overlays/k3s-traefik-secrets/secrets/eve_runner_ssh_key` (gitignored) applied via `k8s/overlays/k3s-traefik-secrets`.
 - The old EVE API credential fields (`username`/`password`) are still supported as a fallback for environments that require it, but are not recommended for this setup.
 - Host reachability check (from the k3s node):
   - `</dev/tcp/10.0.0.10/22` and `</dev/tcp/10.0.0.10/443`

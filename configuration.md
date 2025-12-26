@@ -44,6 +44,13 @@ fall back to local admin authentication only.
 - `SKYFORGE_OBJECT_STORAGE_ENDPOINT`: S3-compatible endpoint (host:port).
 - `SKYFORGE_OBJECT_STORAGE_USE_SSL`: `true` or `false`.
 
+## 4a) Lab server pools (optional)
+- `SKYFORGE_EVE_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing EVE-NG servers.
+- `SKYFORGE_EVE_SERVERS_FILE`: file path containing the same JSON.
+- `SKYFORGE_EVE_API_URL`: fallback single EVE API URL (used if no servers JSON is provided).
+- `SKYFORGE_NETLAB_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing Netlab servers.
+- `SKYFORGE_NETLAB_SERVERS_FILE`: file path containing the same JSON.
+
 ## 5) LDAP defaults (optional)
 - `SKYFORGE_LDAP_URL`: LDAP URL (e.g. `ldap://ldap:389` or `ldaps://ldap:636`).
 - `SKYFORGE_LDAP_BIND_TEMPLATE`: bind template (e.g. `uid=%s,ou=People,dc=example,dc=com`).

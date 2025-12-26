@@ -23,20 +23,20 @@ Minimum values to update:
 - `SKYFORGE_GITEA_URL`, `SKYFORGE_GITEA_API_URL`
 - `SKYFORGE_SEMAPHORE_URL`
 
-If you use LDAP, provide the LDAP secrets (`secrets/skyforge_ldap_url`,
-`secrets/skyforge_ldap_bind_template`, and the Semaphore/Gitea LDAP secrets).
+If you use LDAP, provide the LDAP secrets (`k8s/overlays/k3s-traefik-secrets/secrets/skyforge_ldap_url`,
+`k8s/overlays/k3s-traefik-secrets/secrets/skyforge_ldap_bind_template`, and the Semaphore/Gitea LDAP secrets).
 If you do not use LDAP, leave those secrets empty and skip the LDAP init pods.
 
 ## 3) Secrets
 Secrets are file-backed and gitignored. See
 `k8s/overlays/k3s-traefik-secrets/kustomization.yaml` for the full list. At
 minimum you need:
-- `secrets/skyforge_session_secret`
-- `secrets/skyforge_admin_password`
-- `secrets/gitea_admin_password`
-- `secrets/semaphore_admin_password`
+- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_session_secret`
+- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_password`
+- `k8s/overlays/k3s-traefik-secrets/secrets/gitea_admin_password`
+- `k8s/overlays/k3s-traefik-secrets/secrets/semaphore_admin_password`
 - Postgres + object storage secrets
-- TLS certs under `certs/`
+- TLS certs under `k8s/overlays/k3s-traefik-secrets/certs/`
 
 
 ## 4) Deploy
