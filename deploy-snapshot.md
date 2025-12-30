@@ -22,7 +22,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 ## Notes
 - Skyforge’s external API is served behind Traefik under `https://<hostname>/api/skyforge/*`.
   - The embedded OpenAPI schema `servers` includes `url: /api/skyforge` so Swagger “Try it out” works.
-- API Testing is linked via `https://<hostname>/api-testing`.
+- API Testing is linked via `https://<hostname>/api-testing/`.
   - This sets a short-lived cookie and routes Hoppscotch at the same hostname (Hoppscotch requires `/` due to HTML5 history routing).
   - Exit API Testing with `https://<hostname>/api-testing/exit` to return to the portal.
 
