@@ -34,7 +34,10 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 - NetBox UI: `https://<hostname>/netbox/`
 - Nautobot UI: `https://<hostname>/nautobot/`
 - Swagger UI: `https://<hostname>/swagger/`
-- API testing: `https://<hostname>/hoppscotch/`
+- Swagger schema: `https://<hostname>/swagger/openapi.json` (should include a `servers` entry with `url: /api/skyforge`)
+- API testing: `https://<hostname>/api-testing` (switches to Hoppscotch on the same hostname)
+  - Exit: `https://<hostname>/api-testing/exit`
+  - Note: while API Testing is enabled, Hoppscotch expects `/` and can mask the portal root; use `/status` or `/dashboard/home` to reach Skyforge, or exit API Testing.
 
 If an integration is disabled, remove its health check from
 `SKYFORGE_HEALTH_HTTP_CHECKS` so it doesn’t show up as degraded.

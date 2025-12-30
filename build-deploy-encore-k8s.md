@@ -13,31 +13,43 @@ This mirrors the typed Encore backend approach while keeping Skyforge’s k8s + 
 
 ## Build pipeline (recommended)
 
-Set a registry reachable by your k3s nodes (example uses `registry.lab.local:5000`, or `localhost:5000` on single-node k3s):
+Set a registry reachable by your k3s nodes (private GHCR):
 
 ```bash
-SKYFORGE_REGISTRY=registry.lab.local:5000
+SKYFORGE_REGISTRY=ghcr.io/forwardnetworks
 TAG=latest
 ```
 
-Build the Encore server image:
+For private GHCR, ensure you can push from your build machine:
 ```bash
-cd server
-encore build docker --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
+gh auth refresh -h github.com -s read:packages,write:packages
+gh auth token | docker login ghcr.io -u <github-user> --password-stdin
 ```
 
-Build the remaining images:
+Build the Encore server image (k3s runs `linux/amd64`):
+```bash
+cd server
+encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
+```
+
+Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..
-docker build -f portal/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal
-docker build -f docker/netbox/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}" .
-docker build -f docker/nautobot/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}" .
-docker build -f docker/webhooks/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-webhooks:${TAG}" .
+docker buildx build --platform linux/amd64 --push -f portal/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal
+docker buildx build --platform linux/amd64 --push -f docker/netbox/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}" .
+docker buildx build --platform linux/amd64 --push -f docker/nautobot/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}" .
+```
 
-docker push "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}"
-docker push "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}"
-docker push "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}"
-docker push "${SKYFORGE_REGISTRY}/skyforge-webhooks:${TAG}"
+For private GHCR, the k3s namespace must have an image pull secret:
+```bash
+kubectl -n skyforge create secret docker-registry ghcr-pull \
+  --docker-server=ghcr.io \
+  --docker-username=<github-user> \
+  --docker-password="$(gh auth token)" \
+  --docker-email=<github-user>@users.noreply.github.com
+
+kubectl -n skyforge patch serviceaccount default \
+  -p '{"imagePullSecrets":[{"name":"ghcr-pull"}]}'
 ```
 
 ### Notes on Docker vs Encore
@@ -49,25 +61,18 @@ If you want *everything* built Encore-style, that becomes a separate migration t
 
 ## Native Kubernetes flow (preferred)
 
-Skyforge uses kustomize overlays as the primary deployment interface:
+Skyforge ships a Helm chart and publishes it to GHCR as an OCI artifact:
 
 ```bash
-kubectl create namespace skyforge
-kubectl apply -f k8s/traefik/helmchartconfig-plugins.yaml
-kubectl apply -k k8s/overlays/k3s-traefik-secrets
-```
+gh auth refresh -h github.com -s read:packages
+gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
 
-## Switching registries (kustomize)
-
-The k3s overlay uses `kustomize` image overrides. To point at a different registry:
-
-```bash
-cd k8s/overlays/k3s-traefik
-kustomize edit set image skyforge-server=registry.lab.local/skyforge-server:latest
-kustomize edit set image skyforge-portal=registry.lab.local/skyforge-portal:latest
-kustomize edit set image skyforge-netbox=registry.lab.local/skyforge-netbox:latest
-kustomize edit set image skyforge-nautobot=registry.lab.local/skyforge-nautobot:latest
-kustomize edit set image skyforge-webhooks=registry.lab.local/skyforge-webhooks:latest
+helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+  -n skyforge --create-namespace \
+  --reset-values \
+  --version <chart-version> \
+  -f ./deploy/skyforge-values.yaml \
+  -f /root/skyforge-secrets.yaml
 ```
 
 ## Version pinning

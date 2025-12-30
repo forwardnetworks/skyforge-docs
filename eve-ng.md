@@ -17,12 +17,17 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
            "webUrl": "https://__EVE_NG_HOST__/",
            "sshHost": "__EVE_NG_HOST__",
            "sshUser": "root",
-           "labsPath": "/opt/unetlab/labs",
+           "labsPath": "/opt/unetlab/labs/admin",
            "tmpPath": "/opt/unetlab/tmp"
          }
        ]
      }
      ```
+
+     Notes:
+
+     - EVE stores labs under a per-EVE-username subfolder (commonly `admin`), so `labsPath` should typically be `/opt/unetlab/labs/<eve-username>`.
+     - The examples below assume `labsPath=/opt/unetlab/labs/admin`.
 
 2. Apply/update k8s secrets and roll out:
 
@@ -57,12 +62,20 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 - Projects use a per-owner lab path: `/Users/<owner>/<project-slug>.unl`. Editors/viewers link to the owner’s lab.
 - Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Projects page to view/create the lab file via SSH.
 
+## Where labs live on disk
+
+EVE lab files live under the configured `labsPath` on each EVE server, typically:
+
+- Root: `/opt/unetlab/labs/<eve-username>/`
+- Skyforge-managed labs: `/opt/unetlab/labs/<eve-username>/skyforge/<project-slug>.unl`
+- User-created labs (EVE UI): `/opt/unetlab/labs/<eve-username>/Users/<ldap-user>/…/*.unl`
+
 ## Notes
 
 - Prefer SSH key auth (no EVE web/API credentials required) by setting:
   - `SKYFORGE_EVE_SSH_KEY_FILE` (k3s uses `/run/secrets/eve-runner-ssh-key`)
   - `SKYFORGE_EVE_SSH_USER` (defaults to `root`)
 - The k3s secret for `SKYFORGE_EVE_SSH_KEY_FILE` comes from the local file `k8s/overlays/k3s-traefik-secrets/secrets/eve_runner_ssh_key` (gitignored) applied via `k8s/overlays/k3s-traefik-secrets`.
-- The old EVE API credential fields (`username`/`password`) are still supported as a fallback for environments that require it, but are not recommended for this setup.
+- If you provide EVE API credentials (either global `SKYFORGE_EVE_*` or per-server `apiUrl`/`username`/`password`), Skyforge will use them for richer status stats; otherwise it falls back to SSH for basic stats and lab management.
 - Host reachability check (from the k3s node):
   - `</dev/tcp/10.0.0.10/22` and `</dev/tcp/10.0.0.10/443`

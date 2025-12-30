@@ -16,7 +16,7 @@ sudo kubectl get nodes
 ```
 
 ## 2) Ensure DNS + TLS hostname are correct
-Dex (OIDC) uses the issuer hostname and the object storage console validates it.
+Several components validate the public hostname and TLS certificate (for example, the object storage console redirect URL).
 
 - Pick the public hostname (example): `skyforge.your-domain.local` and set it in `config.env`.
 - Ensure it resolves to the k3s ingress/VM IP from:
@@ -34,7 +34,7 @@ Required inputs (gitignored):
 Note: the secrets overlay reads from local files. If you are skipping optional integrations, create empty placeholder files so `kustomize` can render the Secret manifests.
 
 ## 4) Apply manifests
-Enable the required Traefik plugin (rewritebody) on k3s (required for `/code`, `/code-shared`, `/minio-console` subpaths):
+Enable the required Traefik plugin (rewritebody) on k3s (required for `/code` and `/minio-console` subpaths):
 ```bash
 kubectl apply -f k8s/traefik/helmchartconfig-plugins.yaml
 ```
@@ -84,17 +84,6 @@ Kubernetes can’t see images you built on your workstation unless you:
 - import/load them onto every node
 
 For build commands and registry setup, see `docs/kubernetes-build.md`.
-
-### Local registry
-Run a local registry on the k3s host (default: `localhost:5000`) and configure
-`/etc/rancher/k3s/registries.yaml` as documented in `docs/kubernetes-build.md`.
-
-The k3s overlay already points to `localhost:5000`:
-- `k8s/overlays/k3s-traefik/kustomization.yaml`
-
-Note: `localhost:5000` works for **single-node** k3s. For multi-node, use a real hostname/IP reachable from every node and update:
-- `k8s/overlays/k3s-traefik/kustomization.yaml`
-- `/etc/rancher/k3s/registries.yaml` on all nodes
 
 Traefik is the only edge ingress in the k3s overlay.
 

@@ -32,10 +32,16 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/aws/…`
 - `cloud/terraform/azure/…`
 - `cloud/terraform/gcp/…`
-- `labs/eve-ng/<template-name>/…`
-- `netlab/bgplab/<repo-name>/…`
+- `blueprints/labpp/<template-name>/…`
+- `blueprints/netlab/<template>.yml`
 
 Skyforge deployments store the selected **repo** and **templates folder** (repo-relative), then discover templates underneath.
+
+Notes:
+
+- LabPP templates are directories (each subfolder is a template).
+- Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
+- You can also keep templates in a project repo under the same paths (`blueprints/labpp/...`, `blueprints/netlab/...`) for project-scoped customization.
 
 ## Bootstrap options
 
@@ -46,3 +52,7 @@ provider and push the catalog once:
 git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push gitea HEAD:main
 ```
+
+To make the blueprint catalog visible to everyone, set the repo visibility to public in Gitea:
+
+- Gitea UI: `skyforge/blueprints` → Settings → "Make Repository Public"

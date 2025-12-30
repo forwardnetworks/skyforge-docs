@@ -40,7 +40,20 @@ The shared admin password is used to seed Skyforge, Gitea, Semaphore, NetBox, Na
 and the code-server sync job. LDAP credentials are separate and only required if you enable LDAP.
 
 
-## 4) Deploy
+## 4) Deploy (Helm, preferred)
+```bash
+gh auth refresh -h github.com -s read:packages
+gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
+
+helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+  -n skyforge --create-namespace \
+  --reset-values \
+  --version <chart-version> \
+  -f ./deploy/skyforge-values.yaml \
+  -f /root/skyforge-secrets.yaml
+```
+
+## 4b) Deploy (kustomize, fallback)
 ```bash
 kubectl create namespace skyforge
 kubectl apply -f k8s/traefik/helmchartconfig-plugins.yaml
@@ -49,3 +62,6 @@ kubectl apply -k k8s/overlays/k3s-quickstart
 
 ## 5) Smoke tests
 Follow `docs/smoke-tests.md`.
+
+## 6) Workspace sync
+See `docs/workspaces.md` for how the VS Code workspace sync and S3 placeholders are organized.

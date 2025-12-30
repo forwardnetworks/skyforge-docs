@@ -15,11 +15,14 @@ job API.
 
 ## Job payload fields
 
-- `action`: `up`, `down`, `status`, `create`, or `collect`.
+- `action`: `up`, `create`, `restart`, `down`, `collect`, `status` (plus optional `destroy`).
 - `user`: username for workspace scoping.
 - `project`: project slug.
 - `deployment`: deployment name.
 - `workspaceRoot`: root path for Netlab workspaces (defaults to `/home/<user>/netlab`).
+- `plugin`: optional Netlab plugin name (for example `multilab`).
+- `multilabId`: optional multilab ID for the `multilab` plugin.
+- `stateRoot`: optional state root for external state sharing.
 - `topologyPath`: repo-relative topology path (optional).
 - `topologyUrl`: URL to fetch a topology (optional).
 - `collectOutput`: output directory for `collect` (optional).
@@ -37,13 +40,16 @@ Skyforge’s Semaphore template calls `netlab/job/run_netlab_api.py`, which:
 
 Key environment variables:
 
-- `NETLAB_API_URL` (e.g. `https://<netlab-host>:8090`)
+- `NETLAB_API_URL` (e.g. `https://<netlab-host>/netlab` when reverse-proxied on 443)
 - `NETLAB_ACTION` (`up`, `down`, `status`, `collect`)
 - `NETLAB_USER`, `NETLAB_PROJECT`, `NETLAB_DEPLOYMENT`
 - `NETLAB_WORKSPACE_ROOT` (optional)
+- `NETLAB_PLUGIN=multilab` and `NETLAB_MULTILAB_ID=<id>` (recommended for multi-instance labs)
+- `NETLAB_STATE_ROOT` (optional)
 - `NETLAB_TOPOLOGY` or `NETLAB_TOPOLOGY_URL`
 
 ## Notes
 
 - The API writes per-job logs under `NETLAB_API_DATA_DIR` (default `/var/lib/skyforge/netlab-api`).
 - Use `NETLAB_API_INSECURE=true` if you terminate TLS elsewhere and need to skip cert verification.
+- The `multilab` plugin requires each instance run in a unique working directory; Skyforge uses `/home/<user>/netlab/<project>/<deployment>` by default.

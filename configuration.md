@@ -44,7 +44,7 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 
 ## 4) Integration endpoints (optional)
 - `SKYFORGE_GITEA_URL`: base URL for Git provider (e.g. `http://gitea:3000`).
-- `SKYFORGE_GITEA_API_URL`: API base URL for Git provider (e.g. `http://gitea:3000/api/v1`).
+- `SKYFORGE_GITEA_API_URL`: API base URL for Git provider (e.g. `http://gitea:3000/api/v1`). Note: Gitea’s REST API is versioned; Skyforge’s own API is unversioned under `/api/*`.
 - `SKYFORGE_NETBOX_URL`: NetBox base URL.
 - `SKYFORGE_NAUTOBOT_URL`: Nautobot base URL.
 - `SKYFORGE_OBJECT_STORAGE_ENDPOINT`: S3-compatible endpoint (host:port).
@@ -58,6 +58,11 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_LABPP_SKIP_TLS_VERIFY`: `true` or `false` for LabPP API TLS verification.
 - `SKYFORGE_NETLAB_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing Netlab servers.
 - `SKYFORGE_NETLAB_SERVERS_FILE`: file path containing the same JSON.
+
+## 4b) DNS (Technitium, optional)
+- `SKYFORGE_DNS_URL`: Technitium base URL for the server-to-server API (default `http://technitium-dns:5380`).
+- `SKYFORGE_DNS_ADMIN_USERNAME`: Technitium admin username used for provisioning (default `admin`).
+- `SKYFORGE_DNS_USER_ZONE_SUFFIX`: suffix for per-user zones (default `skyforge`, producing `<username>.skyforge`).
 
 ## 5) LDAP defaults (optional)
 - `SKYFORGE_LDAP_URL`: LDAP URL (e.g. `ldap://ldap:389` or `ldaps://ldap:636`).
@@ -86,6 +91,7 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_PROJECT_SYNC_SECONDS`: project sync interval.
 - `SKYFORGE_SESSION_TTL`: session lifetime (e.g. `8h`).
 - `SKYFORGE_COOKIE_SECURE`: `true` or `false`.
+- `SKYFORGE_COOKIE_DOMAIN`: optional cookie domain attribute (set when you need SSO across subdomains).
 - `SKYFORGE_STATE_BACKEND`: `postgres` or `file`.
 - `SKYFORGE_DB_HOST`, `SKYFORGE_DB_PORT`, `SKYFORGE_DB_NAME`, `SKYFORGE_DB_USER`, `SKYFORGE_DB_SSLMODE`.
 - `SKYFORGE_REDIS_ENABLED`, `SKYFORGE_REDIS_ADDR`, `SKYFORGE_REDIS_DB`, `SKYFORGE_REDIS_KEY_PREFIX`.
@@ -95,7 +101,7 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 ## 9) Service base URLs
 - `GITEA_ROOT_URL`: base URL for Git UI.
 - `MINIO_BROWSER_REDIRECT_URL`: redirect target for the object storage console.
-- `HOPPSCOTCH_BASE_URL`: public Hoppscotch base URL (subpath-friendly).
+- `HOPPSCOTCH_BASE_URL`: public Hoppscotch base URL (same hostname in this environment).
 - `HOPPSCOTCH_SHORTCODE_BASE_URL`: shortcode base URL (usually same as base).
 - `HOPPSCOTCH_ADMIN_URL`: admin URL (usually same as base).
 - `HOPPSCOTCH_BACKEND_GQL_URL`: GraphQL endpoint URL.
@@ -115,5 +121,5 @@ If you deploy the raw kompose manifests, update `k8s/kompose/skyforge-config-con
 
 ## 11) Build/publish registry (build-time)
 - `SKYFORGE_REGISTRY`: container registry hostname used when building/pushing images
-  (for example `localhost:5000` on single-node k3s). This is a build-time value, not
+  (for example `ghcr.io/forwardnetworks` for private GHCR). This is a build-time value, not
   required by the running services.

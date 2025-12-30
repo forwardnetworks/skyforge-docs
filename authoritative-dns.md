@@ -4,14 +4,28 @@ Skyforge’s Traefik edge is HTTP(S)-only; authoritative DNS (UDP/TCP 53) is bes
 
 This repo includes an optional Technitium DNS deployment (authoritative + UI) that you can enable when you need lab zones and controlled AXFR for your lab domains.
 
-## Deploy (k3s)
+## Deploy (Helm, recommended)
+Enable DNS in your Helm values:
+
+```yaml
+skyforge:
+  dns:
+    enabled: true
+    nodePort: 30053
+    webNodePort: 30380
+```
+
+Then `helm upgrade --install` your Skyforge release as usual.
+
+## Deploy (kustomize, legacy)
 ```bash
 kubectl apply -k k8s/infra/technitium-dns
 ```
 
 ## Access
-- Web UI (authenticated via Skyforge SSO gate):
-  - `https://<hostname>/dns/`
+- Web UI (through Skyforge DNS SSO bridge):
+  - Use the DNS link inside Skyforge (it routes through `/api/dns/sso` to set a Technitium token in `localStorage`).
+  - Direct `/dns/` access works too, but you must already have a valid Technitium token in your browser.
 - DNS service (NodePort on the k3s node):
   - UDP/53 on node port `30053`
   - TCP/53 on node port `30053`
@@ -46,4 +60,17 @@ Suggested checklist:
 
 ## Notes
 - This deployment persists config under the PVC `skyforge/technitium-dns-data`.
-- Default NodePorts (`30053`, `30380`) can be changed in `k8s/infra/technitium-dns/service.yaml` if they collide with other services.
+- Default NodePorts (`30053`, `30380`) can be changed via Helm values (recommended) or by editing `k8s/infra/technitium-dns/service.yaml` (legacy).
+
+## DNS SSO (per-user zone)
+Skyforge can optionally provision Technitium per-user access without storing your LDAP password:
+
+- On first visit to DNS via Skyforge, you’ll be prompted for a Technitium password (you can choose to match LDAP).
+- Skyforge uses that password once to create/update a Technitium user, create a per-user zone, and mint a long-lived API token.
+- The token is stored encrypted in the Skyforge database and injected into the browser via the `/api/dns/sso` bridge.
+
+By default the per-user zone is:
+- `<username>.skyforge`
+
+You can customize the suffix via:
+- `SKYFORGE_DNS_USER_ZONE_SUFFIX` (defaults to `skyforge`)
