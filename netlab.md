@@ -30,23 +30,13 @@ job API.
 - `collectCleanup`: `true` to cleanup after collect (optional).
 - `cleanup`: `true` to cleanup on `down` (optional).
 
-## Runner (Semaphore)
+## Runner (native)
 
-Skyforge’s Semaphore template calls `netlab/job/run_netlab_api.py`, which:
+Skyforge launches Netlab runs directly:
 
 1) Posts a job to the Netlab API.
 2) Polls job status.
-3) Streams logs back into the Semaphore task output.
-
-Key environment variables:
-
-- `NETLAB_API_URL` (e.g. `https://<netlab-host>/netlab` when reverse-proxied on 443)
-- `NETLAB_ACTION` (`up`, `down`, `status`, `collect`)
-- `NETLAB_USER`, `NETLAB_PROJECT`, `NETLAB_DEPLOYMENT`
-- `NETLAB_WORKSPACE_ROOT` (optional)
-- `NETLAB_PLUGIN=multilab` and `NETLAB_MULTILAB_ID=<id>` (recommended for multi-instance labs)
-- `NETLAB_STATE_ROOT` (optional)
-- `NETLAB_TOPOLOGY` or `NETLAB_TOPOLOGY_URL`
+3) Streams logs into the Skyforge task output.
 
 ## Notes
 

@@ -75,7 +75,7 @@ Populate the following before installing:
 
 - `skyforge.hostname` (public hostname for the ingress routes)
 - `skyforge.domain` (email suffix for default users)
-- `secrets.items.*` entries for passwords, TLS certs, and Git/Semaphore credentials
+- `secrets.items.*` entries for passwords, TLS certs, and Git credentials
 - LDAP secrets only if you enable LDAP-backed auth for Skyforge/NetBox/Nautobot/MinIO
 - If you use EVE-NG / Netlab integrations: `secrets.items.eve-runner-ssh-key`, `secrets.items.netlab-runner-rsa`, and the server pool secrets (`secrets.items.skyforge-eve-servers`, `secrets.items.skyforge-netlab-servers`). The server pool values accept either a JSON array or `{"servers":[...]}`; see `deploy/skyforge-secrets.example.yaml`.
 

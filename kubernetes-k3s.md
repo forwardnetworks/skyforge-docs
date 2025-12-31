@@ -30,6 +30,7 @@ Populate local secret files under `k8s/overlays/k3s-traefik-secrets/secrets/` an
 Required inputs (gitignored):
 - `k8s/overlays/k3s-traefik-secrets/secrets/*` (LDAP, DB passwords, admin passwords, etc.)
 - `./certs/skyforge.crt` + `./certs/skyforge.key` (for `proxy-tls`)
+- `secrets/skyforge_pki_ca_cert` + `secrets/skyforge_pki_ca_key` if you want to issue certificates from Skyforge’s PKI UI.
 
 Note: the secrets overlay reads from local files. If you are skipping optional integrations, create empty placeholder files so `kustomize` can render the Secret manifests.
 

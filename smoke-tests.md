@@ -30,7 +30,6 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 
 ## Optional integration checks
 - Git UI: `https://<hostname>/git/`
-- Semaphore UI: `https://<hostname>/semaphore/`
 - NetBox UI: `https://<hostname>/netbox/`
 - Nautobot UI: `https://<hostname>/nautobot/`
 - Swagger UI: `https://<hostname>/swagger/`

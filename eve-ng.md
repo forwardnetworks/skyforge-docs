@@ -44,11 +44,11 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
   - `GET /skyforge-server/health/eve?full=1` (include per-server detail; can be slower)
 
 - List labs (authenticated, per-user view):
-  - `GET /skyforge-server/labs/user?provider=eve-ng&project_id=<semaphoreProjectId>`
+  - `GET /skyforge-server/labs/user?provider=eve-ng&project_id=<legacy project id>`
   - Fallback (manual override): `GET /skyforge-server/labs/user?provider=eve-ng&eve_server=eve-ng-01`
 
 - List running labs (public):
-  - `GET /skyforge-server/labs/running?provider=eve-ng&project_id=<semaphoreProjectId>`
+  - `GET /skyforge-server/labs/running?provider=eve-ng&project_id=<legacy project id>`
   - Fallback (manual override): `GET /skyforge-server/labs/running?provider=eve-ng&eve_server=eve-ng-01`
 
 - Project lab path (authenticated):
@@ -57,7 +57,7 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 
 ## UI
 
-- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<semaphoreProjectId>` which redirects to the project’s configured EVE server web UI.
+- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<legacy project id>` which redirects to the project’s configured EVE server web UI.
 - Set the EVE server on the Projects page (“Set EVE” button), which updates `eveServer` for that project in Postgres.
 - Projects use a per-owner lab path: `/Users/<owner>/<project-slug>.unl`. Editors/viewers link to the owner’s lab.
 - Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Projects page to view/create the lab file via SSH.

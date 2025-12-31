@@ -15,8 +15,8 @@ These steps keep E2E runs deterministic so failures are easier to diagnose.
 - Delete the test project itself.
 - Confirm it’s gone from the Projects list.
 
-## 3) Verify Semaphore is not running stale tasks
-- Open Semaphore from Skyforge and confirm there are no long-running tasks for the test project.
+## 3) Verify there are no stale tasks
+- Open the Skyforge runs panel and confirm there are no long-running tasks for the test project.
 
 ## 4) Verify runner-side state (EVE hosts)
 If a prior run left state behind (e.g. a failed job), clean the project directory on the relevant EVE host before rerunning.

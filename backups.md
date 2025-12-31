@@ -2,7 +2,7 @@
 
 Skyforge runs as a Kubernetes workload, but the cluster node still has **stateful data**:
 
-- Postgres databases (`db` PVC): Semaphore, Gitea, NetBox, Nautobot, Hoppscotch, Skyforge state
+- Postgres databases (`db` PVC): Gitea, NetBox, Nautobot, Hoppscotch, Skyforge state
 - Object storage (`minio` PVC): artifacts + Terraform state + file drop
 - Workspace PVCs: shared + per-user VS Code
 

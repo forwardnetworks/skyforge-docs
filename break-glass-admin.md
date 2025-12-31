@@ -23,4 +23,4 @@ kubectl -n skyforge get configmap skyforge-config -o jsonpath='{.data.SKYFORGE_A
 kubectl -n skyforge rollout restart deploy/skyforge-server
 ```
 
-Rotation also impacts other bootstrapped services that reuse the shared admin password (Gitea, NetBox, Nautobot, Semaphore, etc), so prefer rotating only between maintenance windows.
+Rotation also impacts other bootstrapped services that reuse the shared admin password (Gitea, NetBox, Nautobot, etc), so prefer rotating only between maintenance windows.

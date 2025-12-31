@@ -6,14 +6,14 @@ These checks validate the external EVE-NG hosts are ready for Netlab/LabPP runs.
 - `netlab` installed (same version)
 - `containerlab` installed (same version)
 - `apache2` (or equivalent) running to front internal APIs on 443
-- `netlab-api.service` and `labpp-api.service` running (if used)
+- `netlab-api.service`, `labpp-api.service`, and `containerlab-api.service` running (if used)
 - LDAP shell auth configured (if Skyforge expects user-scoped paths like `/home/{user}/...`)
 
 ## Quick commands (run on each EVE host)
 ```bash
 netlab version
 containerlab version
-systemctl is-active apache2.service netlab-api.service labpp-api.service
+systemctl is-active apache2.service netlab-api.service labpp-api.service containerlab-api.service
 ```
 
 If any of these fail, fix host parity before running E2E so the failures don’t happen late in the workflow.

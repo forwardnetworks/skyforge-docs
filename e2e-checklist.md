@@ -38,6 +38,20 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
   - Delete the deployment record in Skyforge
 - Confirm logs are readable in the single “Logs” modal.
 
+### Containerlab deployment (create → up → info → down → destroy → delete)
+- Create a Containerlab deployment:
+  - Pick the Containerlab server (required).
+  - Pick a template source (blueprints repo or project repo).
+  - Pick a template.
+- Run actions in order:
+  - `Create`
+  - `Start`
+  - `Info` (should show containerlab inspect output)
+  - `Stop`
+  - `Destroy`
+  - Delete the deployment record in Skyforge
+- Confirm logs are readable in the single “Logs” modal.
+
 ### LabPP deployment (create → up → info → down → destroy → delete)
 - Create a LabPP deployment:
   - Pick the EVE server (required).
@@ -50,7 +64,6 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 
 From an authenticated session, click each tool and confirm you land inside the tool without an extra login prompt:
 
-- Semaphore
 - Git (Gitea)
 - NetBox
 - Nautobot
@@ -58,4 +71,3 @@ From an authenticated session, click each tool and confirm you land inside the t
 - DNS (Technitium; first-time flow may prompt for a Technitium password)
 - Swagger UI
 - API Testing (Hoppscotch) launches correctly
-

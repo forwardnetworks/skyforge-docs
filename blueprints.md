@@ -15,14 +15,12 @@ flowchart LR
 
   api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
   api -->|creates| proj[Project repos<br/>{user}/{project}]
-  api --> sem[Semaphore templates/tasks]
+  api --> runner[Native task engine<br/>(Tofu / Netlab / LabPP / Containerlab)]
 
-  sem -->|clones| proj
-  sem -->|optionally clones| bp
-  sem --> runner[Runner container<br/>(Tofu / Netlab)]
-
+  runner -->|clones| proj
+  runner -->|optionally clones| bp
   runner --> s3[S3 artifacts + state]
-  runner --> labs[EVE‑NG / Netlab]
+  runner --> labs[EVE‑NG / Netlab / Containerlab]
 ```
 
 ## Recommended folder scheme
@@ -34,6 +32,7 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/gcp/…`
 - `blueprints/labpp/<template-name>/…`
 - `blueprints/netlab/<template>.yml`
+- `blueprints/containerlab/<template>.yml`
 
 Skyforge deployments store the selected **repo** and **templates folder** (repo-relative), then discover templates underneath.
 
@@ -41,7 +40,8 @@ Notes:
 
 - LabPP templates are directories (each subfolder is a template).
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
-- You can also keep templates in a project repo under the same paths (`blueprints/labpp/...`, `blueprints/netlab/...`) for project-scoped customization.
+- Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
+- You can also keep templates in a project repo under the same paths (`blueprints/labpp/...`, `blueprints/netlab/...`, `blueprints/containerlab/...`) for project-scoped customization.
 
 ## Bootstrap options
 

@@ -2,6 +2,8 @@
 
 Skyforge’s Traefik IngressRoutes reference `skyforge/proxy-tls` for TLS termination.
 
+If you enable the PKI integration, you can issue a leaf cert for the Skyforge hostname from the PKI UI and replace the `proxy-tls` secret with the signed cert + key. Keep the CA root in `skyforge-ca-cert` so pods can trust it.
+
 ## Option A: self-signed (recommended for dev)
 Generate a self-signed cert for your Skyforge hostname and store it in `./certs/`:
 

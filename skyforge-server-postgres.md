@@ -16,7 +16,7 @@ Non-goals (still file-based for now):
 - `platform-data` (`/var/lib/skyforge/platform-data/*`) produced by `healthwatch` and read by the UI
 
 ## Target architecture
-- Keep using the **existing** Postgres instance (`db`) that already hosts `semaphore`, `netbox`, `nautobot`, `gitea`.
+- Keep using the **existing** Postgres instance (`db`) that already hosts `netbox`, `nautobot`, `gitea`.
 - Add a dedicated database + role for Skyforge Server:
   - database: `skyforge_server`
   - role/user: `skyforge_server`
@@ -66,7 +66,7 @@ Notes:
 1. Create/update secrets: `kubectl apply -k k8s/overlays/k3s-traefik-secrets`
 2. Re-run DB provisioning if needed: `kubectl -n skyforge apply -f k8s/kompose/db-provision-job.yaml`
 3. Ensure Skyforge Server is running with `SKYFORGE_STATE_BACKEND=postgres`
-4. If the UI shows “API unavailable”, check Skyforge Server logs first; a common cause is broken Semaphore auth (Skyforge Server calls Semaphore to populate runs/templates). Rotate the Semaphore token in the Semaphore UI, update `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_semaphore_token`, then re-apply the secrets overlay and restart the server deployment.
+4. If the UI shows “API unavailable”, check Skyforge Server logs first; a common cause is broken integration credentials or missing DB connectivity. Update secrets and restart the server deployment.
 
 ## Follow-ups (later)
 - Encrypt persisted token/credential fields at rest (AWS SSO tokens, external-cloud static keys) and store only ciphertext.

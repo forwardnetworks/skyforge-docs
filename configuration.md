@@ -12,7 +12,6 @@ At minimum, set:
 - `SKYFORGE_ADMIN_EMAIL`
 - `SKYFORGE_CORP_EMAIL_DOMAIN`
 - `SKYFORGE_GITEA_URL`, `SKYFORGE_GITEA_API_URL`
-- `SKYFORGE_SEMAPHORE_URL`
 
 If you are not using LDAP, leave `SKYFORGE_LDAP_*` values empty. Skyforge will
 fall back to local admin authentication only.
@@ -28,9 +27,9 @@ fall back to local admin authentication only.
 
 ## 3) Org defaults
 - `SKYFORGE_CORP_EMAIL_DOMAIN`: email domain used for login hints (Azure/GCP).
-- `SKYFORGE_ADMIN_EMAIL`: admin email used to seed Gitea/NetBox/Nautobot/Semaphore.
-- `SKYFORGE_ADMIN_USERNAME`: admin username used for provisioning in Semaphore/Gitea.
-- `SKYFORGE_ADMIN_NAME`: admin display name used for provisioning in Semaphore.
+- `SKYFORGE_ADMIN_EMAIL`: admin email used to seed Gitea/NetBox/Nautobot.
+- `SKYFORGE_ADMIN_USERNAME`: admin username used for provisioning in Gitea.
+- `SKYFORGE_ADMIN_NAME`: admin display name used for provisioning.
 - `SKYFORGE_PROVISIONER_LOGIN`: service user name for automation provisioning.
 - `SKYFORGE_PROVISIONER_NAME`: display name for the provisioner user.
 - `SKYFORGE_PROVISIONER_EMAIL`: email for the provisioner user.
@@ -38,7 +37,7 @@ fall back to local admin authentication only.
 
 ## 3a) Shared admin secret (k3s overlay)
 The local admin password is stored in a single secret file and reused across Skyforge,
-Gitea, Semaphore, NetBox, Nautobot, and the code-server sync job:
+Gitea, NetBox, Nautobot, and the code-server sync job:
 - `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_shared_password`
 LDAP credentials live in separate secrets and are only required if you enable LDAP.
 
@@ -58,6 +57,16 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_LABPP_SKIP_TLS_VERIFY`: `true` or `false` for LabPP API TLS verification.
 - `SKYFORGE_NETLAB_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing Netlab servers.
 - `SKYFORGE_NETLAB_SERVERS_FILE`: file path containing the same JSON.
+- `SKYFORGE_CONTAINERLAB_API_PATH`: API path for Containerlab (default `/containerlab`).
+- `SKYFORGE_CONTAINERLAB_JWT_SECRET`: shared JWT secret for the Containerlab API server.
+- `SKYFORGE_CONTAINERLAB_SKIP_TLS_VERIFY`: `true` or `false` for Containerlab API TLS verification.
+- `SKYFORGE_PKI_CA_CERT`: PEM-encoded CA certificate used for issuance.
+- `SKYFORGE_PKI_CA_KEY`: PEM-encoded CA private key used for issuance.
+- `SKYFORGE_PKI_DEFAULT_DAYS`: default certificate TTL (days, default 365).
+
+For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
+- `containerlabApiUrl` (full URL override).
+- `containerlabSkipTlsVerify` (`true`/`false`).
 
 ## 4b) DNS (Technitium, optional)
 - `SKYFORGE_DNS_URL`: Technitium base URL for the server-to-server API (default `http://technitium-dns:5380`).
@@ -74,11 +83,7 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_LDAP_SKIP_TLS_VERIFY`: `true` or `false`.
 - `SKYFORGE_LDAP_STARTTLS`: `true` or `false`.
 
-## 6) Semaphore defaults (optional)
-- `SKYFORGE_SEMAPHORE_URL`: API base URL (e.g. `http://semaphore:3000/semaphore/api`).
-- `SKYFORGE_SEMAPHORE_PROJECT_ID`: default project ID for provisioning.
-- `SKYFORGE_SEMAPHORE_USERNAME`: service user for provisioning.
-- `SKYFORGE_SEMAPHORE_ADMIN_USERNAME`: admin username for provisioning.
+## 6) Session defaults (optional)
 - `SKYFORGE_SESSION_COOKIE`: cookie name for Skyforge sessions.
 
 ## 7) Git defaults (optional)

@@ -15,11 +15,14 @@ At a minimum, the release expects these secrets to exist in the namespace:
 - `skyforge-session-secret` (Skyforge session signing secret)
 
 Additional secrets may be required depending on which integrations are enabled (LDAP, EVE, Netlab, etc).
+If you enable Containerlab, also provide `skyforge-containerlab-jwt-secret`.
+For PKI/CA issuance, provide `skyforge-pki-ca-cert` and `skyforge-pki-ca-key`.
+To distribute that CA to workloads, also set `skyforge-ca-cert` to the same cert so pods can trust it.
 
 ## Full stack (recommended)
-For a typical Skyforge deployment (Semaphore, Gitea, NetBox, Nautobot, Hoppscotch), you should also set:
+For a typical Skyforge deployment (Gitea, NetBox, Nautobot, Hoppscotch), you should also set:
 - `postgres-skyforge-password` (Postgres superuser password for the in-cluster DB provision hook)
-- `db-*` database user passwords (`db-semaphore-password`, `db-gitea-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`, `db-hoppscotch-password`)
+- `db-*` database user passwords (`db-gitea-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`, `db-hoppscotch-password`)
 - `gitea-secret-key` (required by the admin bootstrap job)
 - `netbox-secret-key` and `netbox-superuser-api-token`
 - `nautobot-secret-key` and `nautobot-superuser-api-token`

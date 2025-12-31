@@ -34,7 +34,7 @@ This validates that the Skyforge server can mint sessions and that protected ser
 ```bash
 kubectl -n skyforge get secret skyforge-admin-shared
 kubectl -n skyforge get deploy skyforge-server
-kubectl -n skyforge get deploy gitea semaphore netbox nautobot
+kubectl -n skyforge get deploy gitea netbox nautobot
 ```
 
 ## Hoppscotch sanity (optional)
