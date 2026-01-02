@@ -9,12 +9,14 @@ Provide the CA materials as secrets (PEM-encoded):
 
 - `skyforge-pki-ca-cert` (`SKYFORGE_PKI_CA_CERT`)
 - `skyforge-pki-ca-key` (`SKYFORGE_PKI_CA_KEY`)
+- `skyforge-ssh-ca-key` (`SKYFORGE_SSH_CA_KEY`) for SSH user certificates
 
 The same CA cert should also be stored in `skyforge-ca-cert` so pods can trust it.
 
 ## Default TTL
 
 Set `SKYFORGE_PKI_DEFAULT_DAYS` (default `365`).
+Set `SKYFORGE_SSH_DEFAULT_DAYS` (default `30`) for SSH certificates.
 
 ## Trusting the CA (engineers)
 
@@ -22,6 +24,31 @@ Download the root from the UI or API:
 
 - UI: Dashboard → PKI → “Download root CA”
 - API: `GET /api/pki/root`
+
+## SSH user certificates
+
+Skyforge can issue SSH user certificates for jump-host access (for example, Forward Networks device sync).
+Download the SSH CA public key and add it to `known_hosts` or the target server’s `TrustedUserCAKeys`.
+
+### Get SSH CA public key
+
+- UI: Dashboard → PKI → “Download SSH CA public key”
+- API: `GET /api/pki/ssh/root`
+
+### Issue an SSH certificate
+
+Use the PKI UI to generate a keypair + certificate, then save:
+
+- Private key (keep secure, e.g. `~/.ssh/skyforge_id_rsa`)
+- Certificate (save alongside as `~/.ssh/skyforge_id_rsa-cert.pub`)
+
+Example `known_hosts` entry:
+
+```text
+@cert-authority *.local.forwardnetworks.com <ssh-ca-public-key>
+```
+
+Skyforge uses the authenticated username as the default principal when issuing SSH certs.
 
 ### macOS
 

@@ -63,6 +63,8 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_PKI_CA_CERT`: PEM-encoded CA certificate used for issuance.
 - `SKYFORGE_PKI_CA_KEY`: PEM-encoded CA private key used for issuance.
 - `SKYFORGE_PKI_DEFAULT_DAYS`: default certificate TTL (days, default 365).
+- `SKYFORGE_SSH_CA_KEY`: OpenSSH private key used to sign SSH user certificates.
+- `SKYFORGE_SSH_DEFAULT_DAYS`: default SSH certificate TTL (days, default 30).
 
 For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
 - `containerlabApiUrl` (full URL override).

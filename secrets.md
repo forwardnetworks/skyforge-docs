@@ -17,7 +17,8 @@ At a minimum, the release expects these secrets to exist in the namespace:
 Additional secrets may be required depending on which integrations are enabled (LDAP, EVE, Netlab, etc).
 If you enable Containerlab, also provide `skyforge-containerlab-jwt-secret`.
 For PKI/CA issuance, provide `skyforge-pki-ca-cert` and `skyforge-pki-ca-key`.
-To distribute that CA to workloads, also set `skyforge-ca-cert` to the same cert so pods can trust it.
+For SSH certificates, also provide `skyforge-ssh-ca-key`.
+To distribute the TLS CA to workloads, also set `skyforge-ca-cert` to the same cert so pods can trust it.
 
 ## Full stack (recommended)
 For a typical Skyforge deployment (Gitea, NetBox, Nautobot, Hoppscotch), you should also set:
