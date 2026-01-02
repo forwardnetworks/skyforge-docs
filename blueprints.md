@@ -30,9 +30,9 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/aws/…`
 - `cloud/terraform/azure/…`
 - `cloud/terraform/gcp/…`
-- `blueprints/labpp/<template-name>/…`
-- `blueprints/netlab/<template>.yml`
-- `blueprints/containerlab/<template>.yml`
+- `labpp/<template-name>/…`
+- `netlab/<template>.yml`
+- `containerlab/<template>.yml`
 
 Skyforge deployments store the selected **repo** and **templates folder** (repo-relative), then discover templates underneath.
 
@@ -41,7 +41,7 @@ Notes:
 - LabPP templates are directories (each subfolder is a template).
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
-- You can also keep templates in a project repo under the same paths (`blueprints/labpp/...`, `blueprints/netlab/...`, `blueprints/containerlab/...`) for project-scoped customization.
+- Project repos can keep templates under `blueprints/labpp/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
 
 ## Bootstrap options
 
