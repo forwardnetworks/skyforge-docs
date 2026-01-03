@@ -5,9 +5,9 @@ Skyforge Server stores its state in the shared Postgres service (`db`) so the pl
 ## What is stored in Postgres
 State is stored in tables created/managed by Skyforge Server at startup (idempotent DDL):
 - Users (`sf_users`)
-- Projects + memberships + group mappings (`sf_projects`, `sf_project_members`, `sf_project_groups`)
+- Workspaces + memberships + group mappings (legacy tables: `sf_projects`, `sf_project_members`, `sf_project_groups`)
 - AWS SSO token records (`sf_aws_sso_tokens`)
-- Per-project AWS static credentials placeholder (`sf_project_aws_static_credentials`)
+- Per-workspace AWS static credentials placeholder (legacy table: `sf_project_aws_static_credentials`)
 - Audit log (`sf_audit_log`)
 - Governance inventory (`sf_resources`, `sf_resource_events`, `sf_cost_snapshots`, `sf_usage_snapshots`)
 
@@ -71,5 +71,5 @@ Notes:
 ## Follow-ups (later)
 - Encrypt persisted token/credential fields at rest (AWS SSO tokens, external-cloud static keys) and store only ciphertext.
 - Add templates/artifacts metadata tables (history, retention, ownership) and wire into the UI.
-- Expand `sf_audit_log` usage to cover project sharing and admin impersonation end-to-end.
+- Expand `sf_audit_log` usage to cover workspace sharing and admin impersonation end-to-end.
 - Optionally move `platform-data` (healthwatch output) into Postgres for multi-node HA.

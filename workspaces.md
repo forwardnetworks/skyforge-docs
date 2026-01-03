@@ -1,11 +1,11 @@
 # Workspaces + sync
 
 Skyforge keeps a shared workspace PVC that backs the VS Code experience. The
-workspace sync job pulls project/user Git repos into the shared volume so users
+workspace sync job pulls workspace/user Git repos into the shared volume so users
 can browse and edit them in the browser.
 
 ## Paths
-- `/workspace/projects/<project-slug>`: shared project repos.
+- `/workspace/workspaces/<workspace-slug>`: shared workspace repos.
 - `/workspace/users/<username>/`: per-user workspace folder.
 - `/workspace/users/<username>/s3`: placeholder for S3/MinIO downloads.
 - `/workspace/users/<username>/anonymous`: placeholder for anonymous uploads.

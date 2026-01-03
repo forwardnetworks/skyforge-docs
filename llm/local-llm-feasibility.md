@@ -33,7 +33,7 @@ Skyforge talks to the server’s native API. This can be fine, but you lose port
 
 What matters most for config generation:
 - Steady latency (so “repair loops” don’t feel painful)
-- Enough context window to include templates/examples + current project facts
+- Enough context window to include templates/examples + current workspace facts
 
 ## Do you need training data?
 

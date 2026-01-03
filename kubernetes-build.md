@@ -40,6 +40,8 @@ cd server
 encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 ```
 
+Go toolchain note: `server/go.mod` pins `toolchain go1.26rc1`. If your local Go version differs, the Go tool will fetch/use 1.26rc1 automatically (or set `GOTOOLCHAIN=go1.26rc1`).
+
 Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..

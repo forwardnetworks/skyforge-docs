@@ -6,7 +6,7 @@ Skyforge uses a **blueprints** Git repository as the canonical catalog for:
 - Containerlab / Netlab templates
 - Cloud Terraform starter modules (AWS/Azure/GCP)
 
-Deployments reference these templates by **repo + folder path**; Skyforge does not need to copy templates into each project.
+Deployments reference these templates by **repo + folder path**; Skyforge does not need to copy templates into each workspace.
 
 ```mermaid
 flowchart LR
@@ -14,7 +14,7 @@ flowchart LR
   ui --> api[Skyforge Server]
 
   api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
-  api -->|creates| proj[Project repos<br/>{user}/{project}]
+  api -->|creates| proj[Workspace repos<br/>{user}/{workspace}]
   api --> runner[Native task engine<br/>(Tofu / Netlab / LabPP / Containerlab)]
 
   runner -->|clones| proj

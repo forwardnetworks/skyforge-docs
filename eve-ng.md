@@ -1,6 +1,6 @@
 # EVE-NG Integration (Skyforge)
 
-Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is **SSH-based** (key auth) for health + lab listing, with EVE server selection stored **per Skyforge Project**.
+Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is **SSH-based** (key auth) for health + lab listing, with EVE server selection stored **per Skyforge workspace**.
 
 ## Configuration (k3s)
 
@@ -44,30 +44,30 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
   - `GET /skyforge-server/health/eve?full=1` (include per-server detail; can be slower)
 
 - List labs (authenticated, per-user view):
-  - `GET /skyforge-server/labs/user?provider=eve-ng&project_id=<legacy project id>`
+  - `GET /skyforge-server/labs/user?provider=eve-ng&project_id=<legacy workspace id>`
   - Fallback (manual override): `GET /skyforge-server/labs/user?provider=eve-ng&eve_server=eve-ng-01`
 
 - List running labs (public):
-  - `GET /skyforge-server/labs/running?provider=eve-ng&project_id=<legacy project id>`
+  - `GET /skyforge-server/labs/running?provider=eve-ng&project_id=<legacy workspace id>`
   - Fallback (manual override): `GET /skyforge-server/labs/running?provider=eve-ng&eve_server=eve-ng-01`
 
-- Project lab path (authenticated):
-  - `GET /skyforge-server/projects/<projectId>/eve/lab` (returns lab path + existence)
-  - `POST /skyforge-server/projects/<projectId>/eve/lab` (creates `/Users/<owner>/<project-slug>.unl` if missing)
+- Workspace lab path (authenticated):
+  - `GET /skyforge-server/workspaces/<workspaceId>/eve/lab` (returns lab path + existence)
+  - `POST /skyforge-server/workspaces/<workspaceId>/eve/lab` (creates `/Users/<owner>/<workspace-slug>.unl` if missing)
 
 ## UI
 
-- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<legacy project id>` which redirects to the project’s configured EVE server web UI.
-- Set the EVE server on the Projects page (“Set EVE” button), which updates `eveServer` for that project in Postgres.
-- Projects use a per-owner lab path: `/Users/<owner>/<project-slug>.unl`. Editors/viewers link to the owner’s lab.
-- Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Projects page to view/create the lab file via SSH.
+- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<legacy workspace id>` which redirects to the workspace’s configured EVE server web UI.
+- Set the EVE server on the Workspaces page (“Set EVE” button), which updates `eveServer` for that workspace in Postgres.
+- Workspaces use a per-owner lab path: `/Users/<owner>/<workspace-slug>.unl`. Editors/viewers link to the owner’s lab.
+- Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Workspaces page to view/create the lab file via SSH.
 
 ## Where labs live on disk
 
 EVE lab files live under the configured `labsPath` on each EVE server, typically:
 
 - Root: `/opt/unetlab/labs/<eve-username>/`
-- Skyforge-managed labs: `/opt/unetlab/labs/<eve-username>/skyforge/<project-slug>.unl`
+- Skyforge-managed labs: `/opt/unetlab/labs/<eve-username>/skyforge/<workspace-slug>.unl`
 - User-created labs (EVE UI): `/opt/unetlab/labs/<eve-username>/Users/<ldap-user>/…/*.unl`
 
 ## Notes

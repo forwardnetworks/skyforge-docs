@@ -32,6 +32,8 @@ cd server
 encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 ```
 
+Go toolchain note: `server/go.mod` pins `toolchain go1.26rc1`. If your local Go version differs, the Go tool will fetch/use 1.26rc1 automatically (or set `GOTOOLCHAIN=go1.26rc1`).
+
 Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..
@@ -67,12 +69,16 @@ Skyforge ships a Helm chart and publishes it to GHCR as an OCI artifact:
 gh auth refresh -h github.com -s read:packages
 gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
 
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+scp ./deploy/skyforge-values.yaml ./deploy/skyforge-secrets.yaml skyforge.local.forwardnetworks.com:/tmp/
+
+ssh skyforge.local.forwardnetworks.com "helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
   -n skyforge --create-namespace \
   --reset-values \
   --version <chart-version> \
-  -f ./deploy/skyforge-values.yaml \
-  -f /root/skyforge-secrets.yaml
+  -f /tmp/skyforge-values.yaml \
+  -f /tmp/skyforge-secrets.yaml"
+
+ssh skyforge.local.forwardnetworks.com "rm -f /tmp/skyforge-values.yaml /tmp/skyforge-secrets.yaml"
 ```
 
 ## Version pinning

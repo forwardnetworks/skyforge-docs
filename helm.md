@@ -37,37 +37,28 @@ This pushes to `oci://ghcr.io/forwardnetworks/charts/skyforge` using the chart
 
 ### Deploy (k3s host)
 
-Ensure the host has `helm` and `gh` configured, then run:
+Ensure the host has `helm` and `gh` configured, then run from your local machine:
 
 ```bash
 # Login (uses your existing gh auth)
 gh auth refresh -h github.com -s read:packages
 gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
 
-# Install/upgrade
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+# Copy local values/secrets to the host (use /tmp, then delete).
+scp ./deploy/skyforge-values.yaml ./deploy/skyforge-secrets.yaml skyforge.local.forwardnetworks.com:/tmp/
+
+# Install/upgrade from the host
+ssh skyforge.local.forwardnetworks.com "helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
   -n skyforge --create-namespace \
   --reset-values \
   --version <chart-version> \
-  -f /root/skyforge-values.yaml \
-  -f /root/skyforge-secrets.yaml
+  -f /tmp/skyforge-values.yaml \
+  -f /tmp/skyforge-secrets.yaml"
+
+ssh skyforge.local.forwardnetworks.com "rm -f /tmp/skyforge-values.yaml /tmp/skyforge-secrets.yaml"
 ```
 
-By default this expects these files on the host (not committed):
-- `/root/skyforge-values.yaml` (non-secret values)
-- `/root/skyforge-secrets.yaml` (secrets)
-
-If the k3s host can clone this repo, you can instead point at the committed
-non-secret values file and keep only secrets on-host:
-
-```bash
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
-  -n skyforge --create-namespace \
-  --reset-values \
-  --version <chart-version> \
-  -f ./deploy/skyforge-values.yaml \
-  -f /root/skyforge-secrets.yaml
-```
+Keep host file footprint minimal: use `/tmp` and remove after the deploy.
 
 ## Required values
 

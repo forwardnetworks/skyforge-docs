@@ -44,12 +44,16 @@ and the code-server sync job. LDAP credentials are separate and only required if
 gh auth refresh -h github.com -s read:packages
 gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
 
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+scp ./deploy/skyforge-values.yaml ./deploy/skyforge-secrets.yaml skyforge.local.forwardnetworks.com:/tmp/
+
+ssh skyforge.local.forwardnetworks.com "helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
   -n skyforge --create-namespace \
   --reset-values \
   --version <chart-version> \
-  -f ./deploy/skyforge-values.yaml \
-  -f /root/skyforge-secrets.yaml
+  -f /tmp/skyforge-values.yaml \
+  -f /tmp/skyforge-secrets.yaml"
+
+ssh skyforge.local.forwardnetworks.com "rm -f /tmp/skyforge-values.yaml /tmp/skyforge-secrets.yaml"
 ```
 
 ## 4b) Deploy (kustomize, fallback)

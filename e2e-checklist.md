@@ -19,15 +19,15 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 - Confirm DNS link is only visible when authenticated.
 - Open `EVE-NG` section and confirm the configured hosts appear.
 
-## Project + deployments
+## Workspace + deployments
 
-### Create project
-- Create a project as the non-admin user.
+### Create workspace
+- Create a workspace as the non-admin user.
 
 ### Netlab deployment (create → up → info → down → destroy → delete)
 - Create a Netlab deployment:
   - Pick the Netlab server (required).
-  - Pick a template source (blueprints repo or project repo).
+  - Pick a template source (blueprints repo or workspace repo).
   - Pick a template.
 - Run actions in order:
   - `Create` (should provision workspace/files without starting lab)
@@ -41,7 +41,7 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 ### Containerlab deployment (create → up → info → down → destroy → delete)
 - Create a Containerlab deployment:
   - Pick the Containerlab server (required).
-  - Pick a template source (blueprints repo or project repo).
+  - Pick a template source (blueprints repo or workspace repo).
   - Pick a template.
 - Run actions in order:
   - `Create`

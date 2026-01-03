@@ -17,7 +17,7 @@ job API.
 
 - `action`: `up`, `create`, `restart`, `down`, `collect`, `status` (plus optional `destroy`).
 - `user`: username for workspace scoping.
-- `project`: project slug.
+- `workspace`: workspace slug.
 - `deployment`: deployment name.
 - `workspaceRoot`: root path for Netlab workspaces (defaults to `/home/<user>/netlab`).
 - `plugin`: optional Netlab plugin name (for example `multilab`).
@@ -42,4 +42,4 @@ Skyforge launches Netlab runs directly:
 
 - The API writes per-job logs under `NETLAB_API_DATA_DIR` (default `/var/lib/skyforge/netlab-api`).
 - Use `NETLAB_API_INSECURE=true` if you terminate TLS elsewhere and need to skip cert verification.
-- The `multilab` plugin requires each instance run in a unique working directory; Skyforge uses `/home/<user>/netlab/<project>/<deployment>` by default.
+- The `multilab` plugin requires each instance run in a unique working directory; Skyforge uses `/home/<user>/netlab/<workspace>/<deployment>` by default.

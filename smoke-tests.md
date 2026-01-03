@@ -23,10 +23,10 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 - Sign in.
 - Verify the dashboard loads and the user menu shows your name.
 
-## Project lifecycle
-- Create a project (no deployments required for smoke).
-- Open the project list and confirm it appears.
-- Delete the project and confirm it disappears.
+## Workspace lifecycle
+- Create a workspace (no deployments required for smoke).
+- Open the workspace list and confirm it appears.
+- Delete the workspace and confirm it disappears.
 
 ## Optional integration checks
 - Git UI: `https://<hostname>/git/`
