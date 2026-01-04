@@ -43,3 +43,4 @@ Skyforge launches Netlab runs directly:
 - The API writes per-job logs under `NETLAB_API_DATA_DIR` (default `/var/lib/skyforge/netlab-api`).
 - Use `NETLAB_API_INSECURE=true` if you terminate TLS elsewhere and need to skip cert verification.
 - The `multilab` plugin requires each instance run in a unique working directory; Skyforge uses `/home/<user>/netlab/<workspace>/<deployment>` by default.
+- If template files or topology YAML are newer than the snapshot, the API clears the snapshot/lock and regenerates the lab before running `up`.
