@@ -30,7 +30,8 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/aws/…`
 - `cloud/terraform/azure/…`
 - `cloud/terraform/gcp/…`
-- `labpp/<template-name>/…`
+- `labpp/<template-name>/…` (blueprints repo)
+- `blueprints/labpp/<template-name>/…` (workspace repo override)
 - `netlab/<template>.yml`
 - `containerlab/<template>.yml`
 
@@ -42,6 +43,7 @@ Notes:
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Project repos can keep templates under `blueprints/labpp/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
+- LabPP templates must include `lab.json`. Skyforge syncs the selected LabPP template to the EVE‑NG host at `/var/lib/skyforge/labpp-templates/<template>` on each run.
 
 ## Bootstrap options
 
