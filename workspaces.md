@@ -37,3 +37,10 @@ curl -T ./file.txt https://<skyforge-host>/files/file.txt
 - `SKYFORGE_OBJECT_STORAGE_ENDPOINT` and `SKYFORGE_OBJECT_STORAGE_USE_SSL` drive the mirror.
 - `SKYFORGE_WORKSPACE_S3_BUCKET` overrides the bucket name (default `skyforge-files`).
 - The mirror uses the artifacts access key/secret, falling back to the MinIO root user/password if needed.
+
+## Deployment environment overrides
+Workspaces can define reusable variable groups, and each deployment can include per-deployment overrides.
+
+- Variable groups live in workspace settings and are injected into native runs first.
+- Deployment overrides use `KEY=value` pairs and override any group values.
+- Netlab users can inspect `netlab show defaults` from the deployments form to see server defaults.

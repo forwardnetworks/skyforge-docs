@@ -29,6 +29,7 @@ job API.
 - `collectTar`: tarball path for `collect` (optional).
 - `collectCleanup`: `true` to cleanup after collect (optional).
 - `cleanup`: `true` to cleanup on `down` (optional).
+- `environment`: optional environment variables to inject into the Netlab run (`KEY=value`).
 
 ## Runner (native)
 
@@ -44,3 +45,16 @@ Skyforge launches Netlab runs directly:
 - Use `NETLAB_API_INSECURE=true` if you terminate TLS elsewhere and need to skip cert verification.
 - The `multilab` plugin requires each instance run in a unique working directory; Skyforge uses `/home/<user>/netlab/<workspace>/<deployment>` by default.
 - If template files or topology YAML are newer than the snapshot, the API clears the snapshot/lock and regenerates the lab before running `up`.
+
+## Netlab defaults on the runner
+Use Netlab’s system defaults to avoid editing templates just to pin a common image.
+
+Example: set EOS to default to `ceos:4.35.1F` in `/etc/netlab/defaults.yml` on the Netlab runner:
+```yaml
+defaults:
+  device: eos
+  eos:
+    image: ceos:4.35.1F
+```
+
+See https://netlab.tools/defaults/ for additional options.

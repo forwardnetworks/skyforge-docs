@@ -15,6 +15,20 @@ curl -sfL https://get.k3s.io | sh -
 sudo kubectl get nodes
 ```
 
+## 1a) kubectl context (avoid deploying to the wrong cluster)
+If you run `kubectl` locally, confirm you are pointed at the k3s host (not a local Docker/orbstack cluster).
+
+Recommended: run all deploys on the k3s node itself:
+```bash
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+kubectl config get-contexts
+kubectl get nodes
+```
+
+Notes:
+- On the k3s host, kubeconfig also lives at `/root/.kube/config`.
+- If you copy kubeconfig to your workstation, update the `server:` to `https://<k3s-host>:6443`.
+
 ## 2) Ensure DNS + TLS hostname are correct
 Several components validate the public hostname and TLS certificate (for example, the object storage console redirect URL).
 
