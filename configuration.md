@@ -37,7 +37,7 @@ fall back to local admin authentication only.
 
 ## 3a) Shared admin secret (k3s overlay)
 The local admin password is stored in a single secret file and reused across Skyforge,
-Gitea, NetBox, Nautobot, and the code-server sync job:
+Gitea, NetBox, Nautobot, and Coder:
 - `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_shared_password`
 LDAP credentials live in separate secrets and are only required if you enable LDAP.
 

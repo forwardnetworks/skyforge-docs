@@ -36,7 +36,7 @@ minimum you need:
 - TLS certs under `k8s/overlays/k3s-traefik-secrets/certs/`
 
 The shared admin password is used to seed Skyforge, Gitea, NetBox, Nautobot,
-and the code-server sync job. LDAP credentials are separate and only required if you enable LDAP.
+and Coder. LDAP credentials are separate and only required if you enable LDAP.
 
 
 ## 4) Deploy (Helm, preferred)
@@ -67,4 +67,4 @@ kubectl apply -k k8s/overlays/k3s-quickstart
 Follow `docs/smoke-tests.md`.
 
 ## 6) Workspace sync
-See `docs/workspaces.md` for how the VS Code workspace sync and S3 placeholders are organized.
+See `docs/workspaces.md` for how the Coder workspace directories and S3 placeholders are organized.

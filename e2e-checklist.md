@@ -15,7 +15,7 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 ## Auth + dashboard
 
 - Sign in via LDAP as a non-admin user.
-- Confirm sidebar has only the authenticated VS Code entry (no “shared” link).
+- Confirm sidebar has only the authenticated Coder entry (no “shared” link).
 - Confirm DNS link is only visible when authenticated.
 - Open `EVE-NG` section and confirm the configured hosts appear.
 

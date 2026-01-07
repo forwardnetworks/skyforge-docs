@@ -23,7 +23,7 @@ To distribute the TLS CA to workloads, also set `skyforge-ca-cert` to the same c
 ## Full stack (recommended)
 For a typical Skyforge deployment (Gitea, NetBox, Nautobot, Yaade), you should also set:
 - `postgres-skyforge-password` (Postgres superuser password for the in-cluster DB provision hook)
-- `db-*` database user passwords (`db-gitea-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`)
+- `db-*` database user passwords (`db-gitea-password`, `db-coder-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`)
 - `gitea-secret-key` (required by the admin bootstrap job)
 - `netbox-secret-key` and `netbox-superuser-api-token`
 - `nautobot-secret-key` and `nautobot-superuser-api-token`

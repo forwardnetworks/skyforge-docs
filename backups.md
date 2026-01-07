@@ -4,7 +4,7 @@ Skyforge runs as a Kubernetes workload, but the cluster node still has **statefu
 
 - Postgres databases (`db` PVC): Gitea, NetBox, Nautobot, Hoppscotch, Skyforge state
 - Object storage (`minio` PVC): artifacts + Terraform state + file drop
-- Workspace PVCs: shared + per-user VS Code
+- Workspace PVCs: per-user Coder data
 
 This doc outlines a pragmatic “MVP backup” strategy so you can rebuild the node and recover quickly.
 
@@ -61,7 +61,7 @@ If you’re using Longhorn:
 
 - Enable recurring snapshots + backups to S3 for the PVs backing:
   - `db-data`, `minio-data`, `gitea-data`
-  - `platform-data`, `shared-workspace`, `code-server-home`
+  - `platform-data`, `coder-data`
 
 This gives a fast “restore the volume” path without needing to replay logical dumps.
 
