@@ -12,7 +12,7 @@ This file captures a known-good deployment configuration so we can reproduce the
   - `ghcr.io/forwardnetworks/skyforge-portal:20251229-100117-portal-api-testing-cookie`
   - `ghcr.io/forwardnetworks/skyforge-netbox:20251229-101706-netboxldapfix`
   - `ghcr.io/forwardnetworks/skyforge-nautobot:20251229-100652-ldapfix`
-  - `docker.io/hoppscotch/hoppscotch@sha256:0bf0d0c1a34399d8bc4a0d89126b41c717db771c5a451d69d076cb4305b9eaff` (pinned)
+  - `esperotech/yaade:latest`
 
 ## Values highlights
 - DNS: Technitium DNS enabled (`/dns/`), NodePorts `30053` (DNS) and `30380` (web UI).
@@ -22,9 +22,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 ## Notes
 - Skyforge’s external API is served behind Traefik under `https://<hostname>/api/skyforge/*`.
   - The embedded OpenAPI schema `servers` includes `url: /api/skyforge` so Swagger “Try it out” works.
-- API Testing is linked via `https://<hostname>/api-testing/`.
-  - This sets a short-lived cookie and routes Hoppscotch at the same hostname (Hoppscotch requires `/` due to HTML5 history routing).
-  - Exit API Testing with `https://<hostname>/api-testing/exit` to return to the portal.
+- API Testing is linked via `https://<hostname>/api-testing/` and routes to Yaade.
 
 ## Deploy / upgrade
 1) Ensure Helm can pull from GHCR (one-time per host):

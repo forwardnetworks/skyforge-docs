@@ -21,18 +21,15 @@ For SSH certificates, also provide `skyforge-ssh-ca-key`.
 To distribute the TLS CA to workloads, also set `skyforge-ca-cert` to the same cert so pods can trust it.
 
 ## Full stack (recommended)
-For a typical Skyforge deployment (Gitea, NetBox, Nautobot, Hoppscotch), you should also set:
+For a typical Skyforge deployment (Gitea, NetBox, Nautobot, Yaade), you should also set:
 - `postgres-skyforge-password` (Postgres superuser password for the in-cluster DB provision hook)
-- `db-*` database user passwords (`db-gitea-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`, `db-hoppscotch-password`)
+- `db-*` database user passwords (`db-gitea-password`, `db-netbox-password`, `db-nautobot-password`, `db-skyforge-server-password`)
 - `gitea-secret-key` (required by the admin bootstrap job)
 - `netbox-secret-key` and `netbox-superuser-api-token`
 - `nautobot-secret-key` and `nautobot-superuser-api-token`
 
-## Hoppscotch
-If you enable Hoppscotch, create:
-- `hoppscotch-secrets` with:
-  - `database_url` (Postgres URL for the `hoppscotch` DB/user)
-  - `data-encryption-key` (exactly 32 characters; keep it stable or Hoppscotch will refuse to start)
+## Yaade
+Yaade uses a PVC for persistence and does not require database secrets.
 
 ## Example (do not commit real secrets)
 See `skyforge-private/deploy/skyforge-secrets.example.yaml`.

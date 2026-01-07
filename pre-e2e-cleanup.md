@@ -2,8 +2,7 @@
 
 These steps keep E2E runs deterministic so failures are easier to diagnose.
 
-## 0) Ensure you’re not in “API Testing” mode
-- If you previously launched Hoppscotch, exit it first: `https://<hostname>/api-testing/exit`
+## 0) Ensure the portal is reachable
 - Confirm you can reach the portal at `https://<hostname>/status` (unauthenticated) or `https://<hostname>/dashboard/home` (authenticated)
 
 ## 1) Pick a single “test workspace”

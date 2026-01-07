@@ -37,8 +37,7 @@ kubectl -n skyforge get deploy skyforge-server
 kubectl -n skyforge get deploy gitea netbox nautobot
 ```
 
-## Hoppscotch sanity (optional)
+## Yaade sanity (optional)
 ```bash
-kubectl -n skyforge get secret hoppscotch-secrets
-kubectl -n skyforge rollout status deploy/hoppscotch
+kubectl -n skyforge rollout status deploy/yaade
 ```

@@ -18,6 +18,26 @@ systemctl is-active apache2.service netlab-api.service labpp-api.service contain
 
 If any of these fail, fix host parity before running E2E so the failures don’t happen late in the workflow.
 
+## Netlab upgrade (latest commits)
+
+Netlab 26.01 introduces breaking template changes. Until a 26.01 package is published, install from git on each runner:
+
+```bash
+/opt/pipx/venvs/networklab/bin/python -m pip install --upgrade git+https://github.com/ipspace/netlab.git
+netlab version
+```
+
+Note: the version string may still display `25.12.3` even when the commit is newer.
+
+## Netlab Ansible dependencies
+
+Netlab uses Ansible to push initial configs. Ensure `paramiko` is installed in both the Netlab runtime venv and the Skyforge netlab-api venv:
+
+```bash
+/opt/netlab/venv/bin/python -m pip install --upgrade paramiko
+/opt/skyforge/netlab-api/venv/bin/python -m pip install --upgrade paramiko
+```
+
 ## LabPP API: Telnet EOF hotfix
 
 If LabPP `START` runs fail with an error like:

@@ -31,24 +31,12 @@ If a Helm upgrade fails trying to patch a `Job`, it’s usually because the `spe
 
 This chart runs Jobs as Helm hooks to avoid that (they are deleted/recreated automatically).
 
-### Backend crash: “Invalid key length”
-Cause: `DATA_ENCRYPTION_KEY` must be exactly 32 bytes for `aes-256-cbc`.
+### Yaade data missing
+Cause: the `yaade-data` PVC is missing or was reset.
 
 Fix:
-- Ensure `hoppscotch-secrets.data-encryption-key` is exactly 32 characters and stable.
-
-### Backend crash: “DATA_ENCRYPTION_KEY value changed”
-Cause: the encryption key changed while the Hoppscotch infra config table already contains encrypted data.
-
-Fix options:
-- Restore the previous key, or
-- Reset the Hoppscotch DB (destructive) and re-run migrations.
-
-### Database URL is empty
-Cause: `hoppscotch-secrets.database_url` is empty/missing.
-
-Fix:
-- Populate `hoppscotch-secrets` with `database_url` and restart the Hoppscotch deployment.
+- Ensure the `yaade-data` PVC exists and is bound.
+- Restart the `yaade` deployment after restoring data.
 
 ## Gitea `/api/v1` is expected
 Skyforge uses Gitea’s versioned REST API under:

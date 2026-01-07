@@ -44,6 +44,7 @@ Notes:
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Project repos can keep templates under `blueprints/labpp/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
 - LabPP templates must include `lab.json`. Skyforge syncs the selected LabPP template to the EVE‑NG host at `/var/lib/skyforge/labpp-templates/<template>` on each run.
+- The bundled `blueprints/netlab/netlab-examples` is synced from the upstream Netlab examples; refresh it when updating Netlab to avoid template/filter mismatches.
 
 ## Bootstrap options
 
