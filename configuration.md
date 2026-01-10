@@ -53,8 +53,14 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_EVE_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing EVE-NG servers.
 - `SKYFORGE_EVE_SERVERS_FILE`: file path containing the same JSON.
 - `SKYFORGE_EVE_API_URL`: fallback single EVE API URL (used if no servers JSON is provided).
-- `SKYFORGE_LABPP_API_URL`: optional LabPP API base URL (defaults to `<eve web>/labpp` when unset).
-- `SKYFORGE_LABPP_SKIP_TLS_VERIFY`: `true` or `false` for LabPP API TLS verification.
+- `SKYFORGE_LABPP_FWD_ROOT`: path to the bundled `fwd` repo used by the LabPP CLI (default `/opt/skyforge/fwd`).
+- `SKYFORGE_LABPP_CONFIG_DIR_BASE`: base directory for LabPP generated configs (default `/var/lib/skyforge/labpp-configs`).
+- `SKYFORGE_LABPP_CONFIG_VERSION`: LabPP properties file version (default `1.0`).
+- `SKYFORGE_LABPP_NETBOX_URL`: NetBox base URL used by LabPP.
+- `SKYFORGE_LABPP_NETBOX_USERNAME`: NetBox username for LabPP allocations (secret).
+- `SKYFORGE_LABPP_NETBOX_PASSWORD`: NetBox password for LabPP allocations (secret).
+- `SKYFORGE_LABPP_NETBOX_MGMT_SUBNET`: management subnet CIDR used for LabPP (e.g. `10.255.0.0/24`).
+- `SKYFORGE_LABPP_S3_ACCESS_KEY`, `SKYFORGE_LABPP_S3_SECRET_KEY`, `SKYFORGE_LABPP_S3_REGION`, `SKYFORGE_LABPP_S3_BUCKET`: optional S3 state config for LabPP.
 - `SKYFORGE_NETLAB_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing Netlab servers.
 - `SKYFORGE_NETLAB_SERVERS_FILE`: file path containing the same JSON.
 - `SKYFORGE_CONTAINERLAB_API_PATH`: API path for Containerlab (default `/containerlab`).

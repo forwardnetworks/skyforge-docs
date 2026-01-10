@@ -57,7 +57,7 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
   - Pick the EVE server (required).
   - Pick a template source + template.
 - Run the same action sequence and validate:
-- `Info` shows LabPP status, lab path, and latest LabPP job ID for the selected deployment.
+- `Info` shows LabPP status and lab path for the selected deployment.
 - Use `Sync Forward` on the LabPP info panel to re-push devices into Forward after a run.
   - EVE server selection is honored (deploys to the chosen host).
 

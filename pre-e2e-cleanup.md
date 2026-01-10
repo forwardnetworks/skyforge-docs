@@ -10,7 +10,7 @@ These steps keep E2E runs deterministic so failures are easier to diagnose.
 - Always delete and recreate it for each E2E run.
 
 ## 2) Clean up in Skyforge UI
-- Delete any deployments in the test workspace (netlab/labpp/tofu).
+- Delete any deployments in the test workspace (netlab/labpp/terraform).
 - Delete the test workspace itself.
 - Confirm it’s gone from the Workspaces list.
 

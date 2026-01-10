@@ -29,6 +29,8 @@ gh auth token | docker login ghcr.io -u <github-user> --password-stdin
 Build the Encore server image (k3s runs `linux/amd64`):
 ```bash
 cd server
+# Ensure the LabPP CLI code is bundled into the server image.
+rsync -a --delete ../fwd/ ./fwd/
 encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 ```
 

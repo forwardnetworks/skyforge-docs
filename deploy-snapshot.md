@@ -16,7 +16,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 
 ## Values highlights
 - DNS: Technitium DNS enabled (`/dns/`), NodePorts `30053` (DNS) and `30380` (web UI).
-- LabPP proxy: enabled, routes `https://<hostname>/labpp/<server>/...` to EVE hosts on port 443.
+- LabPP runs locally inside the skyforge-server image (no external LabPP API proxy required).
 - Secrets: `secrets.create: false` (environment-specific secrets are managed out-of-band).
 
 ## Notes

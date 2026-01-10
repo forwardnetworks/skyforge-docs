@@ -37,6 +37,7 @@ TAG=latest
 Build the Encore server image (k3s is `linux/amd64`):
 ```bash
 cd server
+rsync -a --delete ../fwd/ ./fwd/
 encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 ```
 
