@@ -27,4 +27,18 @@ Skyforge maps deployment actions to LabPP CLI actions:
 - `run` (default) → `DEFAULT` (LabPP E2E flow)
 
 ## Forward integration
+Skyforge owns Forward sync; LabPP should not require or attempt any Forward configuration.
+
 After a successful run, Skyforge generates `data_sources.csv` and uses it to register devices with Forward.
+
+### `data_sources.csv` format
+- Desired: `name,ip_address` (management IPv4) with port `22` implied.
+- LabPP may emit: `name,ip_address,ssh_port` where `ip_address` is the EVE host and `ssh_port` is a per-device forwarded port.
+
+To keep Forward jump-server behavior consistent, Skyforge rewrites the generated CSV to `name,ip_address` using the management IPv4s reserved by LabPP/NetBox during the run.
+
+## Status (2026-01-11)
+LabPP core flow is functional end-to-end:
+- Template sync → LabPP run → NetBox allocations → `data_sources.csv` generation → Forward network creation + device upload.
+
+Known follow-ups remain (non-blocking), but the primary LabPP deployment workflow is working.
