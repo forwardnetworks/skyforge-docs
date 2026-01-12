@@ -46,10 +46,12 @@ This file captures a known-good deployment configuration so we can reproduce the
 gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
 ```
 
-2) Upgrade using the repo values file:
+2) Upgrade using the repo chart + values file:
 ```bash
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
-  --version 0.2.24 -n skyforge --create-namespace -f deploy/skyforge-values.yaml
+helm upgrade --install skyforge charts/skyforge \
+  -n skyforge --create-namespace \
+  -f deploy/skyforge-values.yaml -f deploy/skyforge-secrets.yaml \
+  --wait --timeout 10m
 ```
 
 3) Check pods:
