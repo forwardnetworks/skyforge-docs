@@ -83,14 +83,6 @@ For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
 - `containerlabApiUrl` (full URL override).
 - `containerlabSkipTlsVerify` (`true`/`false`).
 
-### Netlab: disable GUI tools (Graphite)
-Some Netlab templates include `tools: { graphite: {} }` which starts the Graphite GUI on the Netlab runner.
-If you don't want Graphite to start (for example, because the runner is not reachable on arbitrary ports),
-you can disable it per-run by setting one of:
-
-- `SKYFORGE_NETLAB_DISABLE_GRAPHITE=true`
-- `SKYFORGE_NETLAB_DISABLE_TOOLS=graphite`
-
 ## 4b) DNS (Technitium, optional)
 - `SKYFORGE_DNS_URL`: Technitium base URL for the server-to-server API (default `http://technitium-dns:5380`).
 - `SKYFORGE_DNS_ADMIN_USERNAME`: Technitium admin username used for provisioning (default `admin`).
