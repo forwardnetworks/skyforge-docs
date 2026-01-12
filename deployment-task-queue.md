@@ -20,3 +20,14 @@ On the deployments list page, Skyforge surfaces a queue summary per deployment:
 These fields are best-effort metadata for UI display; the authoritative source
 is `sf_tasks`.
 
+## Duplicate clicks / idempotency
+
+Some runs include a `metadata.dedupeKey` value. When present, Skyforge will
+return the existing queued/running task for the same `dedupeKey` instead of
+creating a duplicate task (useful for double-clicks and refreshes).
+
+## Preflight checks
+
+Some run endpoints validate basic filesystem prerequisites up front (for example,
+that configured data/config directories are writable) to fail fast with clearer
+errors before enqueuing long-running jobs.
