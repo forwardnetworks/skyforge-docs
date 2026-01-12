@@ -3,6 +3,20 @@
 This file captures a known-good deployment configuration so we can reproduce the environment without copying local files onto the k3s host.
 
 ## Snapshot
+### 2026-01-12
+- Date: 2026-01-12
+- Hostname: `skyforge.local.forwardnetworks.com`
+- Helm chart (repo): `charts/skyforge`
+- Helm chart version: `0.2.195`
+- Images:
+  - `ghcr.io/forwardnetworks/skyforge-server:20260112-0524`
+  - `ghcr.io/forwardnetworks/skyforge-portal:20260112-0524`
+  - `ghcr.io/forwardnetworks/skyforge-labpp-runner:20260111-1933`
+  - `ghcr.io/forwardnetworks/skyforge-netbox:20260111-1222`
+  - `ghcr.io/forwardnetworks/skyforge-nautobot:20260108-0135`
+  - `esperotech/yaade:latest`
+
+### 2025-12-29
 - Date: 2025-12-29
 - Hostname: `skyforge.local.forwardnetworks.com`
 - Helm chart (OCI): `oci://ghcr.io/forwardnetworks/charts/skyforge`
@@ -23,6 +37,8 @@ This file captures a known-good deployment configuration so we can reproduce the
 - Skyforge’s external API is served behind Traefik under `https://<hostname>/api/skyforge/*`.
   - The embedded OpenAPI schema `servers` includes `url: /api/skyforge` so Swagger “Try it out” works.
 - API Testing is linked via `https://<hostname>/api-testing/` and routes to Yaade.
+- Netlab: template sync happens on deployment definition create (best-effort prefetch) and sync is scoped to the selected template subtree for faster starts.
+- Portal: deleting Netlab/Lab++ deployments avoids a redundant destroy run (server handles cleanup on delete).
 
 ## Deploy / upgrade
 1) Ensure Helm can pull from GHCR (one-time per host):
