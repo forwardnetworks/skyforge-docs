@@ -9,7 +9,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 - Helm chart (repo): `charts/skyforge`
 - Helm chart version: `0.2.195`
 - Images:
-  - `ghcr.io/forwardnetworks/skyforge-server:20260112-0524`
+  - `ghcr.io/forwardnetworks/skyforge-server:20260112-0547`
   - `ghcr.io/forwardnetworks/skyforge-portal:20260112-0524`
   - `ghcr.io/forwardnetworks/skyforge-labpp-runner:20260111-1933`
   - `ghcr.io/forwardnetworks/skyforge-netbox:20260111-1222`
