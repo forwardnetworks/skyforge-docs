@@ -37,8 +37,10 @@ After a successful run, Skyforge generates `data_sources.csv` and uses it to reg
 
 To keep Forward jump-server behavior consistent, Skyforge rewrites the generated CSV to `name,ip_address` using the management IPv4s reserved by LabPP/NetBox during the run.
 
-## Status (2026-01-11)
+## Status (2026-01-12)
 LabPP core flow is functional end-to-end:
 - Template sync → LabPP run → NetBox allocations → `data_sources.csv` generation → Forward network creation + device upload.
+
+The `skyforge-server` image tag `20260112-1305` includes the current working LabPP CSV + server-side integration fixes.
 
 Known follow-ups remain (non-blocking), but the primary LabPP deployment workflow is working.

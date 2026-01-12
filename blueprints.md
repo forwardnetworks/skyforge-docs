@@ -15,7 +15,7 @@ flowchart LR
 
   api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
   api -->|creates| proj[Workspace repos<br/>{user}/{workspace}]
-  api --> runner[Native task engine<br/>(Tofu / Netlab / LabPP / Containerlab)]
+  api --> runner[Native task engine<br/>(Tofu / Netlab / LabPP / Containerlab / Clabernetes)]
 
   runner -->|clones| proj
   runner -->|optionally clones| bp
@@ -34,6 +34,7 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `blueprints/labpp/<template-name>/…` (workspace repo override)
 - `netlab/<template>.yml`
 - `containerlab/<template>.yml`
+- `containerlab/<template>.yml` (also used by Clabernetes)
 
 Skyforge deployments store the selected **repo** and **templates folder** (repo-relative), then discover templates underneath.
 
@@ -42,6 +43,7 @@ Notes:
 - LabPP templates are directories (each subfolder is a template).
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
+- Clabernetes templates are Containerlab YAML topology files, deployed to Kubernetes via the clabernetes controller.
 - Project repos can keep templates under `blueprints/labpp/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
 - LabPP templates must include `lab.json`. Skyforge syncs the selected LabPP template to the Skyforge server at `/var/lib/skyforge/labpp-templates/<template>` on each run.
 - The bundled `blueprints/netlab/netlab-examples` is synced from the upstream Netlab examples; refresh it when updating Netlab to avoid template/filter mismatches.
