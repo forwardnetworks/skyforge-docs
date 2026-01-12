@@ -52,7 +52,9 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 ### NetBox/Nautobot permissions (Remote-User)
 - When `SKYFORGE_SSO_ENABLED=true`, Skyforge uses Traefik forwardAuth + `Remote-User` headers to SSO into NetBox/Nautobot.
 - Skyforge also sets `Remote-User-Group: skyforge-users` so NetBox/Nautobot can grant non-superuser write permissions.
-- Current scope: basic create/update/delete for a small set of IPAM/DCIM object types; this is not tenant/workspace-scoped yet.
+- Current scope: basic create for a small set of IPAM/DCIM object types, and change/delete limited to a per-user tenant.
+  - NetBox: a `Tenant` is created (or reused) per username (by slug), and change/delete permissions are constrained to objects with `tenant=<user>` (or `device__tenant=<user>` for interfaces).
+  - Nautobot: a `Tenant` is created (or reused) per username (by name), and change/delete permissions are constrained similarly.
 
 ## 4a) Lab server pools (optional)
 - `SKYFORGE_EVE_SERVERS_JSON`: JSON array (or `{"servers":[...]}`) describing EVE-NG servers.
