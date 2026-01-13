@@ -20,6 +20,15 @@ On the deployments list page, Skyforge surfaces a queue summary per deployment:
 These fields are best-effort metadata for UI display; the authoritative source
 is `sf_tasks`.
 
+## Streaming run output (SSE)
+
+Skyforge streams task output via Server-Sent Events (SSE) directly from the backend:
+
+- Run output tail: `GET /api/skyforge/api/runs/:id/events`
+- Dashboard snapshot stream: `GET /api/skyforge/api/dashboard/events`
+
+The portal consumes these endpoints to avoid polling.
+
 ## Duplicate clicks / idempotency
 
 Some runs include a `metadata.dedupeKey` value. When present, Skyforge will
