@@ -18,6 +18,18 @@ systemctl is-active apache2.service netlab-api.service containerlab-api.service
 
 If any of these fail, fix host parity before running E2E so the failures don’t happen late in the workflow.
 
+## Fix root-owned Netlab workspace artifacts
+
+If user workdirs under `/home/<user>/netlab/...` contain root-owned artifacts (commonly `netlab.lock` and `clab-*`), the Netlab API is likely spawning Netlab as `root`.
+
+- Update the Netlab API script on the runner from `netlab/api/netlab_api.py` in this repo (it drops privileges for the Netlab subprocess when running as root and then reconciles workdir ownership back to the user).
+- Restart the service:
+
+```bash
+systemctl cat netlab-api.service
+sudo systemctl restart netlab-api.service
+```
+
 ## Netlab upgrade (latest commits)
 
 Netlab 26.01 introduces breaking template changes. Until a 26.01 package is published, install from git on each runner:

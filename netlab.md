@@ -48,6 +48,17 @@ Skyforge launches Netlab runs directly:
 - Netlab 26.01+ removes Ansible-based template rendering. Avoid Ansible-only Jinja2 filters in templates and prefer native Netlab filters.
 - Template vars updated in Netlab 26.01+: `clab_files` → `node_files`, `hosts` → `host_addrs` (legacy `hosts` still works for now).
 
+## Workdir ownership
+
+Netlab sometimes runs privileged operations (for example `containerlab deploy` via `sudo`). If the Netlab API process runs as `root` and spawns Netlab as `root`, you can end up with root-owned artifacts inside the user’s workspace directory (commonly `clab-*/` and `netlab.lock`).
+
+Skyforge’s Netlab API supports executing Netlab as the target user (when the API is started as root) and then reconciling workdir ownership back to that user.
+
+- Set `NETLAB_RUN_AS_USER` (or rely on `NETLAB_USER`) so Netlab runs as the workspace user.
+- The API will also best-effort `chown` the workdir tree back to the target user after each run.
+
+If you see root-owned files under `/home/<user>/netlab/...`, update the runner’s Netlab API script with `netlab/api/netlab_api.py` from this repo and restart `netlab-api.service`.
+
 ## Netlab defaults on the runner
 Use Netlab’s system defaults to avoid editing templates just to pin a common image.
 
