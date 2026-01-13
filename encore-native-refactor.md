@@ -78,3 +78,11 @@ Status:
 - Kubernetes CronJobs were removed from the Helm chart.
 - The system relies on Encore cron jobs (`cron.NewJob`) for task reconciliation.
 
+## 5) Task queue metrics
+
+Status:
+- The task runner already records queue latency and run duration metrics.
+- A periodic cron job updates current-depth gauges:
+  - `skyforge_tasks_queued_current_total`, `skyforge_tasks_running_current_total`
+  - `skyforge_tasks_queued_oldest_age_seconds_total`
+  - Per-task-type: `skyforge_tasks_queued_current`, `skyforge_tasks_running_current`, `skyforge_tasks_queued_oldest_age_seconds`
