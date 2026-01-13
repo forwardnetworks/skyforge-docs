@@ -6,6 +6,11 @@ and what it would take to do it cleanly without regressing the current working s
 Status: the system currently uses a dedicated worker **Deployment** plus a dedicated worker **image**
 (`-tags=skyforge_worker`) to ensure only the worker registers the PubSub subscription.
 
+Note: Encore requires `pubsub.NewSubscription(...)` calls to be made from package-level variables
+with a **string literal** subscription name. That means we cannot conditionally register a
+subscription (or switch its name) based on environment variables; doing a true worker-only
+subscription registration without build tags requires the service split described below.
+
 ## 1) True service split (no build tags)
 
 Goal:
