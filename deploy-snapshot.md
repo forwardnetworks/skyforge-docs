@@ -3,6 +3,27 @@
 This file captures a known-good deployment configuration so we can reproduce the environment without copying local files onto the k3s host.
 
 ## Snapshot
+### 2026-01-13 (demo)
+- Date: 2026-01-13
+- Hostname: `skyforge.local.forwardnetworks.com`
+- Helm chart (repo): `charts/skyforge`
+- Helm chart version: `0.2.205`
+- Helm release revision: `759`
+- Images:
+  - `ghcr.io/forwardnetworks/skyforge-server:20260113-1433`
+  - `ghcr.io/forwardnetworks/skyforge-server-worker:20260113-1433`
+  - `ghcr.io/forwardnetworks/skyforge-portal:20260113-0903`
+  - `ghcr.io/forwardnetworks/skyforge-labpp-runner:20260113-0544`
+  - `ghcr.io/forwardnetworks/skyforge-netbox:20260111-1222`
+  - `ghcr.io/forwardnetworks/skyforge-nautobot:20260108-0135`
+  - `esperotech/yaade:latest`
+- Runner notes:
+  - Netlab API script updated on `tsa-eve-ng-001`: `/opt/netlab/netlab-api.py` (timestamp: 2026-01-13 10:37 PST)
+- Demo-critical behavior verified:
+  - Netlab: per-device Forward CLI creds created (`{deployment}-{device}`), device type hints sent when known (`linux_os_ssh`, `arista_eos_ssh`), Linux SSH enabled on Alpine/python-based hosts.
+  - LabPP: EVE upload/config works, CSV generation works, Forward configuration is skipped as desired.
+  - Gitea: shared `skyforge/blueprints` repo is public/visible in Explore; workspace repos are private by default.
+
 ### 2026-01-12
 - Date: 2026-01-12
 - Hostname: `skyforge.local.forwardnetworks.com`
