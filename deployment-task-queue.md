@@ -47,3 +47,16 @@ Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
 
 - Queued tasks are re-published periodically so they aren't stranded if a publish fails.
 - Long-running tasks with no recent output can be marked failed to avoid indefinite `running` status after crashes.
+
+In self-hosted k3s deployments, these cron jobs are executed by Kubernetes CronJobs (see `charts/skyforge/templates/skyforge-server-cronjobs.yaml`) calling token-gated internal endpoints on `skyforge-server`.
+
+## Helm infra config
+
+Encore PubSub requires the Helm-shipped `infra.config.json` to stay in sync with `server/infra.config.json` (for example, NSQ PubSub topics/subscriptions).
+
+To check drift locally:
+
+```bash
+cd skyforge-private
+./scripts/check-infra-config-sync.sh
+```
