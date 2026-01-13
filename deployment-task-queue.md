@@ -40,3 +40,10 @@ creating a duplicate task (useful for double-clicks and refreshes).
 Some run endpoints validate basic filesystem prerequisites up front (for example,
 that configured data/config directories are writable) to fail fast with clearer
 errors before enqueuing long-running jobs.
+
+## Reconciliation
+
+Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
+
+- Queued tasks are re-published periodically so they aren't stranded if a publish fails.
+- Long-running tasks with no recent output can be marked failed to avoid indefinite `running` status after crashes.
