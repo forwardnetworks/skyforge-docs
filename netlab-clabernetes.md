@@ -1,14 +1,15 @@
-# Netlab → Clabernetes / c9s (experimental) TODO
+# Netlab → C9s (experimental)
 
-Goal: add an experimental deployment path that uses `netlab` to generate a topology + artifacts, and runs the resulting Containerlab topology on Kubernetes using the **clabernetes** controller (a.k.a. “c9s” in Skyforge discussions).
+Goal: use `netlab` to generate a Containerlab topology + node artifacts, and run the resulting topology on Kubernetes using the **clabernetes** controller (referred to as “c9s” in Skyforge).
 
 References:
 - Netlab: https://github.com/ipspace/netlab
 - Clabernetes: https://containerlab.dev/manual/clabernetes/
+- Clabverter (used by c9s): https://containerlab.dev/manual/clabernetes/install/#clabverter
 
 This is intentionally “side-by-side” with the existing Netlab runner (EVE hosts) and Containerlab runner flows.
 
-## High-level flow (proposed)
+## High-level flow
 
 1) **Template selection**
    - User selects a Netlab example folder (e.g. `netlab/EVPN/ebgp`) from blueprints/workspace repo.
@@ -20,15 +21,16 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
    - Run `netlab create` (and/or `netlab up --dry-run` if needed) to generate:
      - `clab.yml` (Containerlab topology)
      - `hosts.yml`, `node_files/`, `group_vars/`, etc.
-   - For the first iteration, focus on generating `clab.yml` and any artifacts needed for “export device list”.
+   - Skyforge uses `netlab clab-tarball` to export a tarball containing `clab.yml` + `node_files/`.
 
-4) **Convert → clabernetes**
-   - Option A (preferred if supported): create a `Topology` custom resource that embeds the Containerlab topology (`clab.yml`) directly.
-   - Option B (if required): run **clabverter** to convert `clab.yml` into Kubernetes resources/CRs consumable by clabernetes.
+4) **Deploy via c9s**
+   - Skyforge creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
+   - Skyforge also creates per-node ConfigMaps for `node_files/` and mounts them into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
+   - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
-   - Use a per-workspace namespace (e.g. `sf-ws-<slug>` or `sf-ws-<id>`) to isolate resources.
-   - Apply CRs/resources; wait for controller reconciliation.
+   - Uses a per-workspace namespace (`ws-<workspaceSlug>`) to isolate resources.
+   - Applies the `Topology` CR; waits for `status.topologyReady=true`.
 
 6) **Status + logs**
    - Provide a deployment “info” panel backed by Kubernetes queries:
@@ -84,17 +86,19 @@ Start with “works end-to-end” for topologies that use only images that are a
 ## Implementation checklist (Skyforge)
 
 - Server (encore/Go)
-  - Add new deployment type `netlab-clabernetes` (experimental).
-  - Add runner for:
-    - sync template → workdir
-    - run `netlab create`
-    - produce/apply clabernetes CRs
-    - poll status / stream logs (best-effort)
-  - Add destroy path that cleans up k8s resources and handles stuck finalizers.
+  - Deployment type: `netlab-c9s`.
+  - Runner flow:
+    - sync template → runner workdir
+    - `netlab create` → `netlab clab-tarball`
+    - create per-node ConfigMaps for `node_files/`
+    - create c9s `Topology` CR embedding `clab.yml`
+    - wait for readiness
+  - Destroy flow:
+    - delete `Topology` CR
+    - delete generated ConfigMaps
 
 - Portal
-  - Add new deployment type option + “experimental” badge.
-  - Reuse the existing run output streaming + dashboard SSE for status.
+  - Add `netlab-c9s` to deployment type picker.
 
 - Helm / cluster
   - Ensure clabernetes controller installed and CRDs present in the cluster.
