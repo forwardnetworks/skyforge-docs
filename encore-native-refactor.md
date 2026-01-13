@@ -75,8 +75,10 @@ Status:
 ## 4) Cron
 
 Status:
-- Kubernetes CronJobs were removed from the Helm chart.
-- The system relies on Encore cron jobs (`cron.NewJob`) for task reconciliation.
+- The system does not rely on Encore cron for task reconciliation.
+- Dedicated worker pods run background loops for:
+  - Republishing queued task events (reconcile queue).
+  - Marking stuck running tasks as failed (reconcile running).
 
 ## 5) Task queue metrics
 
