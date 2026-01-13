@@ -1,6 +1,10 @@
-# Netlab → Clabernetes (experimental) TODO
+# Netlab → Clabernetes / c9s (experimental) TODO
 
-Goal: add an experimental deployment path that uses `netlab` to generate a topology + artifacts, and runs the resulting Containerlab topology on Kubernetes using the **clabernetes** controller.
+Goal: add an experimental deployment path that uses `netlab` to generate a topology + artifacts, and runs the resulting Containerlab topology on Kubernetes using the **clabernetes** controller (a.k.a. “c9s” in Skyforge discussions).
+
+References:
+- Netlab: https://github.com/ipspace/netlab
+- Clabernetes: https://containerlab.dev/manual/clabernetes/
 
 This is intentionally “side-by-side” with the existing Netlab runner (EVE hosts) and Containerlab runner flows.
 
@@ -96,9 +100,18 @@ Start with “works end-to-end” for topologies that use only images that are a
   - Ensure clabernetes controller installed and CRDs present in the cluster.
   - Decide where controller runs (namespace) and what RBAC is needed.
 
+## Notes on “adding c9s to netlab”
+
+We likely do **not** need to modify upstream netlab to add a native “c9s” provider to get an MVP:
+- Netlab already emits Containerlab topology (`clab.yml`) via the `clab` provider.
+- Clabernetes consumes containerlab topologies via Kubernetes CRDs/controllers.
+- The simplest integration is therefore a **wrapper**:
+  - `netlab create` → `clab.yml` → clabernetes CR apply
+
+If we later want a “first-class” experience in netlab itself (e.g., `netlab up --provider c9s`), that would be an upstream effort and should be treated as Phase 3+ after the Skyforge wrapper works reliably.
+
 ## Safety / guardrails
 
 - Default-off behind a feature flag in `deploy/skyforge-values.yaml`.
 - Hard cap: max pods/nodes per topology for MVP.
 - Timeouts and clear error messages when CRDs/controller are missing.
-
