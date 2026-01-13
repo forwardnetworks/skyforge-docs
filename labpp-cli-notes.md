@@ -41,6 +41,6 @@ To keep Forward jump-server behavior consistent, Skyforge rewrites the generated
 LabPP core flow is functional end-to-end:
 - Template sync → LabPP run → NetBox allocations → `data_sources.csv` generation → Forward network creation + device upload.
 
-The `skyforge-server` image tag `20260112-1305` includes the current working LabPP CSV + server-side integration fixes.
+The `skyforge-server` image tag `20260112-2348` includes the current working LabPP CSV + server-side integration fixes, and emits task lifecycle events for the Forward upload step (`forward.devices.upload.*`).
 
 Known follow-ups remain (non-blocking), but the primary LabPP deployment workflow is working.
