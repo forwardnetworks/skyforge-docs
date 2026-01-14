@@ -75,10 +75,12 @@ Goal:
 - `server/skyforge/config.cue` provides defaults for a few safe knobs (worker enabled default,
   notification/check intervals, EVE running-scan limits).
 - The Go code still accepts environment-variable overrides for compatibility with Helm values.
+- Netlab/LabPP defaults are now also sourced from `server/skyforge/config.cue` (with legacy env overrides).
 
 ### Helm changes required
 - Render the `ENCORE_RUNTIME_CONFIG` secret from Helm values (or manage it out-of-band) so the
   cluster deployment does not depend on environment-variable parsing.
+  - Chart support exists but is disabled by default: `charts/skyforge/values.yaml` (`skyforge.encoreRuntimeConfig`).
 
 ## 3) Logging
 
