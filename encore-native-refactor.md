@@ -3,8 +3,11 @@
 This document captures the remaining “Encore-native alignment” work that is **not** implemented yet,
 and what it would take to do it cleanly without regressing the current working system.
 
-Status: the system uses a dedicated worker **Deployment** plus a dedicated worker **image**
-to drain the task queue.
+Status: the system uses a dedicated worker **Deployment** to drain the task queue.
+
+Note: worker/image separation is currently achieved by pointing the worker Deployment at the
+same server image tag (simplest + reliable across platforms), and relying on an **infra config split**
+to ensure only the worker pod registers PubSub subscriptions.
 
 Note: Encore requires `pubsub.NewSubscription(...)` calls to be made from package-level variables
 with a **string literal** subscription name and a constant `MaxConcurrency`. That means we cannot
@@ -65,7 +68,12 @@ Goal:
    - tasks/worker knobs
    - gitea/netbox/nautobot URLs
    - LDAP/OIDC
-   - netlab/labpp runner settings
+- netlab/labpp runner settings
+
+### Current progress
+- `server/skyforge/config.cue` provides defaults for a few safe knobs (worker enabled default,
+  notification/check intervals, EVE running-scan limits).
+- The Go code still accepts environment-variable overrides for compatibility with Helm values.
 
 ### Helm changes required
 - Render the `ENCORE_RUNTIME_CONFIG` secret from Helm values (or manage it out-of-band) so the
