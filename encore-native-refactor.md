@@ -4,12 +4,11 @@ This document captures the remaining “Encore-native alignment” work that is 
 and what it would take to do it cleanly without regressing the current working system.
 
 Status: the system uses a dedicated worker **Deployment** plus a dedicated worker **image**
-(`GOFLAGS="-tags=skyforge_worker"`) to ensure only the worker registers the PubSub subscription.
+to drain the task queue.
 
 Note: Encore requires `pubsub.NewSubscription(...)` calls to be made from package-level variables
-with a **string literal** subscription name. That means we cannot conditionally register a
-subscription (or switch its name) based on environment variables; doing a true worker-only
-subscription registration without build tags requires the service split described below.
+with a **string literal** subscription name and a constant `MaxConcurrency`. That means we cannot
+conditionally register a subscription (or switch its concurrency) based on environment variables.
 
 ## 1) True service split (no build tags)
 
@@ -41,10 +40,10 @@ implementation code as a library.
    - Does **not** register the subscription.
 
 ### Image build
-- API image (no subscription code linked in):
-  - `encore build docker ... --services=skyforge,storage`
-- Worker image (subscription code included):
-  - `GOFLAGS="-tags=skyforge_worker" encore build docker ... --services=skyforge,storage`
+- API image (no worker subscriptions):
+  - `encore build docker ... --services=skyforge,health,storage`
+- Worker image (task/maintenance subscriptions):
+  - `encore build docker ... --services=skyforge,health,storage,worker`
 
 ### Helm
 - Worker deployment uses the worker image.
