@@ -3,8 +3,8 @@
 This document captures the remaining “Encore-native alignment” work that is **not** implemented yet,
 and what it would take to do it cleanly without regressing the current working system.
 
-Status: the system currently uses a dedicated worker **Deployment** plus a dedicated worker **image**
-(`-tags=skyforge_worker`) to ensure only the worker registers the PubSub subscription.
+Status: the system uses a dedicated worker **Deployment** plus a dedicated worker **image**
+(`GOFLAGS="-tags=skyforge_worker"`) to ensure only the worker registers the PubSub subscription.
 
 Note: Encore requires `pubsub.NewSubscription(...)` calls to be made from package-level variables
 with a **string literal** subscription name. That means we cannot conditionally register a
@@ -41,8 +41,10 @@ implementation code as a library.
    - Does **not** register the subscription.
 
 ### Image build
-- API image: `encore build docker ... --services=skyforge,storage`
-- Worker image: `encore build docker ... --services=taskworker,storage`
+- API image (no subscription code linked in):
+  - `encore build docker ... --services=skyforge,storage`
+- Worker image (subscription code included):
+  - `GOFLAGS="-tags=skyforge_worker" encore build docker ... --services=skyforge,storage`
 
 ### Helm
 - Worker deployment uses the worker image.
@@ -80,10 +82,12 @@ Status:
 ## 4) Cron
 
 Status:
-- The system does not rely on Encore cron for task reconciliation.
-- Dedicated worker pods run background loops for:
+- The system relies on Encore Cron jobs for periodic maintenance:
   - Republishing queued task events (reconcile queue).
   - Marking stuck running tasks as failed (reconcile running).
+  - Workspace sync and cloud credential checks (published to the maintenance PubSub topic).
+  - Task queue metrics refresh.
+- Legacy Kubernetes CronJobs have been removed from the Helm chart; self-hosted setups must rely on Encore Cron or an external scheduler that triggers private endpoints.
 
 ## 5) Task queue metrics
 

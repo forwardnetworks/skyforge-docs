@@ -29,6 +29,8 @@ Skyforge streams task output via Server-Sent Events (SSE) directly from the back
 
 The portal consumes these endpoints to avoid polling.
 
+Implementation note: SSE streams block until new task logs/events arrive. In Postgres-backed deployments, this uses `LISTEN/NOTIFY` to avoid Redis PubSub fanout.
+
 ## Duplicate clicks / idempotency
 
 Some runs include a `metadata.dedupeKey` value. When present, Skyforge will
@@ -48,7 +50,7 @@ Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
 - Queued tasks are re-published periodically so they aren't stranded if a publish fails.
 - Long-running tasks with no recent output can be marked failed to avoid indefinite `running` status after crashes.
 
-In self-hosted k3s deployments, these cron jobs are executed by Kubernetes CronJobs (see `charts/skyforge/templates/skyforge-server-cronjobs.yaml`) calling token-gated internal endpoints on `skyforge-server`.
+These cron jobs are scheduled via Encore Cron and run in the Skyforge backend.
 
 ## Helm infra config
 
