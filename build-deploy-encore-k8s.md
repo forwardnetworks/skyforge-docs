@@ -26,12 +26,20 @@ gh auth refresh -h github.com -s read:packages,write:packages
 gh auth token | docker login ghcr.io -u <github-user> --password-stdin
 ```
 
-Build the Encore server image (k3s runs `linux/amd64`):
+Build the Encore server images (k3s runs `linux/amd64`):
 ```bash
 cd server
 # Ensure the LabPP CLI code is bundled into the server image.
 rsync -a --delete ../fwd/ ./fwd/
-encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
+# API image (excludes worker subscriptions).
+encore build docker --arch amd64 --config ../charts/skyforge/files/infra.api.config.json \
+  --services=skyforge,health,storage \
+  "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
+
+# Worker image (includes PubSub subscriptions).
+encore build docker --arch amd64 --config infra.config.json \
+  --services=skyforge,health,storage,worker \
+  "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}-worker" --push
 ```
 
 Go toolchain note: `server/go.mod` pins `toolchain go1.26rc1`. If your local Go version differs, the Go tool will fetch/use 1.26rc1 automatically (or set `GOTOOLCHAIN=go1.26rc1`).

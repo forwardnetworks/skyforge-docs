@@ -5,9 +5,10 @@ and what it would take to do it cleanly without regressing the current working s
 
 Status: the system uses a dedicated worker **Deployment** to drain the task queue.
 
-Note: worker/image separation is currently achieved by pointing the worker Deployment at the
-same server image tag (simplest + reliable across platforms), and relying on an **infra config split**
-to ensure only the worker pod registers PubSub subscriptions.
+Note: API/worker image separation is now done using `encore build docker --services=...`:
+- API image excludes the `worker` service.
+- Worker image includes the `worker` service.
+We still keep the infra config split so only the worker pod has `subscriptions` in the runtime infra config.
 
 Note: Encore requires `pubsub.NewSubscription(...)` calls to be made from package-level variables
 with a **string literal** subscription name and a constant `MaxConcurrency`. That means we cannot
