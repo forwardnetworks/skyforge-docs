@@ -78,3 +78,37 @@ K3S_VERSION="v1.33.6+k3s1" # replace with the control-plane version
 ssh root@skyforge-2 "curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='$K3S_VERSION' K3S_URL=https://$K3S_SERVER_IP:6443 K3S_TOKEN=$TOKEN INSTALL_K3S_EXEC='agent --node-name skyforge-2' sh -"
 ```
 
+## Local-path PV storage on the secondary disk
+
+Skyforge uses k3s `local-path` (host-local PVs). On all nodes we mount the secondary disk (`/dev/sdb`) at:
+
+- `/var/lib/rancher/k3s/storage`
+
+This keeps PV data off the root filesystem, and ensures PVs on `skyforge-2`/`skyforge-3` can be created without filling the small root partition.
+
+To verify:
+
+```bash
+ssh root@skyforge-1 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
+ssh root@skyforge-2 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
+ssh root@skyforge-3 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
+```
+
+## Network sanity (iptables)
+
+If a node has default iptables policies set to `DROP`, pod-to-service networking (including DNS) can break for workloads scheduled on that node.
+
+Quick check:
+
+```bash
+ssh root@skyforge-2 'iptables -S | head -n 3'
+ssh root@skyforge-3 'iptables -S | head -n 3'
+```
+
+Expected:
+
+```
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+```
