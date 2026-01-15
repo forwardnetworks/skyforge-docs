@@ -109,7 +109,6 @@ For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
 - `SKYFORGE_LISTEN_ADDR`: HTTP listen address (default `:8085`).
 - `SKYFORGE_MAX_GROUPS`: maximum LDAP groups to load.
 - `SKYFORGE_WORKSPACE_SYNC_SECONDS`: workspace sync interval (preferred).
-- `SKYFORGE_PROJECT_SYNC_SECONDS`: legacy alias for workspace sync interval.
 - `SKYFORGE_SESSION_TTL`: session lifetime (e.g. `8h`).
 - `SKYFORGE_COOKIE_SECURE`: `true` or `false`.
 - `SKYFORGE_COOKIE_DOMAIN`: optional cookie domain attribute (set when you need SSO across subdomains).
