@@ -142,6 +142,15 @@ WantedBy=multi-user.target
 sudo mkdir -p /var/lib/skyforge/netlab-api
 sudo systemctl daemon-reload
 sudo systemctl enable --now netlab-api
+
+## Netlab API Authentication
+
+The Netlab API supports:
+- Static HTTP Basic auth via `NETLAB_API_USERNAME` + `NETLAB_API_PASSWORD`
+- PAM auth (LDAP-backed) if the `pam` module is installed and the host is configured for LDAP
+- Static bearer token auth via `NETLAB_API_BEARER_TOKEN` (recommended for Skyforge -> Netlab calls)
+
+For Skyforge’s Netlab status telemetry (`/api/netlab/stats`) and for consistent automation, prefer configuring a bearer token on the Netlab host and setting the same `apiToken` in Skyforge’s `skyforge-netlab-servers` secret entry.
 ```
 
 ## 5. Security & Networking
