@@ -3,7 +3,7 @@
 Skyforge today models a deployment as a single provider run (Terraform, Netlab/Containerlab, LabPP, etc). For multi-provider demos and real workflows, we want a **composite deployment** that can orchestrate multiple providers as one “deployment” with shared state, ordering, and consistent UX.
 
 This doc describes the intended model for a composite that combines:
-- **On‑prem containerlab/netlab** (running on a host like `tsa-eve-ng-001`)
+- **On‑prem containerlab/netlab** (running on a host like `netlab.local.forwardnetworks.com`)
 - **Cloud Terraform** (AWS/Azure/GCP)
 - A **tunnel/interconnect** so cloud resources and on‑prem lab nodes can reach each other.
 
@@ -99,4 +99,3 @@ To implement composites without rewriting everything:
 - How to expose stage outputs in the UI (per-stage “Outputs” panel vs one merged view)?
 - Which tunnel type do we standardize first (WireGuard vs IPsec vs Tailscale)?
 - Do we want reusable “connection templates” per workspace (like variable groups)?
-

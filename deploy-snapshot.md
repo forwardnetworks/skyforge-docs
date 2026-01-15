@@ -18,7 +18,7 @@ This file captures a known-good deployment configuration so we can reproduce the
   - `ghcr.io/forwardnetworks/skyforge-nautobot:20260108-0135`
   - `esperotech/yaade:latest`
 - Runner notes:
-  - Netlab API script updated on `tsa-eve-ng-001`: `/opt/netlab/netlab-api.py` (timestamp: 2026-01-13 10:37 PST)
+  - Netlab API script updated on `netlab.local.forwardnetworks.com`: `/opt/skyforge/netlab-api/netlab_api.py`
 - Demo-critical behavior verified:
   - Netlab: per-device Forward CLI creds created (`{deployment}-{device}`), device type hints sent when known (`linux_os_ssh`, `arista_eos_ssh`), Linux SSH enabled on Alpine/python-based hosts.
   - LabPP: EVE upload/config works, CSV generation works, Forward configuration is skipped as desired.
