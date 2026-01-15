@@ -8,6 +8,10 @@ This doc captures the current multi-node k3s setup for Skyforge.
 - `skyforge-2`: k3s **agent**
 - `skyforge-3`: k3s **agent**
 
+## Storage
+
+Skyforge uses Longhorn for HA PVCs. See `docs/storage-longhorn.md`.
+
 ## Accessing the cluster from your workstation
 
 Skyforge’s repo kubeconfig expects a local port-forward to the Kubernetes API.
