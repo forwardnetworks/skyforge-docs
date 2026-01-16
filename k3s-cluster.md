@@ -4,22 +4,42 @@ This doc captures the current multi-node k3s setup for Skyforge.
 
 ## Current topology
 
-- `skyforge-1`: k3s **server** (control-plane)
-- `skyforge-2`: k3s **agent**
-- `skyforge-3`: k3s **agent**
+- `skyforge-1`: k3s **server** (control-plane/etcd/worker)
+- `skyforge-2`: k3s **server** (control-plane/etcd/worker)
+- `skyforge-3`: k3s **server** (control-plane/etcd/worker)
+
+## Networking
+
+- CNI: Cilium (kube-proxy disabled)
+- Pod CIDR: `100.64.0.0/16`
+- Service CIDR: `100.65.0.0/16`
+- Kubernetes API VIP: `10.128.16.11` (kube-vip on control-plane nodes)
 
 ## Storage
 
 Skyforge uses Longhorn for HA PVCs. See `docs/storage-longhorn.md`.
 
+On all nodes, the secondary disk (`/dev/sdb1`) is mounted at:
+
+- `/var/lib/longhorn`
+
+To keep the root disk small and avoid DiskPressure, we bind-mount Kubernetes data under:
+
+- `/var/lib/rancher` → `/var/lib/longhorn/rancher`
+
 ## Accessing the cluster from your workstation
 
 Skyforge’s repo kubeconfig expects a local port-forward to the Kubernetes API.
 
+Notes:
+- Skyforge’s user-facing URL can be round-robin across nodes (Traefik runs on all nodes).
+- The Kubernetes API endpoint used by agents (`K3S_URL`) should be a stable VIP/LB (not round-robin),
+  or you risk agents pinning to a dead/rotated IP.
+
 1) Start a tunnel:
 
 ```bash
-ssh -fN -L 6443:127.0.0.1:6443 root@skyforge-1
+ssh -fN -L 6443:127.0.0.1:6443 ubuntu@skyforge-1.local.forwardnetworks.com
 ```
 
 2) Use the repo kubeconfig:
@@ -32,40 +52,43 @@ kubectl get nodes -o wide
 ## Verifying cluster health (from the control-plane)
 
 ```bash
-ssh root@skyforge-1 'k3s kubectl get nodes -o wide'
-ssh root@skyforge-1 'k3s kubectl -n kube-system get pods -o wide'
-ssh root@skyforge-1 'k3s kubectl -n skyforge get pods -o wide'
+ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo k3s kubectl get nodes -o wide'
+ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo k3s kubectl -n kube-system get pods -o wide'
+ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo k3s kubectl -n skyforge get pods -o wide'
 ```
 
-## Joining a new node as an agent
+## Joining a new node as a server
 
 Run these from your workstation (or anywhere with SSH access to the nodes).
 
 1) Fetch the k3s join token from the server:
 
 ```bash
-TOKEN="$(ssh root@skyforge-1 'cat /var/lib/rancher/k3s/server/node-token')"
+TOKEN="$(ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo cat /var/lib/rancher/k3s/server/node-token')"
 ```
 
-2) Check the control-plane k3s version and pin agents to **the same** version:
+2) Check the control-plane k3s version and pin the new node to **the same** version:
 
 ```bash
-ssh root@skyforge-1 'k3s --version'
+ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo k3s --version'
 ```
 
-3) Install the agent on the node:
+3) Install the server on the new node:
 
 ```bash
-K3S_SERVER_IP="10.128.16.11"
-K3S_VERSION="v1.33.6+k3s1" # replace with the control-plane version
+# IMPORTANT: use a stable control-plane address (VIP/LB), not round-robin DNS.
+# In prod, we typically use the API VIP `10.128.16.11` (or a DNS name that
+# resolves to that VIP).
+K3S_SERVER_HOST="10.128.16.11"
+K3S_VERSION="v1.35.0+k3s1" # replace with the control-plane version
 
-ssh root@skyforge-2 "curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='$K3S_VERSION' K3S_URL=https://$K3S_SERVER_IP:6443 K3S_TOKEN=$TOKEN INSTALL_K3S_EXEC='agent --node-name skyforge-2' sh -"
+ssh ubuntu@<new-node> "curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='$K3S_VERSION' K3S_URL=https://$K3S_SERVER_HOST:6443 K3S_TOKEN=$TOKEN sh -"
 ```
 
 4) Confirm the node is Ready:
 
 ```bash
-ssh root@skyforge-1 'k3s kubectl get nodes -o wide'
+ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo k3s kubectl get nodes -o wide'
 ```
 
 ## Fixing agent version mismatch
@@ -73,29 +96,13 @@ ssh root@skyforge-1 'k3s kubectl get nodes -o wide'
 If an agent is installed with a different k3s minor version than the server, uninstall and reinstall pinned to the server version.
 
 ```bash
-ssh root@skyforge-2 '/usr/local/bin/k3s-agent-uninstall.sh || true'
+ssh ubuntu@<new-node> 'sudo /usr/local/bin/k3s-uninstall.sh || true'
 
-TOKEN="$(ssh root@skyforge-1 'cat /var/lib/rancher/k3s/server/node-token')"
-K3S_SERVER_IP="10.128.16.11"
-K3S_VERSION="v1.33.6+k3s1" # replace with the control-plane version
+TOKEN="$(ssh ubuntu@skyforge-1.local.forwardnetworks.com 'sudo cat /var/lib/rancher/k3s/server/node-token')"
+K3S_SERVER_HOST="10.128.16.11"
+K3S_VERSION="v1.35.0+k3s1" # replace with the control-plane version
 
-ssh root@skyforge-2 "curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='$K3S_VERSION' K3S_URL=https://$K3S_SERVER_IP:6443 K3S_TOKEN=$TOKEN INSTALL_K3S_EXEC='agent --node-name skyforge-2' sh -"
-```
-
-## Local-path PV storage on the secondary disk
-
-Skyforge uses k3s `local-path` (host-local PVs). On all nodes we mount the secondary disk (`/dev/sdb`) at:
-
-- `/var/lib/rancher/k3s/storage`
-
-This keeps PV data off the root filesystem, and ensures PVs on `skyforge-2`/`skyforge-3` can be created without filling the small root partition.
-
-To verify:
-
-```bash
-ssh root@skyforge-1 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
-ssh root@skyforge-2 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
-ssh root@skyforge-3 'df -h /var/lib/rancher/k3s/storage; mount | grep /var/lib/rancher/k3s/storage'
+ssh ubuntu@<new-node> "curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='$K3S_VERSION' K3S_URL=https://$K3S_SERVER_HOST:6443 K3S_TOKEN=$TOKEN sh -"
 ```
 
 ## Network sanity (iptables)
@@ -105,8 +112,8 @@ If a node has default iptables policies set to `DROP`, pod-to-service networking
 Quick check:
 
 ```bash
-ssh root@skyforge-2 'iptables -S | head -n 3'
-ssh root@skyforge-3 'iptables -S | head -n 3'
+ssh ubuntu@skyforge-2.local.forwardnetworks.com 'sudo iptables -S | head -n 3'
+ssh ubuntu@skyforge-3.local.forwardnetworks.com 'sudo iptables -S | head -n 3'
 ```
 
 Expected:

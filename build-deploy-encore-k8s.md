@@ -42,12 +42,13 @@ encore build docker --arch amd64 --config infra.config.json \
   "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}-worker" --push
 ```
 
-Go toolchain note: `server/go.mod` pins `toolchain go1.26rc1`. If your local Go version differs, the Go tool will fetch/use 1.26rc1 automatically (or set `GOTOOLCHAIN=go1.26rc1`).
+Go toolchain note: `server/go.mod` pins `toolchain go1.26rc2`. If your local Go version differs, the Go tool will fetch/use 1.26rc2 automatically (or set `GOTOOLCHAIN=go1.26rc2`).
 
 Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..
-docker buildx build --platform linux/amd64 --push -f portal/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal
+# Portal (TanStack Router SPA)
+docker buildx build --platform linux/amd64 --push -f portal-tanstack/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal-tanstack
 docker buildx build --platform linux/amd64 --push -f docker/netbox/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}" .
 docker buildx build --platform linux/amd64 --push -f docker/nautobot/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}" .
 ```
