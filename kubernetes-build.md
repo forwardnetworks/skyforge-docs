@@ -3,7 +3,7 @@
 Goal: build Skyforge images using the local Docker daemon (including `encore build docker` for the server), push them to a registry used by k3s, and optionally roll deployments.
 
 ## How it works
-- Source: local working tree (monorepo with `server/`, `portal/`, and `k8s/`).
+- Source: local working tree (monorepo with `server/`, `portal-tanstack/`, and `k8s/`).
 - Builder: local Docker daemon.
 - Server image: built with Encore (`encore build docker ...`) because Encore owns the build pipeline.
 - Registry: **recommended** `ghcr.io/forwardnetworks` (private GHCR).

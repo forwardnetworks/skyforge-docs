@@ -13,9 +13,9 @@ Set these in `k8s/overlays/k3s-traefik-secrets/config.env` (or the `skyforge-con
 - `SKYFORGE_UI_SUPPORT_URL`
 
 ## 2) Default assets (safe to replace)
-- `portal/public/assets/skyforge/skyforge-mark.svg` (product mark)
-- `portal/public/assets/skyforge/header-background.png` (header image)
-- `portal/public/assets/skyforge/FN-logo.svg` (optional alternate logo)
+- `docs/assets/skyforge/skyforge-mark.svg` (product mark)
+- `docs/assets/skyforge/header-background.png` (header image)
+- `docs/assets/skyforge/FN-logo.svg` (optional alternate logo)
 - `server/static/brand/logo.svg` (legacy brand asset for server-side pages)
 - `server/static/brand/skyforge.css` (brand styling)
 
