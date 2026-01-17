@@ -112,7 +112,7 @@ For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
 - `SKYFORGE_SESSION_TTL`: session lifetime (e.g. `8h`).
 - `SKYFORGE_COOKIE_SECURE`: `true` or `false`.
 - `SKYFORGE_COOKIE_DOMAIN`: optional cookie domain attribute (set when you need SSO across subdomains).
-- `SKYFORGE_STATE_BACKEND`: `postgres` or `file`.
+- Skyforge state is stored in Postgres (required).
 - `SKYFORGE_DB_HOST`, `SKYFORGE_DB_PORT`, `SKYFORGE_DB_NAME`, `SKYFORGE_DB_USER`, `SKYFORGE_DB_SSLMODE`.
 - `SKYFORGE_REDIS_ENABLED`, `SKYFORGE_REDIS_ADDR`, `SKYFORGE_REDIS_DB`, `SKYFORGE_REDIS_KEY_PREFIX`.
 - `SKYFORGE_HEALTH_HTTP_CHECKS`: semicolon-separated checks (`Name|Icon|URL|Hint`).

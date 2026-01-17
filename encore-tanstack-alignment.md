@@ -12,7 +12,8 @@ This is the “do first” architecture checklist for the TanStack portal migrat
 ## Contracts to lock down (don’t break)
 - **Portal assets:** served under `/assets/skyforge/*` (avoid Traefik `/assets/*` → Coder).
 - **Encore API base (browser):** `/api/skyforge/api/*` (Traefik rewrites to the Encore service).
-- **Platform health:** `/data/platform-health.json`.
+- **Platform status:** `/status/summary` (plus SSE at `/status/summary/events`).
+- (Legacy) **Platform health JSON:** `/data/platform-health.json` (served from live checks; no filesystem dependency).
 - **OIDC login entry:** `GET /api/skyforge/api/oidc/login?next=<path>`.
 
 ## Client architecture (TanStack)
@@ -47,6 +48,10 @@ This is the “do first” architecture checklist for the TanStack portal migrat
 - Request endpoints enqueue tasks and return quickly.
 - Workers execute tasks and append logs.
 - SSE endpoints stream logs/state (`dashboard/events`, `runs/:id/events`).
+- Avoid shared-disk side effects in tasks where possible (prefer DB/object storage + per-task temp dirs).
+
+### Bootstrap behavior
+- `user-bootstrap` tasks should not clone repos or write to shared user home directories; they only provision downstream integrations (e.g. Gitea user + catalog repos).
 
 ### Observability
 - Metrics to add/keep:
@@ -60,3 +65,7 @@ This is the “do first” architecture checklist for the TanStack portal migrat
 3) Port screens page-by-page, using the shared API/query/SSE layers.
 4) Only then start deeper UX polish.
 
+## Regenerating generated files
+- `./scripts/regen-generated.sh`
+
+Generated files are marked in `.gitattributes` to reduce review noise.

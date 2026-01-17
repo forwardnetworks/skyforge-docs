@@ -107,7 +107,7 @@ Traefik is the only edge ingress in the k3s overlay.
 From any machine with `kubectl` access:
 ```bash
 kubectl -n skyforge get pods
-curl -k https://<hostname>/data/platform-health.json
+curl -k https://<hostname>/status/summary
 ```
 
 ## Edge exposure (Traefik)
@@ -120,7 +120,7 @@ Ensure the host firewall allows inbound `80/tcp` and `443/tcp`.
 
 Quick check:
 ```bash
-curl -k https://<hostname>/data/platform-health.json
+curl -k https://<hostname>/status/summary
 ```
 
 ## TLS

@@ -42,7 +42,7 @@ tar czf "${dest}/k3s-local-path-storage.tgz" -C /var/lib/rancher/k3s storage
 ```bash
 kubectl -n skyforge scale deploy --all --replicas=1
 kubectl -n skyforge rollout status deploy --all --timeout=600s
-curl -k https://<hostname>/data/platform-health.json
+curl -k https://<hostname>/status/summary
 ```
 
 ## Restore procedure (single node)
@@ -77,7 +77,7 @@ sudo systemctl start k3s
 ```bash
 kubectl get nodes
 kubectl -n skyforge get pods
-curl -k https://<hostname>/data/platform-health.json
+curl -k https://<hostname>/status/summary
 ```
 
 ## Notes

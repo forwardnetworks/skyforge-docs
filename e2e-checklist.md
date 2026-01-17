@@ -5,7 +5,8 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 ## Prereqs
 
 - Skyforge is reachable at `https://<skyforge-hostname>/`.
-- `https://<skyforge-hostname>/data/platform-health.json` shows expected services `up`.
+- `https://<skyforge-hostname>/status/summary` returns `status=ok` (or expected degraded state).
+- (Legacy) `https://<skyforge-hostname>/data/platform-health.json` is still available (served from live checks).
 - Runner secrets exist and are non-empty:
   - `eve-runner-ssh-key` (`eve-runner-ssh-key` key)
   - `netlab-runner-rsa` (`netlab-runner-rsa` key)

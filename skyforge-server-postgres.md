@@ -13,14 +13,14 @@ State is stored in tables created/managed by Skyforge Server at startup (idempot
 
 Non-goals (still file-based for now):
 - Netlab “state root” (`SKYFORGE_NETLAB_STATE_ROOT`)
-- `platform-data` (`/var/lib/skyforge/platform-data/*`) produced by `healthwatch` and read by the UI
+- (Legacy) `platform-data` PVC: no longer required for UI health; `/status/summary` and `/data/platform-health.json` are computed live.
 
 ## Target architecture
 - Keep using the **existing** Postgres instance (`db`) that already hosts `netbox`, `nautobot`, `gitea`.
 - Add a dedicated database + role for Skyforge Server:
   - database: `skyforge_server`
   - role/user: `skyforge_server`
-- Skyforge Server uses Postgres for all “state” reads/writes when `SKYFORGE_STATE_BACKEND=postgres`.
+- Skyforge Server uses Postgres for all state reads/writes.
 
 ## DB provisioning (k3s)
 The `db-provision` job provisions the `skyforge_server` role + database using inline SQL in the job manifest (no bootstrap scripts).
@@ -44,10 +44,9 @@ DB connection env vars:
 - `SKYFORGE_DB_USER=skyforge_server`
 - `SKYFORGE_DB_PASSWORD` (from the `db-skyforge-server-password` secret)
 - `SKYFORGE_DB_SSLMODE=disable` (in-cluster)
-- `SKYFORGE_STATE_BACKEND=postgres` (recommended explicit switch)
 
 ## Schema (canonical source)
-The canonical schema is managed by **Atlas migrations** (golang-migrate format) in `server/skyforge/migrations/`, applied by the `skyforge-migrate` Job (one-shot). The job mounts migrations via a ConfigMap and runs the upstream Atlas image directly.
+The canonical schema is managed by **Atlas migrations** (golang-migrate format) in `server/internal/skyforgedb/migrations/`, applied by the `skyforge-migrate` Job (one-shot). The job mounts migrations via a ConfigMap and runs the upstream Atlas image directly.
 
 ## Running migrations (canonical)
 
@@ -65,11 +64,9 @@ Notes:
 ## Operational checklist (k3s, single node)
 1. Create/update secrets: `kubectl apply -k k8s/overlays/k3s-traefik-secrets`
 2. Re-run DB provisioning if needed: `kubectl -n skyforge apply -f k8s/kompose/db-provision-job.yaml`
-3. Ensure Skyforge Server is running with `SKYFORGE_STATE_BACKEND=postgres`
-4. If the UI shows “API unavailable”, check Skyforge Server logs first; a common cause is broken integration credentials or missing DB connectivity. Update secrets and restart the server deployment.
+3. If the UI shows “API unavailable”, check Skyforge Server logs first; a common cause is broken integration credentials or missing DB connectivity. Update secrets and restart the server deployment.
 
 ## Follow-ups (later)
 - Encrypt persisted token/credential fields at rest (AWS SSO tokens, external-cloud static keys) and store only ciphertext.
 - Add templates/artifacts metadata tables (history, retention, ownership) and wire into the UI.
 - Expand `sf_audit_log` usage to cover workspace sharing and admin impersonation end-to-end.
-- Optionally move `platform-data` (healthwatch output) into Postgres for multi-node HA.
