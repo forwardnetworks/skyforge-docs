@@ -8,14 +8,15 @@ This is a living list of follow-ups after the Encore-native + TanStack migration
   - Done: worker emits heartbeats + runs reconciliation/maintenance loops without requiring Encore Cron.
 
 - **Task artifacts from worker/taskengine**
-  - Decide on one approach for persisting artifacts generated in `server/internal/taskengine` (LabPP CSV, Netlab tarballs, logs).
-  - Implement a non-API storage client (or a dedicated worker-side API) instead of calling `storage.*` service APIs.
+  - Done: taskengine persists artifacts directly to MinIO (`skyforge` bucket) without calling `storage.*` service APIs.
+  - LabPP: stores `labpp/<deploymentID>/data_sources.csv` and sets `labppDataSourcesKey` on the task.
+  - Netlab: stores `netlab/<deploymentID>/{netlab.snapshot.yml,clab.yml}` and sets `netlabSnapshotKey`/`netlabClabKey`.
+  - Netlab C9s: stores `netlab-c9s/<deploymentID>/<tarball>` and sets `netlabC9sTarballKey`.
 - **Cancellation hardening**
-  - Current model: API marks task canceled + publishes cancel; worker performs runner cancellation.
-  - Add idempotency + retries to cancellation (netlab cancel + k8s job delete) and record a task event when cancellation was applied.
+  - Done: cancellation is idempotent, retries runner cancellation, and records `cancel.requested`/`cancel.applied` task events.
 - **Queue backpressure & observability**
-  - Metrics: queued depth, queued→running latency, runtime duration (by task type), failure counts.
-  - Add a simple “worker busy” signal in dashboard/status.
+  - Done: status summary includes a `task-queue` check with queued/running + oldest queued age.
+  - Metrics already cover depth/latency/runtime by task type.
 
 ## Priority: UX polish (TanStack portal)
 
