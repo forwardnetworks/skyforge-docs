@@ -4,6 +4,9 @@ This is a living list of follow-ups after the Encore-native + TanStack migration
 
 ## Priority: Platform correctness
 
+- **Self-hosted scheduling**
+  - Done: worker emits heartbeats + runs reconciliation/maintenance loops without requiring Encore Cron.
+
 - **Task artifacts from worker/taskengine**
   - Decide on one approach for persisting artifacts generated in `server/internal/taskengine` (LabPP CSV, Netlab tarballs, logs).
   - Implement a non-API storage client (or a dedicated worker-side API) instead of calling `storage.*` service APIs.
@@ -38,4 +41,3 @@ This is a living list of follow-ups after the Encore-native + TanStack migration
   - Continue pruning leftover compatibility endpoints and configs that no longer have callers.
 - **Security hardening**
   - Review RBAC/permissions for embedded tools (NetBox/Nautobot) and document the intended access model.
-
