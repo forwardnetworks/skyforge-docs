@@ -23,6 +23,39 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
      - `hosts.yml`, `node_files/`, `group_vars/`, etc.
    - Skyforge uses `netlab clab-tarball` to export a tarball containing `clab.yml` + `node_files/`.
 
+## Generator modes
+
+`netlab-c9s` is cluster-native and generates artifacts in-cluster.
+
+Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab server over the Netlab API; it is intentionally not used by `netlab-c9s`.
+
+### In-cluster generator (required)
+
+- Skyforge runs a Kubernetes Job (in the workspace namespace) that executes Netlab to generate artifacts.
+- The generator writes:
+  - a manifest ConfigMap (`c9s-<topology>-manifest`) containing `manifest.json`
+  - per-node ConfigMaps containing `node_files/<node>/...` text files
+- Skyforge deploys the resulting containerlab definition via clabernetes, mounting the generated files via `filesFromConfigMap`.
+
+### Configuration knobs
+
+- Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
+  - `C9sGeneratorMode`: `"k8s"`
+  - `GeneratorImage`: netlab generator image (required for `netlab-c9s`)
+  - `AnsibleImage`: ansible runner image (optional; future phase)
+- Helm values (recommended):
+  - `skyforge.netlabC9s.generatorImage`
+  - `skyforge.netlabC9s.generatorPullPolicy`
+
+### Build the generator image
+
+```bash
+cd netlab/generator
+docker buildx build --platform linux/amd64 \
+  -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
+  --push .
+```
+
 4) **Deploy via c9s**
    - Skyforge creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
    - Skyforge also creates per-node ConfigMaps for `node_files/` and mounts them into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
@@ -61,6 +94,9 @@ Start with “works end-to-end” for topologies that use only images that are a
 - Phase 3: support Netlab “initial configuration” semantics:
   - Prefer startup-config/configmaps mounted into containers over SSH-driven config
   - Any SSH-based approach should be optional and best-effort
+  - Add an **optional post-deploy Ansible phase**:
+    - Netlab generates Ansible inventory + playbooks
+    - Skyforge executes Ansible against the running topology (connectivity model TBD)
 
 ## Open questions
 

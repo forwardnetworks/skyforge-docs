@@ -25,7 +25,9 @@ Notes:
 
 Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then deploys those artifacts to Kubernetes via clabernetes:
 
-1. Skyforge syncs the Netlab template folder onto the Netlab runner host (BYO Netlab server).
+1. Skyforge syncs the Netlab template folder and runs Netlab generation in one of two modes:
+   - **remote (default):** BYOS Netlab server over the Netlab API
+   - **k8s (planned):** in-cluster generator Job (see `docs/netlab-clabernetes.md`)
 2. Runs `netlab create` to generate:
    - `clab.yml`
    - `node_files/…` (startup configs and related files)
