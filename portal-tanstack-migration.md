@@ -8,9 +8,9 @@ This aligns the frontend with an API-first architecture (Encore endpoints + auth
 
 ## Current state
 
-- `portal-tanstack/`: production portal (TanStack Router + TanStack Query, served by Nginx on port `3000`).
+- `portal-tanstack/`: production portal (TanStack Router + TanStack Query, built with Vite and embedded into the `skyforge-server` image).
 
-The TanStack portal mirrors the existing Traefik routing surface so the Kubernetes ingress can continue routing all paths to `skyforge-portal`:
+The TanStack portal mirrors the existing Traefik routing surface so the Kubernetes ingress can route all UI paths to `skyforge-server`:
 
 - `/` (landing)
 - `/dashboard/*` (deployments, runs, logs, templates)
@@ -36,11 +36,11 @@ The TanStack portal mirrors the existing Traefik routing surface so the Kubernet
    - Replace polling/auto-refresh with SSE endpoints and subscribe via TanStack Query `queryClient.invalidateQueries` on events.
 
 5. **Deployment cutover**
-   - Build/push `skyforge-portal` from `portal-tanstack/`.
-   - Flip the Helm image tag (QA first, then prod) and validate end-to-end.
+   - Build `portal-tanstack/` with Vite (`pnpm build`) and embed it into the `skyforge-server` image.
+   - Flip the Helm server image tag (QA first, then prod) and validate end-to-end.
    - Retire and remove the legacy portal from the repo once stable.
 
 ## Notes
 
-- The SPA server must rewrite unknown routes to `index.html` to support deep links (handled by `portal-tanstack/nginx.conf`).
-- The Kubernetes ingress can keep routing all paths to `skyforge-portal`; the SPA will handle client-side routing.
+- The SPA server must rewrite unknown routes to `index.html` to support deep links (handled by `server/skyforge/frontend_spa_raw.go`).
+- Assets are served under `/assets/skyforge/*` to avoid collisions with Coder’s `/assets/*` paths.

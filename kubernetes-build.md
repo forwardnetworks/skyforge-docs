@@ -37,6 +37,12 @@ TAG=latest
 Build the Encore server image (k3s is `linux/amd64`):
 ```bash
 cd server
+# Build the embedded TanStack frontend first.
+cd ../portal-tanstack
+pnpm install
+pnpm build
+cd ../server
+
 rsync -a --delete ../fwd/ ./fwd/
 encore build docker --arch amd64 --config infra.config.json "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 ```
@@ -46,8 +52,6 @@ Go toolchain note: `server/go.mod` pins `toolchain go1.26rc2`. If your local Go 
 Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..
-# Portal (TanStack Router SPA)
-docker buildx build --platform linux/amd64 --push -f portal-tanstack/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal-tanstack
 docker buildx build --platform linux/amd64 --push -f docker/netbox/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}" .
 docker buildx build --platform linux/amd64 --push -f docker/nautobot/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}" .
 ```

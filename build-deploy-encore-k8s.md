@@ -7,7 +7,8 @@ Skyforge favors Encore-native workflows where possible, but the production runti
 - Deployment target: **self-hosted k8s** (k3s).
 - Build strategy:
   - **Skyforge server**: build container images using `encore build docker ...` (Encore-native; no repo `server/Dockerfile`).
-  - **Everything else** (portal, supporting services): build with Dockerfiles using the local Docker daemon.
+  - **UI**: build the TanStack portal with Vite and embed it into the server image (served by Encore; no separate Nginx portal container).
+  - **Everything else** (supporting services): build with Dockerfiles using the local Docker daemon.
 
 This mirrors the typed Encore backend approach while keeping Skyforge’s k8s + S3 constraints.
 
@@ -29,6 +30,12 @@ gh auth token | docker login ghcr.io -u <github-user> --password-stdin
 Build the Encore server images (k3s runs `linux/amd64`):
 ```bash
 cd server
+# Build the embedded TanStack frontend first.
+cd ../portal-tanstack
+pnpm install
+pnpm build
+cd ../server
+
 # Ensure the LabPP CLI code is bundled into the server image.
 rsync -a --delete ../fwd/ ./fwd/
 # API image (excludes worker subscriptions).
@@ -47,8 +54,6 @@ Go toolchain note: `server/go.mod` pins `toolchain go1.26rc2`. If your local Go 
 Build the remaining images (`linux/amd64` from Apple Silicon requires Buildx):
 ```bash
 cd ..
-# Portal (TanStack Router SPA)
-docker buildx build --platform linux/amd64 --push -f portal-tanstack/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-portal:${TAG}" portal-tanstack
 docker buildx build --platform linux/amd64 --push -f docker/netbox/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-netbox:${TAG}" .
 docker buildx build --platform linux/amd64 --push -f docker/nautobot/Dockerfile -t "${SKYFORGE_REGISTRY}/skyforge-nautobot:${TAG}" .
 ```
