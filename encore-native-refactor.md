@@ -107,3 +107,38 @@ Status:
   - `skyforge_tasks_queued_current_total`, `skyforge_tasks_running_current_total`
   - `skyforge_tasks_queued_oldest_age_seconds_total`
   - Per-task-type: `skyforge_tasks_queued_current`, `skyforge_tasks_running_current`, `skyforge_tasks_queued_oldest_age_seconds`
+
+## Remaining TODOs (post-demo)
+
+These are the next “Encore-native” cleanups that improve multi-replica correctness and reduce legacy surface area.
+
+### A) Worker-owned cancellation
+Goal:
+- API marks task `canceled` and publishes a cancel message.
+- Worker consumes cancel messages and performs the provider-specific cleanup (k8s job delete, remote API cancel, etc.).
+
+Why:
+- Avoid the API reaching into provider cleanup paths.
+- Make cancellation consistent when the API is scaled horizontally.
+
+### B) Remove legacy internal dispatch endpoints
+Goal:
+- Fully remove any internal “call the skyforge service to run a task” endpoints (if still present) and associated OpenAPI stubs.
+- Keep the API surface as: enqueue + query state/logs + admin/maintenance.
+
+### C) Topology graph parity
+Status:
+- `netlab-c9s-run` now stores a post-deploy topology artifact (derived from clabernetes pods) for correct mgmt IP rendering.
+
+TODO:
+- Extend the same topology artifact capture for `clabernetes-run` (pure containerlab templates) so the UI can render consistent topology graphs for those deployments as well.
+
+### D) Typed config consolidation
+Goal:
+- Move remaining env parsing into Encore typed config with `ENCORE_RUNTIME_CONFIG` backing.
+- Keep the Helm chart as the single deploy-time configuration surface.
+
+### E) Operational guardrails
+Ideas:
+- Add alert-style metrics for: oldest queued age, stuck-running count, worker heartbeat staleness.
+- Add a “repair queue” admin endpoint to re-publish or requeue tasks in known-safe cases.
