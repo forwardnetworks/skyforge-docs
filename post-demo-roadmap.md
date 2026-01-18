@@ -24,7 +24,7 @@ This is a living list of follow-ups after the Encore-native + TanStack migration
   - Runs/deployments update via SSE/Query invalidation (avoid “click to refresh” flows).
   - Tail logs in-place (client-side streaming; avoid re-opening dialogs).
 - **Route parity cleanup**
-  - Confirm all former Next.js pages/actions exist and remove dead links/redirects.
+  - Confirm all former portal pages/actions exist and remove dead links/redirects.
   - Normalize “Back/Done” behavior to return to the correct dashboard context.
 
 ## Priority: Netlab/Clabernetes roadmap
