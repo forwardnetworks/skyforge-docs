@@ -69,3 +69,15 @@ This is the “do first” architecture checklist for the TanStack portal migrat
 - `./scripts/regen-generated.sh`
 
 Generated files are marked in `.gitattributes` to reduce review noise.
+
+## Interactive terminals (Containerlab/Netlab)
+Goal:
+- Provide an in-browser terminal for node CLI access without depending on BYOS host SSH access.
+
+Preferred approach (Encore-native):
+- Use a Skyforge backend endpoint that proxies Kubernetes `exec` into the clabernetes pod/container.
+- Frontend uses `xterm.js` and a WebSocket to stream IO.
+
+Why not GoTTY:
+- GoTTY is fine for demos, but becomes another moving piece with its own auth/session model.
+- A native “kube exec terminal” works uniformly for clabernetes-backed labs.
