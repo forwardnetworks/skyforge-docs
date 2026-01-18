@@ -85,50 +85,34 @@ The Skyforge agent runs via the Netlab API, which requires specific permissions 
     ```
     *Note: `SETENV` is crucial for passing environment variables.*
 
-## 4. Skyforge Netlab API Setup
+## 4. Netlab API Setup (BYOS host)
 
-Skyforge communicates with the host via a lightweight Python API.
-
-### Installation
-
-1.  **Deploy API Code:**
-    Copy `netlab/api/netlab_api.py` from the Skyforge repository to the host (e.g., `/opt/skyforge/netlab-api/netlab_api.py`).
-
-2.  **Python Environment:**
-    Create a venv for the API (or reuse the netlab one, but isolation is better).
-    ```bash
-    sudo mkdir -p /opt/skyforge/netlab-api
-    sudo python3 -m venv /opt/skyforge/netlab-api/venv
-    
-    # Install API dependencies
-    sudo /opt/skyforge/netlab-api/venv/bin/pip install fastapi uvicorn pydantic
-    ```
+Skyforge communicates with the BYOS Netlab host via the upstream Netlab API server (`netlab api`).
 
 ### Service Configuration (Systemd)
 
 Create a systemd unit file at `/etc/systemd/system/netlab-api.service`.
 
-**Important:** The API process runs as `root` to allow spawning privileged subprocesses, but it drops privileges to `NETLAB_RUN_AS_USER` for standard operations.
+Recommended: run the service as the same user that owns the Netlab workdir tree (to avoid root-owned artifacts).
 
 ```ini
 [Unit]
-Description=Skyforge Netlab API
+Description=Netlab API
 After=network.target docker.service
 
 [Service]
 Type=simple
-User=root
-WorkingDirectory=/opt/skyforge/netlab-api
+User=skyforge
+WorkingDirectory=/home/skyforge
 
-# Configuration
-Environment="NETLAB_RUN_AS_USER=skyforge"
+# Optional: store logs in a stable location
 Environment="NETLAB_API_DATA_DIR=/var/lib/skyforge/netlab-api"
-Environment="NETLAB_SOURCE=/opt/netlab/netlab-src"
-Environment="NETLAB_ANSIBLE_PATH=/opt/netlab/venv/bin"
-Environment="PYTHONPATH=/opt/netlab/netlab-src"
 
-# Command
-ExecStart=/opt/skyforge/netlab-api/venv/bin/python /opt/skyforge/netlab-api/netlab_api.py --bind 0.0.0.0 --port 8090
+# Optional: Basic Auth
+Environment="NETLAB_API_USER=skyforge"
+Environment="NETLAB_API_PASSWORD=change-me"
+
+ExecStart=/usr/bin/netlab api --bind 0.0.0.0 --port 8090
 
 Restart=always
 RestartSec=5
@@ -137,20 +121,13 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-**Enable and Start:**
+Enable and start:
+
 ```bash
 sudo mkdir -p /var/lib/skyforge/netlab-api
+sudo chown -R skyforge:skyforge /var/lib/skyforge/netlab-api
 sudo systemctl daemon-reload
 sudo systemctl enable --now netlab-api
-
-## Netlab API Authentication
-
-The Netlab API supports:
-- Static HTTP Basic auth via `NETLAB_API_USERNAME` + `NETLAB_API_PASSWORD`
-- PAM auth (LDAP-backed) if the `pam` module is installed and the host is configured for LDAP
-- Static bearer token auth via `NETLAB_API_BEARER_TOKEN` (recommended for Skyforge -> Netlab calls)
-
-For Skyforge’s Netlab status telemetry (`/api/netlab/stats`) and for consistent automation, prefer configuring a bearer token on the Netlab host and setting the same `apiToken` in Skyforge’s `skyforge-netlab-servers` secret entry.
 ```
 
 ## 5. Security & Networking
@@ -189,5 +166,5 @@ Run the following commands on the host to verify readiness:
 
 ## 7. Troubleshooting
 
-- **Root-owned artifacts:** If you see `root`-owned files in user workspaces (`~/netlab/...`), ensure `NETLAB_RUN_AS_USER` is correctly set in the systemd unit and that the `netlab_api.py` is the latest version from the Skyforge repo.
+- **Root-owned artifacts:** If you see `root`-owned files in user workspaces (`~/netlab/...`), ensure the Netlab API service is not running as `root` (and that users have passwordless sudo for the required binaries).
 \

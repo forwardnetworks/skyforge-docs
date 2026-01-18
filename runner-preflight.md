@@ -20,10 +20,12 @@ If any of these fail, fix host parity before running E2E so the failures don’t
 
 ## Fix root-owned Netlab workspace artifacts
 
-If user workdirs under `/home/<user>/netlab/...` contain root-owned artifacts (commonly `netlab.lock` and `clab-*`), the Netlab API is likely spawning Netlab as `root`.
+If user workdirs under `/home/<user>/netlab/...` contain root-owned artifacts (commonly `netlab.lock` and `clab-*`), Netlab is likely running under `root` (or via `sudo`) and writing into the user tree.
 
-- Update the Netlab API script on the runner from `netlab/api/netlab_api.py` in this repo (it drops privileges for the Netlab subprocess when running as root and then reconciles workdir ownership back to the user).
-- Restart the service:
+Recommended approach:
+
+- Run the upstream Netlab API (`netlab api ...`) under the same user that owns the lab workspace directory.
+- Ensure users have the required sudoers entries (see below) so Netlab does not require an interactive password prompt.
 
 ```bash
 systemctl cat netlab-api.service
