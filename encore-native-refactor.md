@@ -125,9 +125,10 @@ Status: implemented
 ### C) Topology graph parity
 Status:
 - `netlab-c9s-run` now stores a post-deploy topology artifact (derived from clabernetes pods) for correct mgmt IP rendering.
+- `clabernetes-run` now stores a post-deploy topology artifact (derived from clabernetes pods) for correct mgmt IP rendering.
 
 TODO:
-- Extend the same topology artifact capture for `clabernetes-run` (pure containerlab templates) so the UI can render consistent topology graphs for those deployments as well.
+- None (parity is now implemented for clabernetes-backed deployments).
 
 ### D) Typed config consolidation
 Goal:
