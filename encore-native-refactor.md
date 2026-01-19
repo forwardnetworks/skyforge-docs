@@ -113,18 +113,14 @@ Status:
 These are the next “Encore-native” cleanups that improve multi-replica correctness and reduce legacy surface area.
 
 ### A) Worker-owned cancellation
-Goal:
-- API marks task `canceled` and publishes a cancel message.
-- Worker consumes cancel messages and performs the provider-specific cleanup (k8s job delete, remote API cancel, etc.).
-
-Why:
-- Avoid the API reaching into provider cleanup paths.
-- Make cancellation consistent when the API is scaled horizontally.
+Status: implemented
+- API publishes `skyforge-task-cancel` events (and marks tasks canceled in DB).
+- Worker consumes cancel events and performs provider-specific cleanup via `internal/taskengine`.
 
 ### B) Remove legacy internal dispatch endpoints
-Goal:
-- Fully remove any internal “call the skyforge service to run a task” endpoints (if still present) and associated OpenAPI stubs.
-- Keep the API surface as: enqueue + query state/logs + admin/maintenance.
+Status: implemented
+- Task execution lives in `server/internal/taskengine` and is invoked by the worker.
+- The API surface is enqueue + query state/logs + admin/maintenance.
 
 ### C) Topology graph parity
 Status:
