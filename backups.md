@@ -3,7 +3,7 @@
 Skyforge runs as a Kubernetes workload, but the cluster node still has **stateful data**:
 
 - Postgres databases (`db` PVC): Gitea, NetBox, Nautobot, Hoppscotch, Skyforge state
-- Object storage (`minio` PVC): artifacts + Terraform state + file drop
+- Object storage (`minio` PVC): artifacts + state + file drop
 - Workspace PVCs: per-user Coder data
 
 This doc outlines a pragmatic “MVP backup” strategy so you can rebuild the node and recover quickly.
