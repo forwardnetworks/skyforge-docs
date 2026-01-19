@@ -42,7 +42,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
   - `C9sGeneratorMode`: `"k8s"`
   - `GeneratorImage`: netlab generator image (required for `netlab-c9s`)
-  - `AnsibleImage`: ansible runner image (optional; future phase)
+  - Ansible runner: removed (post-up config is Go-only; Linux scripts run in-pod and NOS uses startup configs)
 - Helm values (recommended):
   - `skyforge.netlabC9s.generatorImage`
   - `skyforge.netlabC9s.generatorPullPolicy`

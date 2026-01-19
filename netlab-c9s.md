@@ -9,8 +9,10 @@ deploys the resulting Containerlab topology via Clabernetes.
    `ENCORE_CFG_SKYFORGE.NetlabGenerator.GeneratorImage`.
 2. **Clabernetes deploy**: Skyforge sanitizes node names for Kubernetes, then
    deploys the generated `clab.yml`.
-3. **Post-deploy config (netlab initial)**: runs as a Kubernetes Job using
-   `ENCORE_CFG_SKYFORGE.NetlabGenerator.AnsibleImage`.
+3. **Post-deploy config (Go-only)**:
+   - Linux nodes: Skyforge runs the netlab-generated `node_files/<node>/{initial,routing}` shell scripts
+     directly inside the Linux pods (parallelized).
+   - Network OS nodes (e.g. cEOS): configuration is applied via startup configs mounted at boot time.
 
 ## Phase 2 networking model (service DNS)
 
@@ -19,11 +21,9 @@ stable per-node Service DNS names:
 
 `<topologyName>-<sanitizedNode>.<namespace>.svc`
 
-The ansible runner patches the generated `hosts.yml` accordingly and then runs
-`netlab initial`.
+Skyforge does not rely on Ansible for Netlab C9s post-up configuration.
 
 ## Images
 
 Skyforge rewrites generated NOS images (for example, `ceos:*`, `vrnetlab/*`) to
 use the `ghcr.io/forwardnetworks/*` mirror so Clabernetes can pull them.
-

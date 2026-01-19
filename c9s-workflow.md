@@ -43,9 +43,10 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 
 ## What’s still “phase 2” / future work
 
-- Post-deploy configuration steps (Netlab’s `netlab up`/Ansible phases) executed *after* the C9s topology becomes ready.
-  - Many Netlab examples can be fully configured via startup configs (node_files) alone.
-  - If a topology requires Ansible-driven postdeploy, we can add an optional “netlab ansible” step after `TopologyReady=true` and wire that to the correct connectivity model (service exposure/SSH reachability).
+- Post-deploy configuration steps executed *after* the C9s topology becomes ready.
+  - Linux nodes are configured by running the netlab-generated `node_files/<node>/{initial,routing}` scripts directly in-pod.
+  - Network OS nodes are configured via startup configs mounted at boot time.
+  - If we need additional post-up work in the future, it should be implemented in Go (worker/taskengine) rather than via Ansible jobs.
 
 ## Ops / prerequisites
 
