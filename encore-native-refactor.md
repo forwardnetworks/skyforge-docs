@@ -74,8 +74,8 @@ Goal:
 ### Current progress
 - `server/skyforge/config.cue` provides defaults for a few safe knobs (worker enabled default,
   notification/check intervals, EVE running-scan limits).
-- The Go code still accepts environment-variable overrides for compatibility with Helm values.
-- Netlab/LabPP defaults are now also sourced from `server/skyforge/config.cue` (with legacy env overrides).
+- Configuration is sourced from typed Encore config (`ENCORE_CFG_*`) plus Encore secrets, with only
+  a few remaining env reads for non-functional metadata (for example build/version info).
 
 ### Helm changes required
 - Render the `ENCORE_RUNTIME_CONFIG` secret from Helm values (or manage it out-of-band) so the
@@ -97,7 +97,10 @@ Status:
   - Marking stuck running tasks as failed (reconcile running).
   - Workspace sync and cloud credential checks (published to the maintenance PubSub topic).
   - Task queue metrics refresh.
-- Legacy Kubernetes CronJobs have been removed from the Helm chart; self-hosted setups must rely on Encore Cron or an external scheduler that triggers private endpoints.
+- Legacy Kubernetes CronJobs have been removed from the Helm chart. Self-hosted setups must ensure Encore cron jobs are running, or provide an external scheduler that triggers the private cron endpoints.
+
+Operational note:
+- Skyforge no longer runs “cron fallback loops” inside the worker. This keeps the system aligned with Encore’s cron model and avoids surprising background work.
 
 ## 5) Task queue metrics
 
@@ -132,10 +135,23 @@ TODO:
 
 ### D) Typed config consolidation
 Goal:
-- Move remaining env parsing into Encore typed config with `ENCORE_RUNTIME_CONFIG` backing.
+- Move remaining “knob” configuration into Encore typed config (`ENCORE_CFG_*`) and Encore secrets.
+- Keep `ENCORE_RUNTIME_CONFIG` reserved for infrastructure/runtime settings (subscriptions, etc).
 - Keep the Helm chart as the single deploy-time configuration surface.
+
+Status:
+- Most runtime knobs are already read via typed Encore config (`config.Load`) + Encore secrets.
+- Remaining env reads are limited to pod identity (`POD_NAME`, `POD_NAMESPACE`) and build metadata.
 
 ### E) Operational guardrails
 Ideas:
 - Add alert-style metrics for: oldest queued age, stuck-running count, worker heartbeat staleness.
 - Add a “repair queue” admin endpoint to re-publish or requeue tasks in known-safe cases.
+
+Status:
+- `skyforge_tasks_queued_oldest_age_seconds_total` (existing)
+- `skyforge_tasks_running_oldest_age_seconds_total` (added)
+- `skyforge_task_workers_heartbeat_age_seconds` (added)
+- Admin repair endpoints exist:
+  - `POST /api/admin/tasks/reconcile`
+  - `POST /api/admin/tasks/reconcile-running`

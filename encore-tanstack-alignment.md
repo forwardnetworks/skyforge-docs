@@ -2,6 +2,10 @@
 
 This is the “do first” architecture checklist for the TanStack portal migration so we don’t have to redo work later.
 
+Note:
+- Skyforge now serves the TanStack-built frontend directly from the Encore backend (see `server/skyforge/frontend_dist`),
+  so there is no separate “portal service” deployment to keep in sync.
+
 ## Goals
 - **Single source of truth:** server state lives in Skyforge; UI is a cache/view.
 - **Live UX:** use SSE for status/logs instead of manual refresh/polling where possible.

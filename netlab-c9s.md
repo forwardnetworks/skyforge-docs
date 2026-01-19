@@ -12,7 +12,9 @@ deploys the resulting Containerlab topology via Clabernetes.
 3. **Post-deploy config (Go-only)**:
    - Linux nodes: Skyforge runs the netlab-generated `node_files/<node>/{initial,routing}` shell scripts
      directly inside the Linux pods (parallelized).
-   - Network OS nodes (e.g. cEOS): configuration is applied via startup configs mounted at boot time.
+   - Network OS nodes (e.g. cEOS): base configuration is applied via startup configs mounted at boot time,
+     and Skyforge applies any netlab-generated post-up config snippets (cfglets/modules) using Kubernetes exec
+     (still Go-only; no Ansible).
 
 ## Phase 2 networking model (service DNS)
 

@@ -2,15 +2,20 @@
 
 This document outlines a refactor path to make Skyforge “runs” and deployment workflows **event-driven** and “Encore-native”, while preserving backward compatibility during rollout.
 
-Current state (simplified):
-- API endpoints create and drive runs imperatively.
-- Run output/status is observed via polling (and portal-side SSE that polls the backend).
+Current state (as implemented):
+- Runs are stored as tasks in Postgres (`sf_tasks`) with append-only output (`sf_task_logs`) and events (`sf_task_events`).
+- Task execution is drained by the dedicated `worker` service (Pub/Sub subscriber + DB-backed state machine).
+- The Skyforge API provides raw SSE endpoints for streaming without portal-side polling:
+  - `GET /api/runs/:id/events` (task output)
+  - `GET /api/dashboard/events` (dashboard snapshot stream)
+  - Additional inbox streams (notifications/webhooks/syslog/snmp/workspaces) exist for the UI.
+- Streaming uses Postgres `LISTEN/NOTIFY` as a lightweight wake-up signal and replays from DB by cursor.
 
 Target state:
-- Runs are a SQL-backed state machine.
-- Workflow orchestration is driven by `encore.dev/pubsub` events + subscribers.
-- The Go server exposes **raw SSE** (or WebSocket) endpoints for UI streaming.
-- Cron-based reconcilers handle retries and stuck-run recovery.
+- Keep the current “task-as-run” model, but continue to refine:
+  - workflow step boundaries (more granular step events)
+  - explicit retries/reconciliation policies
+  - richer event payloads for UI and auditability
 
 ## Goals
 
@@ -99,6 +104,9 @@ This can be a gradual refactor; start in-place if needed.
 
 Outcome: you now have a consistent event stream without changing orchestration.
 
+Status:
+- Implemented using DB-backed task logs/events + SSE endpoints keyed by `task_id`.
+
 ### Phase 1 — Event mirror subscriber (keeps current DB/output)
 
 Add a subscriber for `RunEventTopic` that:
@@ -127,12 +135,10 @@ Implementation approach:
 - Replay: query `run_events` from `seq > last_event_id` (bounded page size).
 - Tail: short sleep + query loop, or an in-memory fanout per run keyed by `run_id`.
 
-Portal changes:
-
-- Replace `/events/runs/:id` (portal SSE) with the server SSE endpoint.
-- Keep fallback polling when SSE unsupported.
-
 Outcome: UI streams directly from the source-of-truth (server) and avoids duplicate compute in the portal.
+
+Status:
+- Implemented. The frontend consumes server-provided SSE endpoints and uses cursors (`Last-Event-ID`) for replay.
 
 ### Phase 3 — Orchestration becomes event-driven
 
@@ -201,4 +207,3 @@ Browser push:
 3) Add server SSE endpoint for run output and switch the portal to consume it.
 
 These three steps get most of the benefits without a big-bang workflow rewrite.
-

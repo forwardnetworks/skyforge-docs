@@ -1,82 +1,102 @@
-# Backups and disaster recovery
+# Backups & Restore (Skyforge)
 
-Skyforge runs as a Kubernetes workload, but the cluster node still has **stateful data**:
+Skyforge state lives in three places:
 
-- Postgres databases (`db` PVC): Gitea, NetBox, Nautobot, Hoppscotch, Skyforge state
-- Object storage (`minio` PVC): artifacts + state + file drop
-- Workspace PVCs: per-user Coder data
+1) **Postgres (required)** — system of record
+   - Workspaces, deployments, runs/tasks/logs/events, settings, tokens, etc.
+2) **Object storage (recommended)** — artifacts
+   - Topology graphs, uploaded artifacts, generated bundles, exports, etc.
+3) **Gitea (optional, depending on how you use it)** — template/workspace repos
+   - Can be treated as source-of-truth or as a cache that is rebuildable.
 
-This doc outlines a pragmatic “MVP backup” strategy so you can rebuild the node and recover quickly.
+This runbook describes a Kubernetes-native backup strategy that works well with Skyforge’s “Encore-native” architecture.
 
-## 1) Back up Postgres locally (MinIO)
+## Goals
 
-Kubernetes CronJob: `k8s/kompose/backup-postgres-minio-cronjob.yaml`.
+- Backup on a schedule (daily + optional hourly).
+- Store backups in S3/MinIO.
+- Simple restore procedure.
+- No secrets committed to git.
 
-Note: backup/replication CronJobs are **not deployed by default** in the OSS
-overlay. Apply them explicitly (or create your own overlay) if you want
-automated backups.
+## What to back up
 
-- Runs `pg_dumpall` nightly and writes the compressed dump to the MinIO bucket `skyforge-backups/postgres/`.
-- This keeps backups **inside the cluster**, close to the rest of the platform state.
-- Default retention: 30 days.
+### Required: Postgres
 
-## 2) Replicate MinIO offsite (AWS S3)
+Backup:
+- **Logical dump**: `pg_dump` (portable; easiest for small/medium DBs)
+- **Physical backup**: (optional) your storage snapshot solution
 
-Kubernetes CronJob: `k8s/kompose/replicate-minio-aws-s3-cronjob.yaml`.
+Restore:
+- `psql < dump.sql` into a fresh DB, or restore a snapshot.
 
-- Mirrors important MinIO buckets to an AWS S3 bucket.
-- Disabled by default (`suspend: true`) until you:
-  - create an AWS credentials secret `aws-backup-credentials` (keys: `access_key_id`, `secret_access_key`)
-  - set `BACKUP_S3_BUCKET` in the CronJob
+### Recommended: Object storage (MinIO/S3)
 
-This provides the “local first, offsite second” backup model:
+Backup:
+- Bucket replication to another bucket/cluster, or periodic mirroring (`mc mirror`)
 
-1) Postgres dumps land in MinIO
-2) MinIO buckets (including the backup bucket) are replicated to AWS S3
+Restore:
+- Mirror back into the MinIO bucket(s) Skyforge uses.
 
-## 3) (Optional) Direct Postgres → S3 backup
+### Optional: Gitea
 
-Legacy CronJob: `k8s/kompose/backup-postgres-s3-cronjob.yaml`.
+If you treat Gitea as source-of-truth:
+- Back up the Gitea Postgres + storage (repos) the same way.
 
-- Uploads `pg_dumpall` output directly to AWS S3.
-- Kept for reference, but the preferred model is MinIO-local + offsite replication.
-## 4) Back up MinIO to S3
+If you treat Gitea as rebuildable/cache:
+- You can restore Skyforge + re-provision/sync repos.
 
-For MVP, treat MinIO as the “authoritative” store for artifacts/state and replicate to AWS S3:
+## Recommended minimal implementation
 
-- Configure MinIO replication to a remote S3 bucket (preferred), or
-- Run a scheduled `mc mirror` job to copy buckets to AWS S3.
+### A) Postgres backup Job (pg_dump → S3/MinIO)
 
-## 5) Back up Kubernetes manifests/config
+Create a Kubernetes CronJob that:
+- runs `pg_dump` against the Skyforge Postgres service
+- compresses output (`gzip`)
+- uploads to MinIO/S3
 
-- All manifests live in this repo under `k8s/`.
-- Keep secrets out of Git; store them in:
-  - a password manager, or
-  - a private S3 bucket as encrypted tarballs (recommended), or
-  - Kubernetes Secret export encrypted with age/sops.
+Key requirements:
+- A Secret containing:
+  - `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`
+  - MinIO/S3 endpoint + bucket + credentials
+- Network access from the Job to Postgres and MinIO.
 
-## 6) PV snapshots (optional, recommended with Longhorn)
+Notes:
+- Keep retention (e.g. 14 daily backups) by deleting old objects via `mc rm --older-than`.
+- Use UTC timestamps in object keys.
 
-If you’re using Longhorn:
+### B) MinIO bucket backup (mirror/replicate)
 
-- Enable recurring snapshots + backups to S3 for the PVs backing:
-  - `db-data`, `minio-data`, `gitea-data`
-  - `platform-data`, `coder-data`
+Option 1: replication
+- Configure MinIO bucket replication to another bucket or MinIO instance.
 
-This gives a fast “restore the volume” path without needing to replay logical dumps.
+Option 2: CronJob mirror
+- `mc mirror --overwrite --remove` from source bucket to backup bucket.
 
-## Recovery runbook (high level)
+## Restore procedure (high level)
 
-1. Recreate the node and install k3s.
-2. Restore PVCs (Longhorn restore) **or** deploy and restore Postgres + MinIO from S3.
-3. Apply Skyforge manifests: `kubectl apply -k k8s/overlays/k3s-traefik`.
-4. Validate `/healthz` and the status page.
+1) **Stop writes**
+   - Scale Skyforge API + worker to 0 replicas (or take the cluster out of rotation).
+2) **Restore Postgres**
+   - Create/restore DB
+   - Import the dump (`psql`) or restore snapshot
+3) **Restore object storage**
+   - Ensure the expected buckets exist
+   - Mirror/replicate objects back
+4) **Restart Skyforge**
+   - Scale back up
+   - Verify health (`/status/summary`)
+5) **Verify tasks/workflows**
+   - Run a small deployment create/start/destroy
 
-## Restore notes (capability)
+## Verification checklist
 
-To do a “100% restore”, you need:
+- `/status/summary` shows `postgres: up`
+- `task-workers: up` (recent heartbeat)
+- Dashboard loads and lists workspaces/deployments
+- A small deployment run produces logs and finishes successfully
 
-- **Git repo** (GitHub + Gitea)
-- **Postgres** data (from MinIO backups or Longhorn snapshot)
-- **MinIO** data (replicated to AWS S3 and/or restored from Longhorn snapshot)
-- **Kubernetes secrets** (stored out-of-band; without these you can still restore data, but services won’t authenticate correctly)
+## Operational notes
+
+- Skyforge relies on **Encore cron** for internal reconciliation, but backups should be done with Kubernetes-native Jobs for portability.
+- If you add a second backup target (off-cluster), treat it as the source for disaster recovery.
+
