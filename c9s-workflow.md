@@ -62,5 +62,11 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - `kubectl -n <ns> get topologies`
   - `kubectl -n <ns> describe topology <name>`
   - check clabernetes manager logs: `kubectl -n skyforge logs deploy/clabernetes-manager`
+- If node pods constantly restart (Deployment `kubectl.kubernetes.io/restartedAt` keeps changing):
+  - root cause is usually the clabernetes controller thinking configs changed every reconcile.
+  - ensure the clabernetes manager image is built with the “restart on config hash” fix (Skyforge tags around `20260119-restart-hash-*`).
+- If you see `topology capture failed: Access Denied`:
+  - the Skyforge worker stores topology graph artifacts in the `skyforge-files` bucket.
+  - ensure the MinIO service account referenced by `SKYFORGE_OBJECT_STORAGE_ACCESS_KEY` has write access to `skyforge-files/*`.
 - If Netlab-C9s deploy fails early:
   - confirm the Netlab server can run `netlab create` and produce `clab.yml` and `node_files/`.
