@@ -3,7 +3,7 @@
 Use the local admin path when LDAP is unavailable or you need to recover access.
 
 ## What it is
-- Skyforge supports a local admin user list (`SKYFORGE_ADMIN_USERS`) plus a shared password (`SKYFORGE_ADMIN_PASSWORD`).
+- Skyforge supports a local admin user list (Helm value `skyforge.adminUsers`, typed config `AdminUsers`) plus a shared password (`SKYFORGE_ADMIN_PASSWORD`).
 - In this k3s deployment the password is sourced from the Kubernetes secret `skyforge-admin-shared` (key: `password`).
 
 ## Get the password (cluster admin)
@@ -13,7 +13,7 @@ kubectl -n skyforge get secret skyforge-admin-shared -o jsonpath='{.data.passwor
 
 ## Check who is allowed
 ```bash
-kubectl -n skyforge get configmap skyforge-config -o jsonpath='{.data.SKYFORGE_ADMIN_USERS}'; echo
+helm -n skyforge get values skyforge | rg -n \"adminUsers\" || true
 ```
 
 ## Rotate

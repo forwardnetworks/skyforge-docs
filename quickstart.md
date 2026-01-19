@@ -19,7 +19,6 @@ $EDITOR k8s/overlays/k3s-traefik-secrets/config.env
 Minimum values to update:
 - `SKYFORGE_HOSTNAME`
 - `SKYFORGE_ADMIN_EMAIL`
-- `SKYFORGE_CORP_EMAIL_DOMAIN`
 - `SKYFORGE_GITEA_URL`, `SKYFORGE_GITEA_API_URL`
 
 If you use LDAP, provide the LDAP secrets (`k8s/overlays/k3s-traefik-secrets/secrets/skyforge_ldap_url`,

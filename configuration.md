@@ -1,7 +1,8 @@
 # Configuration quick reference
 
-Skyforge is configured entirely via environment variables and secrets. For k3s deployments, prefer the
-`k8s/overlays/k3s-traefik-secrets/` overlay and set values in `config.env`.
+Skyforge uses typed Encore config (`ENCORE_CFG_SKYFORGE`, `ENCORE_CFG_WORKER`) plus Encore-managed secrets.
+For k3s deployments, prefer Helm and configure values in `deploy/skyforge-values.yaml` and secrets in
+`deploy/skyforge-secrets.yaml` (local-only).
 
 ## 1) Core hostnames
 - `SKYFORGE_HOSTNAME`: primary hostname (comma-separated aliases also supported).
@@ -10,7 +11,6 @@ Skyforge is configured entirely via environment variables and secrets. For k3s d
 At minimum, set:
 - `SKYFORGE_HOSTNAME`
 - `SKYFORGE_ADMIN_EMAIL`
-- `SKYFORGE_CORP_EMAIL_DOMAIN`
 - `SKYFORGE_GITEA_URL`, `SKYFORGE_GITEA_API_URL`
 
 If you are not using LDAP, leave `SKYFORGE_LDAP_*` values empty. Skyforge will
@@ -26,14 +26,14 @@ fall back to local admin authentication only.
 - `SKYFORGE_UI_SUPPORT_URL`: footer support link (optional).
 
 ## 3) Org defaults
-- `SKYFORGE_CORP_EMAIL_DOMAIN`: email domain used for login hints (Azure/GCP).
+- `ENCORE_CFG_SKYFORGE.CorpEmailDomain`: email domain used for login hints (Azure/GCP).
 - `SKYFORGE_ADMIN_EMAIL`: admin email used to seed Gitea/NetBox/Nautobot.
-- `SKYFORGE_ADMIN_USERNAME`: admin username used for provisioning in Gitea.
+- `ENCORE_CFG_SKYFORGE.AdminUsername`: admin username used for provisioning in Gitea.
 - `SKYFORGE_ADMIN_NAME`: admin display name used for provisioning.
 - `SKYFORGE_PROVISIONER_LOGIN`: service user name for automation provisioning.
 - `SKYFORGE_PROVISIONER_NAME`: display name for the provisioner user.
 - `SKYFORGE_PROVISIONER_EMAIL`: email for the provisioner user.
-- `SKYFORGE_ADMIN_USERS`: comma-separated admin usernames for Skyforge access control.
+- `ENCORE_CFG_SKYFORGE.AdminUsers`: comma-separated admin usernames for Skyforge access control.
 
 ## 3a) Shared admin secret (k3s overlay)
 The local admin password is stored in a single secret file and reused across Skyforge,
