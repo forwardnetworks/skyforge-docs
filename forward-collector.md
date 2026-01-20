@@ -1,54 +1,39 @@
-# Forward Collector (Workspace Option)
+# Forward Collector (In-Cluster)
 
-Use this flow when a workspace needs its own Forward collector. Skyforge creates the collector through the Forward API (SaaS or on-prem) and returns an authorization key you can run on a host you control. Once it appears in Forward, select it in the workspace settings.
+Skyforge can run a **per-user Forward collector inside the Skyforge Kubernetes cluster**.
 
-## Create the Collector
+Skyforge creates the collector in Forward (SaaS or on-prem) and stores the returned `authorizationKey`. That authorization key is used as the in-cluster collector `TOKEN`.
 
-1) Save Forward credentials in the workspace settings (SaaS or on-prem base URL).
-2) Click **Add collector** → **Create collector**.
-3) Copy the authorization key and run command shown in the dialog.
+## Notes (Key Persistence + Upgrades)
 
-## Build the Collector Image (One-Time)
+- Forward Enterprise collectors generate and use an encryption key (`customer_key.pb`) which protects locally-stored secrets. If you lose it, you have to re-enter secrets after restarts/upgrades.
+- Skyforge **persists** this file by mounting a per-user PVC at `/collector/private` (so `customer_key.pb` survives pod restarts and image upgrades).
+- To upgrade: change `skyforge.forwardCollector.image` to a newer tag and redeploy Skyforge, then click **Restart collector** in the UI (or simply wait for the Deployment rollout).
+- To rotate credentials: use **Reset collector** (creates a new Forward collector and updates the stored authorization key). The local `customer_key.pb` stays intact.
+- To fully remove: use **Clear collector settings** (deletes stored creds and deletes the in-cluster Deployment + PVC).
 
-1) Obtain the Forward collector installer (`fwd-unix-<version>.sh`) from Forward Networks. Keep it out of git.
-2) Use the standalone guide as a build context (example path below):
+## Configure In-Cluster Collector (Skyforge)
 
-```bash
-cd /Users/captainpacket/Projects/active/skyforge/collector-standalone
-```
+- Helm values:
+  - Set `skyforge.forwardCollector.image` (example Harbor tag below).
+  - Optional: set `skyforge.forwardCollector.heapSizeGB` to control memory (maps to `COLLECTOR_HEAP_SIZE`).
+  - Optional: set `skyforge.forwardCollector.imagePullSecretName` if your registry requires auth.
 
-3) Update `fwd.properties.template` if you are using Forward on-prem (the URL must match the base URL in the workspace settings):
-
-```
-url = https://your-forward-appliance
-```
-
-4) Build and push the image to GHCR:
+Example (Harbor):
 
 ```bash
-TAG=20260102-collector
-IMAGE=ghcr.io/forwardnetworks/skyforge-forward-collector:${TAG}
-docker buildx build --platform linux/amd64 -t "${IMAGE}" --push .
+skyforge:
+  forwardCollector:
+    image: harbor.local.forwardnetworks.com/forward/fwd_collector:26.1.0-05
+    pullPolicy: Always
+    imagePullSecretName: harbor-pull
+    imagePullSecretNamespace: skyforge
+    heapSizeGB: 16
 ```
 
-## Run the Collector
+## User Flow
 
-Use the command shown in the Skyforge workspace dialog, for example:
-
-```bash
-docker run --rm \
-  -e TOKEN="<forward-username>:<forward-password>" \
-  -e PROXY_HOST= \
-  -e PROXY_PORT= \
-  -e PROXY_USERNAME= \
-  -e PROXY_PASSWORD= \
-  ghcr.io/forwardnetworks/skyforge-forward-collector:latest
-```
-
-## Select in Skyforge
-
-After the collector registers in Forward, open the workspace Forward settings, refresh the collector list, and select the new collector.
-
-## Cleanup
-
-Stop the container when the workspace no longer needs the collector. Remove any test collector instances from Forward to avoid confusion.
+1) Open **Collector** in the UI.
+2) Enter Forward base URL (SaaS or on-prem), credentials, then **Save**.
+3) Skyforge creates (or reuses) a per-user Forward collector and deploys the in-cluster collector pod.
+4) When connected, the UI will show the pod as `Running` and the collector as present in Forward.
