@@ -15,6 +15,16 @@ This doc captures the current multi-node k3s setup for Skyforge.
 - Service CIDR: `100.65.0.0/16`
 - Kubernetes API VIP: `10.128.16.11` (kube-vip on control-plane nodes)
 
+## External DNS
+
+`skyforge.local.forwardnetworks.com` is published as a round-robin A record across the k3s nodes:
+
+- `10.128.16.54`
+- `10.128.16.55`
+- `10.128.16.58`
+
+This is intended for the **user-facing HTTPS** entrypoint (Traefik runs on all nodes).
+
 ## Storage
 
 Skyforge uses Longhorn for HA PVCs. See `docs/storage-longhorn.md`.
@@ -39,7 +49,8 @@ Notes:
 1) Start a tunnel:
 
 ```bash
-ssh -fN -L 6443:127.0.0.1:6443 ubuntu@skyforge-1.local.forwardnetworks.com
+# Use a specific control-plane node hostname (not the round-robin DNS name).
+ssh -fN -L 6443:127.0.0.1:6443 ubuntu@skyforge-2.local.forwardnetworks.com
 ```
 
 2) Use the repo kubeconfig:

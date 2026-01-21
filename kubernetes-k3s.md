@@ -76,7 +76,7 @@ kubectl apply -k k8s/overlays/k3s-traefik-secrets
 
 Optional overlays:
 - Longhorn storage class (sets all PVCs `storageClassName: longhorn`): `kubectl apply -k k8s/overlays/k3s-longhorn`
-- LoadBalancer exposure (MetalLB/cloud LB): use Traefik’s Service config (k3s HelmChartConfig)
+- LoadBalancer exposure: prefer Cilium-native options (L2 announcements or BGP) or use Traefik NodePort/hostNetwork depending on your environment
 
 Notes:
 - `k8s/overlays/k3s-traefik` uses Traefik CRDs (`IngressRoute`, `Middleware`). On k3s they are typically installed with Traefik.
