@@ -10,6 +10,7 @@ Policy: always deploy to QA first, validate, then deploy to prod.
 - SSH access to the cluster nodes.
 - `kubectl` + `helm` installed locally.
 - Set `KUBECONFIG` to the environment you intend to deploy to.
+- Run `scripts/preflight-packaging.sh` before deploying (catch template/chart breakage early).
 
 ## Deploy to QA
 
@@ -36,6 +37,7 @@ export KUBECONFIG=$PWD/skyforge-private/.kubeconfig-skyforge-qa
 
 ```bash
 cd skyforge-private
+scripts/preflight-packaging.sh
 helm upgrade --install skyforge charts/skyforge -n skyforge --create-namespace \
   -f deploy/skyforge-values.yaml \
   -f deploy/skyforge-values-qa.yaml \
@@ -80,6 +82,7 @@ export KUBECONFIG=$PWD/skyforge-private/.kubeconfig-skyforge
 
 ```bash
 cd skyforge-private
+scripts/preflight-packaging.sh
 helm upgrade --install skyforge charts/skyforge -n skyforge --create-namespace \
   -f deploy/skyforge-values.yaml \
   -f deploy/skyforge-secrets.yaml \
