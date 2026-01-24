@@ -48,6 +48,22 @@ Upstream: `github.com/srl-labs/clabernetes`
 
 Fork (target): `github.com/forwardnetworks/clabernetes`
 
+### Creating the fork repo (one-time)
+
+If the fork repo doesn’t exist yet, have an org admin create it:
+
+```bash
+gh repo create forwardnetworks/clabernetes --private --source https://github.com/srl-labs/clabernetes
+```
+
+Then add the remote:
+
+```bash
+cd ~/Projects/skyforge/clabernetes
+git remote add fork https://github.com/forwardnetworks/clabernetes
+git fetch fork
+```
+
 ### Policy
 
 - Keep Skyforge-specific logic out of clabernetes when possible (Skyforge should adapt inputs).
@@ -85,6 +101,15 @@ Update them in:
 - `deploy/skyforge-values.yaml` (prod)
 - `deploy/skyforge-values-qa.yaml` (QA)
 
+### Building/pushing clabernetes images
+
+Skyforge uses custom images (built from the fork) under the `ghcr.io/forwardnetworks/` org, for example:
+
+- `ghcr.io/forwardnetworks/skyforge-clabernetes-manager:<tag>`
+- `ghcr.io/forwardnetworks/skyforge-clabernetes-launcher:<tag>`
+
+Build/push and then bump the Helm values to match.
+
 ## Template validation gates
 
 Before any QA deploy, run:
@@ -93,4 +118,3 @@ Before any QA deploy, run:
 cd skyforge-private
 scripts/preflight-packaging.sh
 ```
-
