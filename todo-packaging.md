@@ -74,6 +74,17 @@ We should be able to enable/disable features cleanly at chart install time.
   - `helm lint charts/skyforge`
   - `helm template` (both minimal + full) and ensure it renders
   - optional: `kubectl apply --dry-run=server` on rendered output
+  - template validators:
+    - `scripts/validate_netlab_templates.py`
+    - `scripts/validate_containerlab_templates.py`
+    - `scripts/validate_terraform_templates.py`
+
+Local equivalent (run before any QA deploy):
+
+```bash
+cd skyforge-private
+scripts/preflight-packaging.sh
+```
 
 ## QA Redeploy Drill (Practice “fresh install”)
 
@@ -93,4 +104,3 @@ We should be able to enable/disable features cleanly at chart install time.
 - Conditional RBAC for cluster-scoped resources is a footgun → core RBAC must be unconditional.
 - Some Helm template mistakes only show up at render time → CI must run `helm template`.
 - Local dev environments can generate invalid pull secrets (macOS keychain) → documented registry secret creation required.
-
