@@ -19,8 +19,8 @@ SKYFORGE_GHCR_TOKEN='<token-with-read:packages>' \
 
 Notes:
 - If your images are public, omit the `SKYFORGE_GHCR_*` vars.
+- If you’re iterating and need a clean slate, add `SKYFORGE_RESET=true` (danger: deletes the namespace + clabernetes CRDs).
 - The script uses `deploy/longhorn-values-qa.yaml` defaults (replicas=1). For multi-node prod, override accordingly.
 
 ## Post-install
 Follow `docs/post-install-verify.md`.
-
