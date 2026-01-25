@@ -20,7 +20,6 @@ edit files in the browser.
 - Anonymous uploads use `anonymous/` or `files/` prefixes.
 - Artifacts are mirrored into `/var/lib/skyforge/users/<username>/s3` (download-only).
 - Do not edit files inside the mirror; upload via S3 instead.
-- When SeaweedFS is enabled, it replaces MinIO as the backing S3 endpoint (buckets remain the same names).
 - Gitea stores large assets (LFS + attachments + misc storage) in the `gitea` bucket; git repo data remains on the `gitea-data` PVC.
 Example (mc):
 ```bash

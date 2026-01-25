@@ -2,6 +2,8 @@
 
 This is the minimal single-node k3s deployment path.
 
+If you want a repeatable “install drill” workflow (recommended), use `docs/install-on-server.md` instead.
+
 ## 1) Prereqs
 - k3s installed and `kubectl` works.
 - A DNS name for Skyforge (or `/etc/hosts` entry).
@@ -39,6 +41,17 @@ and Coder. LDAP credentials are separate and only required if you enable LDAP.
 
 
 ## 4) Deploy (Helm, preferred)
+Preferred for install drills: run the installer on the node:
+
+```bash
+cd /opt/skyforge/skyforge-private
+export SKYFORGE_ENV=prod
+export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
+sudo -E ./scripts/install-on-host.sh
+```
+
+Legacy / manual flow:
+
 ```bash
 gh auth refresh -h github.com -s read:packages
 gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
