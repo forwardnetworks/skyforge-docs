@@ -40,8 +40,7 @@ Use Forward’s defaults unless you have a reason to diverge:
    - `bpf.masquerade=true`
    - `bpf.datapathMode=netkit` (requires kernel >= 6.8; Skyforge nodes run >= 6.18)
 4) Deploy an ingress controller that binds `:443` on every node (RR DNS):
-   - **Preferred for Skyforge today:** Traefik (because Skyforge’s Helm chart currently ships Traefik CRDs + IngressRoute overlays)
-   - **Future:** nginx-ingress (requires porting Traefik middlewares to nginx annotations/config-snippets)
+   - **nginx-ingress** as a **DaemonSet** with hostPorts 80/443 (Forward-aligned ops, no VIP required)
 5) Deploy Skyforge Helm chart.
 
 ## Scripts
@@ -51,16 +50,10 @@ Use the scripts in `scripts/k0s/`:
 - `scripts/k0s/k0sctl.yaml.example` (edit node IPs/SSH users)
 - `scripts/k0s/install-k0sctl.sh`
 - `scripts/k0s/install-cilium.sh`
-- `scripts/k0s/install-traefik.sh`
+- `scripts/k0s/install-nginx-ingress.sh`
 - `scripts/k0s/install-skyforge.sh`
 
-## Why Traefik (for now)
+## Ingress notes
 
-Skyforge currently relies on Traefik CRDs (`IngressRoute`, `Middleware`, `TLSStore`) to implement:
-
-- path-based routing to multiple internal tools under one hostname
-- auth header injection for OIDC-protected routes
-- rewrite/strip-prefix behaviors (Gitea, MinIO console, Swagger, etc)
-
-Porting these to nginx is doable, but it’s a focused project.
-
+Skyforge ships Kubernetes `Ingress` resources targeting nginx-ingress. These replace the previous
+Traefik CRD-based routing setup (IngressRoute/Middleware/TLSStore).
