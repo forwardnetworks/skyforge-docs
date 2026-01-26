@@ -48,6 +48,8 @@ Use Forward’s defaults unless you have a reason to diverge:
 Use the scripts in `scripts/k0s/`:
 
 - `scripts/k0s/k0sctl.yaml.example` (edit node IPs/SSH users)
+- `scripts/k0s/bootstrap-cluster.sh` (one-shot runner on a node)
+- `scripts/k0s/install-helm.sh`
 - `scripts/k0s/install-k0sctl.sh`
 - `scripts/k0s/install-cilium.sh`
 - `scripts/k0s/install-nginx-ingress.sh`
