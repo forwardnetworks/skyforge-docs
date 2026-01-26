@@ -55,6 +55,14 @@ Use the scripts in `scripts/k0s/`:
 - `scripts/k0s/install-nginx-ingress.sh`
 - `scripts/k0s/install-skyforge.sh`
 
+### One-shot runner defaults
+
+If you don’t set `SKYFORGE_K0S_HOSTS`, the bootstrap script defaults to:
+
+- `skyforge-1.local.forwardnetworks.com`
+- `skyforge-2.local.forwardnetworks.com`
+- `skyforge-3.local.forwardnetworks.com`
+
 ## Ingress notes
 
 Skyforge ships Kubernetes `Ingress` resources targeting nginx-ingress. These replace the previous
