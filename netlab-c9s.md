@@ -16,6 +16,12 @@ deploys the resulting Containerlab topology via Clabernetes.
      and Skyforge applies any netlab-generated post-up config snippets (cfglets/modules) using Kubernetes exec
      (still Go-only; no Ansible).
 
+Linux node extras (optional, controlled by env vars):
+
+- `SKYFORGE_NETLAB_C9S_LINUX_ENABLE_SSH=true`: enable password-based SSH inside Linux pods (used by Forward endpoints).
+- `SKYFORGE_NETLAB_C9S_LINUX_NOISE=true`: start a lightweight background “noise” loop (gratuitous ARP + gateway ping)
+  so quiet endpoints still generate L2/L3 activity.
+
 ## Phase 2 networking model (service DNS)
 
 To avoid coupling configuration to Pod IP churn, Skyforge targets nodes via
