@@ -14,7 +14,12 @@ This repo is created automatically on Skyforge startup, but it starts with only 
 From `skyforge-private/`:
 
 ```bash
-export GITEA_API_URL="https://skyforge.local.forwardnetworks.com/git"
+# Gitea is protected by Skyforge SSO at /git, so use a port-forward to
+# talk to Gitea's API directly.
+#
+# In another terminal:
+#   KUBECONFIG=.kubeconfig-skyforge kubectl -n skyforge port-forward svc/gitea 3000:3000
+export GITEA_API_URL="http://127.0.0.1:3000"
 export GITEA_USERNAME="skyforge"
 export GITEA_PASSWORD="<skyforge admin password>"
 
@@ -46,4 +51,3 @@ go run ./cmd/pushblueprints \
 
 - This tool **only upserts** files; it does not delete removed files from the repo.
 - By default we sync only `containerlab`, `netlab`, and `terraform` (not `labpp`).
-
