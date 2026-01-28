@@ -33,3 +33,11 @@ Yaade uses a PVC for persistence and does not require database secrets.
 
 ## Example (do not commit real secrets)
 See `skyforge-private/deploy/skyforge-secrets.example.yaml`.
+
+## Generate for install drills
+For QA/OSS-style install drills, you can generate a local dev secrets file:
+
+```bash
+cd skyforge-private
+./scripts/gen-secrets.sh --hostname "<skyforge-hostname>" --out ./deploy/skyforge-secrets.yaml
+```

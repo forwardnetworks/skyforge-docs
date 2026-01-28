@@ -14,6 +14,8 @@ Run the installer **on the node** that will host k3s. This avoids SSH tunnel / k
 From a checkout of `skyforge-private/` on the node:
 
 ```bash
+./scripts/gen-secrets.sh --hostname "<skyforge-hostname>" --out ./deploy/skyforge-secrets.yaml
+
 export SKYFORGE_ENV=qa
 SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml \
 SKYFORGE_GHCR_USERNAME='<github-user-or-bot>' \

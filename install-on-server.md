@@ -19,6 +19,14 @@ cd /opt/skyforge/skyforge-private
 - Start from `deploy/skyforge-secrets.example.yaml`
 - Save your real values to `deploy/skyforge-secrets.yaml` (do not commit it).
 
+For install drills / quickstarts, you can generate a dev-friendly file:
+
+```bash
+./scripts/gen-secrets.sh \
+  --hostname "skyforge-qa.local.forwardnetworks.com" \
+  --out ./deploy/skyforge-secrets.yaml
+```
+
 3) If GHCR images are private, export GHCR credentials (avoid shell history)
 
 ```bash
@@ -33,6 +41,16 @@ export SKYFORGE_GHCR_TOKEN
 export SKYFORGE_ENV=qa
 export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
 sudo -E ./scripts/install-on-host.sh
+```
+
+5) Upload templates (blueprints) to Gitea
+
+If the UI shows “failed to load templates”, sync the bundled `blueprints/` catalog:
+
+```bash
+export SKYFORGE_HOST="skyforge-qa.local.forwardnetworks.com"
+export GITEA_SKIP_TLS_VERIFY=true
+./scripts/push-blueprints-to-gitea.sh
 ```
 
 ## What the installer does
