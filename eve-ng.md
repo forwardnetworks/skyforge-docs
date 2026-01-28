@@ -44,11 +44,11 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
   - `GET /skyforge-server/health/eve?full=1` (include per-server detail; can be slower)
 
 - List labs (authenticated, per-user view):
-  - `GET /skyforge-server/labs/user?provider=eve-ng&project_id=<legacy workspace id>` (legacy param name)
+  - `GET /skyforge-server/labs/user?provider=eve-ng&workspace_id=<workspaceId>`
   - Fallback (manual override): `GET /skyforge-server/labs/user?provider=eve-ng&eve_server=eve-ng-01`
 
 - List running labs (public):
-  - `GET /skyforge-server/labs/running?provider=eve-ng&project_id=<legacy workspace id>` (legacy param name)
+  - `GET /skyforge-server/labs/running?provider=eve-ng&workspace_id=<workspaceId>`
   - Fallback (manual override): `GET /skyforge-server/labs/running?provider=eve-ng&eve_server=eve-ng-01`
 
 - Workspace lab path (authenticated):
@@ -57,7 +57,7 @@ Skyforge supports multiple EVE-NG servers. In k3s, the preferred integration is 
 
 ## UI
 
-- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?project_id=<legacy workspace id>` (legacy param name) which redirects to the workspace’s configured EVE server web UI.
+- The Toolchain “EVE-NG Servers” card launches via `GET /labs/?workspace_id=<workspaceId>` which redirects to the workspace’s configured EVE server web UI.
 - Set the EVE server on the Workspaces page (“Set EVE” button), which updates `eveServer` for that workspace in Postgres.
 - Workspaces use a per-owner lab path: `/Users/<owner>/<workspace-slug>.unl`. Editors/viewers link to the owner’s lab.
 - Use **Show EVE Lab Path** / **Ensure EVE Lab** on the Workspaces page to view/create the lab file via SSH.
