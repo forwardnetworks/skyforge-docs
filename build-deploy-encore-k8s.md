@@ -21,6 +21,14 @@ SKYFORGE_REGISTRY=ghcr.io/forwardnetworks
 TAG=latest
 ```
 
+### One-command build (recommended)
+
+Use the repo script to avoid shipping a server image with stale embedded UI assets:
+
+```bash
+./scripts/build-push-skyforge-server.sh --registry "${SKYFORGE_REGISTRY}" --tag "${TAG}"
+```
+
 For private GHCR, ensure you can push from your build machine:
 ```bash
 gh auth refresh -h github.com -s read:packages,write:packages
