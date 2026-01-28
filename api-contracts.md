@@ -64,10 +64,6 @@ Payload:
 OIDC login entry point:
 - `GET /api/oidc/login?next=<path>`
 
-Legacy aliases exist for compatibility:
-- `GET /api/skyforge/api/oidc/login`
-- `GET /api/skyforge/api/oidc/callback`
-
 ## URL prefix contract (UI + API)
 
 Browser API base:
@@ -75,4 +71,3 @@ Browser API base:
 
 Static assets:
 - `/assets/skyforge/*`
-

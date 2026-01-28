@@ -18,7 +18,7 @@ Note:
 - **Encore API base (browser):** `/api/skyforge/api/*` (Traefik rewrites to the Encore service).
 - **Platform status:** `/status/summary` (plus SSE at `/status/summary/events`).
 - (Legacy) **Platform health JSON:** `/data/platform-health.json` (served from live checks; no filesystem dependency).
-- **OIDC login entry:** `GET /api/skyforge/api/oidc/login?next=<path>`.
+- **OIDC login entry:** `GET /api/oidc/login?next=<path>`.
 
 ## Client architecture (TanStack)
 ### Query model
