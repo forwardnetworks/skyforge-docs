@@ -4,6 +4,18 @@ Skyforge uses typed Encore config (`ENCORE_CFG_SKYFORGE`, `ENCORE_CFG_WORKER`) p
 For k3s deployments, prefer Helm and configure values in `deploy/skyforge-values.yaml` and secrets in
 `deploy/skyforge-secrets.yaml` (local-only).
 
+For OSS/packaging, start with `docs/feature-flags.md` to understand which components can be enabled/disabled at install time.
+
+## Auth modes (recommended)
+
+Skyforge supports these “auth shapes” in 2026-style deployments:
+
+- **In-cluster Dex (recommended default)**: `skyforge.dex.enabled=true` and set LDAP (`SKYFORGE_LDAP_*`) or rely on “local admin only” if LDAP is not configured.
+- **External OIDC provider**: `skyforge.dex.enabled=false` and provide `ENCORE_CFG_SKYFORGE.OIDC.*` (typed config) + OIDC client secrets.
+
+Non-goals (today):
+- “Local accounts for everyone” (username/password registry managed by Skyforge). This can be added later but isn’t the current default model.
+
 ## 1) Core hostnames
 - `SKYFORGE_HOSTNAME`: primary hostname (comma-separated aliases also supported).
 
@@ -48,6 +60,15 @@ LDAP credentials live in separate secrets and are only required if you enable LD
 - `SKYFORGE_NAUTOBOT_URL`: Nautobot base URL.
 - `SKYFORGE_OBJECT_STORAGE_ENDPOINT`: S3-compatible endpoint (host:port).
 - `SKYFORGE_OBJECT_STORAGE_USE_SSL`: `true` or `false`.
+
+### Forward Networks integration (optional)
+
+Skyforge can optionally integrate with Forward Networks to:
+
+- provision per-user in-cluster collectors
+- sync deployments as devices/endpoints into Forward
+
+To disable this in OSS installs, set `skyforge.forward.enabled=false` (Helm value).
 
 ### NetBox/Nautobot permissions (Remote-User)
 - When `SKYFORGE_SSO_ENABLED=true`, Skyforge uses Traefik forwardAuth + `Remote-User` headers to SSO into NetBox/Nautobot.
