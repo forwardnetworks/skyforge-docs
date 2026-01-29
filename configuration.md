@@ -4,7 +4,7 @@ Skyforge uses typed Encore config (`ENCORE_CFG_SKYFORGE`, `ENCORE_CFG_WORKER`) p
 For k3s deployments, prefer Helm and configure values in `deploy/skyforge-values.yaml` and secrets in
 `deploy/skyforge-secrets.yaml` (local-only).
 
-For OSS/packaging, start with `docs/feature-flags.md` to understand which components can be enabled/disabled at install time.
+For OSS/packaging, start with `docs/operator/feature-flags.md` to understand which components can be enabled/disabled at install time.
 
 ## Auth modes (recommended)
 
