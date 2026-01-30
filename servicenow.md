@@ -27,10 +27,16 @@ The demo app:
      - choose **Custom…** and enter username/password.
 4) Click **Save**.
 5) (Optional) If your PDI is sleeping, use **PDI status → Wake up**.
-6) Click **Install demo app**.
+6) Create the demo schema (manual step):
+   - Create tables:
+     - `x_fwd_demo_connectivity_ticket`
+     - `x_fwd_demo_connectivity_hop`
+   - Create fields listed in **ServiceNow → Schema status** (Skyforge will tell you what’s missing).
+7) Click **Install demo app** (installs scripts, REST message, portal widget, and properties).
 7) (Optional) Click **Configure Forward (ticketing)** to configure Forward’s ServiceNow ticketing integration (auto-create/update incidents).
 
 ## Notes
 
 - ServiceNow calls Forward SaaS directly. Skyforge is only used to install/configure the ServiceNow artifacts.
-- The installer uses ServiceNow’s Table API to create/update records and will overwrite demo artifact contents by name (tables, fields, scripts, widget, REST message).
+- Skyforge installs scripts/widgets/etc via ServiceNow’s Table API, but **does not create the schema** (custom tables/fields). Some ServiceNow instances block schema creation via Table API.
+- The installer overwrites demo artifact contents by name (scripts, widget, REST message, properties).
