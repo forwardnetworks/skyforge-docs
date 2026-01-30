@@ -11,38 +11,24 @@ The demo app:
 ## Prerequisites
 
 - A ServiceNow Personal Developer Instance (PDI)
-- Forward SaaS credentials (for `https://fwd.app`)
+- Forward SaaS credentials (for `https://fwd.app`) via either:
+  - a Skyforge Forward collector (recommended), or
+  - manual username/password.
 
 ## Setup
 
 1) Create a ServiceNow PDI.
 2) In Skyforge, open **ServiceNow** (left navigation).
-3) (Optional) Create a local env file (not uploaded) to speed up setup:
-
-```bash
-cat > servicenow-pdi.env <<'EOF'
-# ServiceNow PDI
-SN_INSTANCE_URL=https://dev12345.service-now.com
-SN_ADMIN_USERNAME=admin
-SN_ADMIN_PASSWORD=REPLACE_ME
-
-# Forward SaaS
-FWD_BASE_URL=https://fwd.app/api
-FWD_USERNAME=you@example.com
-FWD_PASSWORD=REPLACE_ME
-EOF
-```
-
-Then import it in the UI via **Import from env file**.
-
-4) Enter / confirm:
+3) Enter / confirm:
    - ServiceNow instance URL (your PDI URL)
    - ServiceNow admin username/password
-   - Forward base URL: `https://fwd.app/api`
-   - Forward username/password
-5) Click **Save**.
-6) (Optional) If your PDI is sleeping, use **PDI status → Wake up**.
-7) Click **Install demo app**.
+   - Forward credentials:
+     - select a collector (recommended), or
+     - choose **Custom…** and enter username/password.
+4) Click **Save**.
+5) (Optional) If your PDI is sleeping, use **PDI status → Wake up**.
+6) Click **Install demo app**.
+7) (Optional) Click **Configure Forward (ticketing)** to configure Forward’s ServiceNow ticketing integration (auto-create/update incidents).
 
 ## Notes
 
