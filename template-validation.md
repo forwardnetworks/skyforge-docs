@@ -48,10 +48,10 @@ refactor the templates:
 
 ## Containerlab
 
-We do lightweight validation (YAML schema sanity checks) without trying to deploy.
+We validate containerlab templates against the official containerlab JSON schema (no deploy).
 
 ```bash
-python3 scripts/validate_containerlab_templates.py > /tmp/containerlab-validate-report.md
+(cd server && go run ./cmd/validatecontainerlab --root ../blueprints/containerlab) > /tmp/containerlab-validate-report.md
 ```
 
 ## Terraform
@@ -62,4 +62,3 @@ copy to avoid writing `.terraform/` into the repo.
 ```bash
 python3 scripts/validate_terraform_templates.py > /tmp/terraform-validate-report.md
 ```
-

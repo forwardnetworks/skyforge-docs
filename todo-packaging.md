@@ -76,7 +76,7 @@ We should be able to enable/disable features cleanly at chart install time.
   - optional: `kubectl apply --dry-run=server` on rendered output
   - template validators:
     - `scripts/validate_netlab_templates.py`
-    - `scripts/validate_containerlab_templates.py`
+    - `(cd server && go run ./cmd/validatecontainerlab --root ../blueprints/containerlab)`
     - `scripts/validate_terraform_templates.py`
 
 Local equivalent (run before any QA deploy):
