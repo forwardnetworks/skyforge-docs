@@ -44,3 +44,7 @@ From repo root:
 ```bash
 ./scripts/lint-all.sh
 ```
+
+See also:
+- `docs/dev-workflow.md`
+- `docs/secrets.md`
