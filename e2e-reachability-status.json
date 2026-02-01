@@ -1,0 +1,114 @@
+{
+  "updatedAt": "2026-02-01T00:00:00Z",
+  "devices": {
+    "arubacx": {
+      "device": "arubacx",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "asav": {
+      "device": "asav",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "cat8000v": {
+      "device": "cat8000v",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "csr": {
+      "device": "csr",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "cumulus": {
+      "device": "cumulus",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "dellos10": {
+      "device": "dellos10",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "requires vrnetlab qcow2"
+    },
+    "eos": {
+      "device": "eos",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "fortios": {
+      "device": "fortios",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "iol": {
+      "device": "iol",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "iosv": {
+      "device": "iosv",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "pinned to deterministic ssh tag"
+    },
+    "iosvl2": {
+      "device": "iosvl2",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "pinned to deterministic ssh tag"
+    },
+    "linux": {
+      "device": "linux",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "nxos": {
+      "device": "nxos",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "sros": {
+      "device": "sros",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "vjunos-router": {
+      "device": "vjunos-router",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "vjunos-switch": {
+      "device": "vjunos-switch",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "vjunosevolved": {
+      "device": "vjunosevolved",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "needs qcow2 (iso not supported by vrnetlab)"
+    },
+    "vmx": {
+      "device": "vmx",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    }
+  }
+}
+
