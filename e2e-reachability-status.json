@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-01T18:10:52Z",
+  "updatedAt": "2026-02-01T22:59:24Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
@@ -21,9 +21,13 @@
     },
     "csr": {
       "device": "csr",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "not yet run"
+      "status": "fail",
+      "updatedAt": "2026-02-01T22:41:29Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 470,
+      "error": "100.70.1.78: bad banner prefix: \"\\x00\\x00\\x00\\x00\"",
+      "notes": "ssh probe failed"
     },
     "cumulus": {
       "device": "cumulus",
@@ -33,18 +37,19 @@
     },
     "dellos10": {
       "device": "dellos10",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "requires vrnetlab qcow2"
+      "status": "fail",
+      "updatedAt": "2026-02-01T20:10:05Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 401,
+      "error": "job failed (no logs): pod=netlab-gen-e2e-20260201-200927-dellos10-minimal-6586-m6vfn phase=Failed node=skyforge-3 ip=100.70.2.11\n  container=generator ready=false restarts=0 image=ghcr.io/forwardnetworks/skyforge-netlab-generator:20260201-7e7d3657\n    terminated exitCode=255 reason=Error message=\"\"",
+      "notes": "deployment failed"
     },
     "eos": {
       "device": "eos",
-      "status": "pass",
-      "updatedAt": "2026-02-01T18:04:13Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 360,
-      "notes": "deploy+ssh ok"
+      "status": "skip",
+      "updatedAt": "2026-02-01T22:46:52Z",
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "fortios": {
       "device": "fortios",
@@ -54,18 +59,19 @@
     },
     "iol": {
       "device": "iol",
-      "status": "pass",
-      "updatedAt": "2026-02-01T18:10:52Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 363,
-      "notes": "deploy+ssh ok"
+      "status": "skip",
+      "updatedAt": "2026-02-01T22:46:52Z",
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "iosv": {
       "device": "iosv",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "pinned to deterministic ssh tag"
+      "status": "fail",
+      "updatedAt": "2026-02-01T22:59:24Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 478,
+      "error": "100.70.1.241: bad banner prefix: \"\\x00\\x00\\x00\\x00\"",
+      "notes": "ssh probe failed"
     },
     "iosvl2": {
       "device": "iosvl2",
@@ -81,9 +87,13 @@
     },
     "nxos": {
       "device": "nxos",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "not yet run"
+      "status": "fail",
+      "updatedAt": "2026-02-01T22:45:10Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 475,
+      "error": "100.70.1.128: context canceled",
+      "notes": "ssh probe failed"
     },
     "sros": {
       "device": "sros",
@@ -103,14 +113,14 @@
       "updatedAt": "2026-02-01T00:00:00Z",
       "notes": "not yet run"
     },
-    "vjunosevolved": {
-      "device": "vjunosevolved",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "needs qcow2 (iso not supported by vrnetlab)"
-    },
     "vmx": {
       "device": "vmx",
+      "status": "unknown",
+      "updatedAt": "2026-02-01T00:00:00Z",
+      "notes": "not yet run"
+    },
+    "vptx": {
+      "device": "vptx",
       "status": "unknown",
       "updatedAt": "2026-02-01T00:00:00Z",
       "notes": "not yet run"
