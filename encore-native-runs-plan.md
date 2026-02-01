@@ -87,7 +87,7 @@ Split responsibilities into small packages/services over time:
 
 - `runs` service: create runs, persist state, publish/subscribe run events, expose streaming endpoints.
 - `deployments` service: user-facing deployment APIs; translates actions into run requests.
-- `runners/*`: provider-specific execution (netlab/labpp/containerlab/clabernetes).
+- `runners/*`: provider-specific execution (netlab/eve-ng/containerlab/clabernetes).
 - `forward` integration: Forward API calls and device upload formats.
 - `blueprints` integration: template resolution/sync.
 

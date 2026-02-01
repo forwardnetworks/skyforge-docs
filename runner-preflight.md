@@ -76,15 +76,3 @@ Netlab uses Ansible to push initial configs. Ensure `paramiko` is installed in b
 /opt/netlab/venv/bin/python -m pip install --upgrade paramiko
 /opt/skyforge/netlab-api/venv/bin/python -m pip install --upgrade paramiko
 ```
-
-## LabPP: Telnet EOF hotfix
-
-If LabPP `START` runs fail with an error like:
-
-```
-Range [0, 0 + -1) out of bounds for length 4096
-```
-
-it typically means the embedded Telnet expect client crashed when the remote console closed the connection (EOF during `read()`).
-
-Skyforge keeps the fix in `fwd/test/labpp/src/main/java/com/forwardnetworks/tools/labdevicesetup/TelnetExpectClient.java`. After updating/building that class, rebuild and redeploy the skyforge-server image so the LabPP CLI picks it up from the bundled `fwd` repo.

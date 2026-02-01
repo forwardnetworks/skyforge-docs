@@ -15,7 +15,7 @@ flowchart LR
 
   api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
   api -->|creates| proj[Workspace repos<br/>{user}/{workspace}]
-  api --> runner[Native task engine<br/>(Tofu / Netlab / LabPP / Containerlab / Clabernetes)]
+  api --> runner[Native task engine<br/>(Tofu / Netlab / EVE‑NG / Containerlab / Clabernetes)]
 
   runner -->|clones| proj
   runner -->|optionally clones| bp
@@ -30,8 +30,8 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/aws/…`
 - `cloud/terraform/azure/…`
 - `cloud/terraform/gcp/…`
-- `labpp/<template-name>/…` (blueprints repo)
-- `blueprints/labpp/<template-name>/…` (workspace repo override)
+- `eve-ng/<template-name>/…` (blueprints repo)
+- `blueprints/eve-ng/<template-name>/…` (workspace repo override)
 - `netlab/<template>.yml`
 - `containerlab/<template>.yml`
 - `containerlab/<template>.yml` (also used by Clabernetes)
@@ -40,12 +40,12 @@ Skyforge deployments store the selected **repo** and **templates folder** (repo-
 
 Notes:
 
-- LabPP templates are directories (each subfolder is a template).
+- EVE‑NG templates are directories (each subfolder is a template).
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Clabernetes templates are Containerlab YAML topology files, deployed to Kubernetes via the clabernetes controller.
-- Project repos can keep templates under `blueprints/labpp/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
-- LabPP templates must include `lab.json`. Skyforge syncs the selected LabPP template to the Skyforge server at `/var/lib/skyforge/labpp-templates/<template>` on each run.
+- Project repos can keep templates under `blueprints/eve-ng/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
+- EVE‑NG templates should include the `.unl` lab file (or a `.zip` containing it).
 - The bundled `blueprints/netlab/netlab-examples` is synced from the upstream Netlab examples; refresh it when updating Netlab to avoid template/filter mismatches.
 
 ## Bootstrap options

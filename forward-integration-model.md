@@ -1,6 +1,6 @@
 # Skyforge ↔ Forward Integration Model (Proposed)
 
-This document outlines a model for connecting Skyforge deployments (netlab-c9s/clabernetes/labpp/byos) to Forward (network creation + classic device onboarding) without tying the configuration to a single workspace.
+This document outlines a model for connecting Skyforge deployments (netlab-c9s/clabernetes/eve-ng/byos) to Forward (network creation + classic device onboarding) without tying the configuration to a single workspace.
 
 ## Goals
 
@@ -70,4 +70,3 @@ Tradeoffs:
    - Create/ensure Forward network.
    - Upsert classic devices with best-effort type hints where known.
 3) Store Forward network ID in deployment config for later updates/destroy.
-

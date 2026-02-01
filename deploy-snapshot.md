@@ -13,7 +13,6 @@ This file captures a known-good deployment configuration so we can reproduce the
   - `ghcr.io/forwardnetworks/skyforge-server:20260113-1433`
   - `ghcr.io/forwardnetworks/skyforge-server-worker:20260113-1433`
   - `ghcr.io/forwardnetworks/skyforge-portal:20260113-0903`
-  - `ghcr.io/forwardnetworks/skyforge-labpp-runner:20260113-0544`
   - `ghcr.io/forwardnetworks/skyforge-netbox:20260111-1222`
   - `ghcr.io/forwardnetworks/skyforge-nautobot:20260108-0135`
   - `esperotech/yaade:latest`
@@ -21,7 +20,7 @@ This file captures a known-good deployment configuration so we can reproduce the
   - Netlab host runs upstream `netlab api` (no Skyforge-specific Netlab API script).
 - Demo-critical behavior verified:
   - Netlab: per-device Forward CLI creds created (`{deployment}-{device}`), device type hints sent when known (`linux_os_ssh`, `arista_eos_ssh`), Linux SSH enabled on Alpine/python-based hosts.
-  - LabPP: EVE upload/config works, CSV generation works, Forward configuration is skipped as desired.
+  - EVE-NG: EVE upload/config works, Forward configuration is skipped as desired.
   - Gitea: shared `skyforge/blueprints` repo is public/visible in Explore; workspace repos are private by default.
 
 ### 2026-01-12
@@ -32,7 +31,6 @@ This file captures a known-good deployment configuration so we can reproduce the
 - Images:
   - `ghcr.io/forwardnetworks/skyforge-server:20260112-0547`
   - `ghcr.io/forwardnetworks/skyforge-portal:20260112-0524`
-  - `ghcr.io/forwardnetworks/skyforge-labpp-runner:20260111-1933`
   - `ghcr.io/forwardnetworks/skyforge-netbox:20260111-1222`
   - `ghcr.io/forwardnetworks/skyforge-nautobot:20260108-0135`
   - `esperotech/yaade:latest`
@@ -51,7 +49,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 
 ## Values highlights
 - DNS: Technitium DNS enabled (`/dns/`), NodePorts `30053` (DNS) and `30380` (web UI).
-- LabPP runs locally inside the skyforge-server image (no external LabPP API proxy required).
+- EVE-NG runs via the native Encore task engine (no external runner required).
 - Scheduling: periodic maintenance (task reconcile, workspace sync, cloud checks, metrics refresh) uses Encore Cron jobs (no Kubernetes CronJobs in the chart).
 - Secrets: `secrets.create: false` (environment-specific secrets are managed out-of-band).
 
@@ -60,7 +58,7 @@ This file captures a known-good deployment configuration so we can reproduce the
   - The embedded OpenAPI schema `servers` includes `url: /api/skyforge` so Swagger “Try it out” works.
 - API Testing is linked via `https://<hostname>/api-testing/` and routes to Yaade.
 - Netlab: template sync happens on deployment definition create (best-effort prefetch) and sync is scoped to the selected template subtree for faster starts.
-- Portal: deleting Netlab/Lab++ deployments avoids a redundant destroy run (server handles cleanup on delete).
+- Portal: deleting Netlab/EVE-NG deployments avoids a redundant destroy run (server handles cleanup on delete).
 
 ## Deploy / upgrade
 1) Ensure Helm can pull from GHCR (one-time per host):

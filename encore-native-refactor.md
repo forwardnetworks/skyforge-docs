@@ -32,7 +32,7 @@ implementation code as a library.
    - `server/internal/skyforgecore`
 2. The library package owns:
    - DB task store helpers (read task, mark running/finished, append logs/events, advisory locks).
-   - Dispatch logic (`labpp`, `netlab`, `terraform`, `clabernetes`, etc).
+   - Dispatch logic (`eve-ng`, `netlab`, `terraform`, `clabernetes`, etc).
    - Any shared integration helpers needed by both API + worker.
 3. Create new service `server/taskworker` with:
    - `//encore:service`
@@ -69,7 +69,7 @@ Goal:
    - tasks/worker knobs
    - gitea/netbox/nautobot URLs
    - LDAP/OIDC
-- netlab/labpp runner settings
+- netlab/eve-ng runner settings
 
 ### Current progress
 - `server/skyforge/config.cue` provides defaults for a few safe knobs (worker enabled default,

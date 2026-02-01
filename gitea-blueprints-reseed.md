@@ -3,7 +3,7 @@
 Skyforge expects the public blueprints repo (`skyforge/blueprints`) to contain top-level template folders like:
 
 - `netlab/…`
-- `labpp/…`
+- `eve-ng/…`
 - `containerlab/…`
 - `terraform/…`
 
@@ -58,4 +58,3 @@ Then use:
 
 - This is intentionally a force-push: the repo is treated as a published catalog, and `skyforge-private/blueprints/` remains the source-of-truth.
 - Keeping the top-level layout (`netlab/…`, not `blueprints/netlab/…`) is required for the “Blueprints” template source to work without extra path prefixes.
-
