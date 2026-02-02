@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-02T14:22:07Z",
+  "generated_at": "2026-02-02T16:47:37Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
@@ -110,9 +110,13 @@
     },
     "vmx": {
       "device": "vmx",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "not yet run"
+      "status": "pass",
+      "updatedAt": "2026-02-02T16:47:37Z",
+      "last_ok_at": "2026-02-02T16:47:37Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 65,
+      "notes": "deploy+collector-ssh ok"
     },
     "vptx": {
       "device": "vptx",
@@ -231,9 +235,13 @@
     },
     {
       "device": "vmx",
-      "status": "unknown",
-      "updatedAt": "2026-02-01T00:00:00Z",
-      "notes": "not yet run"
+      "status": "pass",
+      "updatedAt": "2026-02-02T16:47:37Z",
+      "last_ok_at": "2026-02-02T16:47:37Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 65,
+      "notes": "deploy+collector-ssh ok"
     },
     {
       "device": "vptx",
