@@ -1,6 +1,6 @@
 # Skyforge E2E Device Reachability Status
 
-Last updated: 2026-02-01T22:59:24Z
+Last updated: 2026-02-02T10:22:13Z
 
 Scope: baseline **deploy + SSH reachability** for each onboarded Netlab device type (netlab-c9s → clabernetes + vrnetlab hybrid).
 
@@ -8,24 +8,24 @@ Legend: ✅ pass · ❌ fail · ⏭ skipped · ❔ unknown
 
 | Device type | Status | Updated | Notes |
 | --- | --- | --- | --- |
-| `arubacx` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `asav` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `cat8000v` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `csr` | ❌ | 2026-02-01T22:41:29Z | ssh probe failed |
-| `cumulus` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `dellos10` | ❌ | 2026-02-01T20:10:05Z | deployment failed |
-| `eos` | ⏭ | 2026-02-01T22:46:52Z | skipped by SKYFORGE_E2E_DEVICES filter |
-| `fortios` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `iol` | ⏭ | 2026-02-01T22:46:52Z | skipped by SKYFORGE_E2E_DEVICES filter |
-| `iosv` | ❌ | 2026-02-01T22:59:24Z | ssh probe failed |
-| `iosvl2` | ❔ | 2026-02-01T00:00:00Z | pinned to deterministic ssh tag |
+| `arubacx` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `asav` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `cat8000v` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `csr` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `cumulus` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `dellos10` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `eos` | ⏭ | 2026-02-02T08:44:40Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `fortios` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `iol` | ⏭ | 2026-02-02T08:44:40Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `iosv` | ❌ | 2026-02-02T09:07:34Z | deployment failed |
+| `iosvl2` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 | `linux` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `nxos` | ❌ | 2026-02-01T22:45:10Z | ssh probe failed |
-| `sros` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `vjunos-router` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `vjunos-switch` | ❔ | 2026-02-01T00:00:00Z | not yet run |
+| `nxos` | ✅ | 2026-02-02T10:22:13Z | deploy+ssh ok |
+| `sros` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `vjunos-router` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
+| `vjunos-switch` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 | `vmx` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `vptx` | ❔ | 2026-02-01T00:00:00Z | not yet run |
+| `vptx` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 
 ## How to run
 
