@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-02T10:22:13Z",
+  "generated_at": "2026-02-02T14:22:07Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
@@ -82,13 +82,13 @@
     "nxos": {
       "device": "nxos",
       "status": "pass",
-      "updatedAt": "2026-02-02T10:22:13Z",
-      "last_ok_at": "2026-02-02T10:22:13Z",
-      "last_fail_at": "2026-02-02T10:12:20Z",
+      "updatedAt": "2026-02-02T14:22:07Z",
+      "last_ok_at": "2026-02-02T14:22:07Z",
+      "last_fail_at": "2026-02-02T14:03:09Z",
       "template": "netlab/_e2e/minimal",
       "deployType": "netlab-c9s",
-      "taskId": 560,
-      "notes": "deploy+ssh ok"
+      "taskId": 37,
+      "notes": "deploy+collector-ssh ok"
     },
     "sros": {
       "device": "sros",
@@ -203,13 +203,13 @@
     {
       "device": "nxos",
       "status": "pass",
-      "updatedAt": "2026-02-02T10:22:13Z",
-      "last_ok_at": "2026-02-02T10:22:13Z",
-      "last_fail_at": "2026-02-02T10:12:20Z",
+      "updatedAt": "2026-02-02T14:22:07Z",
+      "last_ok_at": "2026-02-02T14:22:07Z",
+      "last_fail_at": "2026-02-02T14:03:09Z",
       "template": "netlab/_e2e/minimal",
       "deployType": "netlab-c9s",
-      "taskId": 560,
-      "notes": "deploy+ssh ok"
+      "taskId": 37,
+      "notes": "deploy+collector-ssh ok"
     },
     {
       "device": "sros",

@@ -1,6 +1,6 @@
 # Skyforge E2E Device Reachability Status
 
-Last updated: 2026-02-02T10:22:13Z
+Last updated: 2026-02-02T14:22:07Z
 
 Scope: baseline **deploy + SSH reachability** for each onboarded Netlab device type (netlab-c9s → clabernetes + vrnetlab hybrid).
 
@@ -20,7 +20,7 @@ Legend: ✅ pass · ❌ fail · ⏭ skipped · ❔ unknown
 | `iosv` | ❌ | 2026-02-02T09:07:34Z | deployment failed |
 | `iosvl2` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 | `linux` | ❔ | 2026-02-01T00:00:00Z | not yet run |
-| `nxos` | ✅ | 2026-02-02T10:22:13Z | deploy+ssh ok |
+| `nxos` | ✅ | 2026-02-02T14:22:07Z | deploy+collector-ssh ok |
 | `sros` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 | `vjunos-router` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
 | `vjunos-switch` | ⏭ | 2026-02-02T01:37:34Z | skipped by SKYFORGE_E2E_DEVICES filter |
