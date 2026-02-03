@@ -45,3 +45,11 @@ helm -n kube-system upgrade --install cilium cilium/cilium -f skyforge-private/d
 We can enable IPv6 in Cilium once k3s is configured for dual-stack PodCIDR/ServiceCIDR.
 Until then, IPv6 remains off in the overlay to avoid mismatched control-plane networking.
 
+### Current reality check
+
+On the Skyforge nodes today, IPv6 is enabled at the kernel level, but interfaces only have **link-local** IPv6
+addresses (no routed/global IPv6). That means:
+
+- NDP exists on-link, but there is no IPv6 underlay to route “real” IPv6 traffic between nodes.
+- To run dual-stack pods (IPv4+IPv6), we must first provision a routed IPv6 underlay (or IPv6 L2 adjacency with
+appropriate addressing) and then enable k3s dual-stack CIDRs.
