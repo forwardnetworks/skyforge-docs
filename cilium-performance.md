@@ -53,3 +53,18 @@ addresses (no routed/global IPv6). That means:
 - NDP exists on-link, but there is no IPv6 underlay to route “real” IPv6 traffic between nodes.
 - To run dual-stack pods (IPv4+IPv6), we must first provision a routed IPv6 underlay (or IPv6 L2 adjacency with
 appropriate addressing) and then enable k3s dual-stack CIDRs.
+
+### Dual-stack (IPv4+IPv6) enablement checklist
+
+Skyforge can run dual-stack on an IPv4-only underlay by using a ULA IPv6 underlay (for example, `fd00:.../64`) as long
+as all nodes are L2-adjacent and can reach each other over IPv6. The minimum requirements are:
+
+1. **IPv6 underlay on every node interface** (beyond link-local): assign a stable IPv6 address (ULA or global) on the
+   primary node interface (e.g. `ens33`) and ensure the addresses are reachable between nodes.
+2. **k3s dual-stack cluster/service CIDRs**: configure k3s with dual-stack `cluster-cidr` (pods) and `service-cidr`
+   (ClusterIPs). Kubernetes validates Service ClusterIPs against `service-cidr`, so Cilium alone cannot “fake” this.
+3. **Enable IPv6 in Cilium**: set `ipv6.enabled=true` and set `ipv6NativeRoutingCIDR` to match the pod IPv6 CIDR used by
+   Cilium IPAM (cluster-pool). Keep `l2NeighDiscovery.enabled=true` for NDP.
+
+Note: changing `cluster-cidr` / `service-cidr` on an existing k3s cluster is typically disruptive and may require a
+cluster rebuild. For dev, this can be acceptable; for production, plan a migration.
