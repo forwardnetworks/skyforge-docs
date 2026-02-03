@@ -68,3 +68,12 @@ as all nodes are L2-adjacent and can reach each other over IPv6. The minimum req
 
 Note: changing `cluster-cidr` / `service-cidr` on an existing k3s cluster is typically disruptive and may require a
 cluster rebuild. For dev, this can be acceptable; for production, plan a migration.
+
+### Dual-stack Cilium overlay
+
+This repo includes `skyforge-private/deploy/cilium-values-dualstack.yaml` which:
+
+- Enables `ipv6.enabled`
+- Sets `ipv6NativeRoutingCIDR` (pods) to `fd00::/104`
+- Enables eBPF masquerade (`bpf.masquerade=true`) to reduce reliance on iptables
+- Requires k8s PodCIDRs (`k8s.requireIPv4PodCIDR/requireIPv6PodCIDR=true`) to keep routing deterministic
