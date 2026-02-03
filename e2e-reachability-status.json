@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-03T12:16:35Z",
+  "generated_at": "2026-02-03T12:27:38Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
@@ -110,16 +110,14 @@
     },
     "vmx": {
       "device": "vmx",
-      "status": "fail",
-      "updatedAt": "2026-02-03T12:16:35Z",
-      "last_ok_at": "2026-02-02T16:47:37Z",
+      "status": "pass",
+      "updatedAt": "2026-02-03T12:27:38Z",
+      "last_ok_at": "2026-02-03T12:27:38Z",
       "last_fail_at": "2026-02-03T12:16:35Z",
-      "last_error": "job failed: 2026-02-03T12:16:29.441287007Z stage: load kube config\n2026-02-03T12:16:29.441875216Z stage: fetch generator manifest\n2026-02-03T12:16:29.451525960Z stage: reassemble netlab output tarball\n2026-02-03T12:16:29.455141533Z stage: extract netlab output\n2026-02-03T12:16:29.461142336Z /app/netlab_apply.py:59: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\n2026-02-03T12:16:29.461165471Z   tar.extractall(dest, members=members)\n2026-02-03T12:16:29.462965868Z stage: reconstruct node_files\n2026-02-03T12:16:29.465643395Z stage: load node name mapping\n2026-02-03T12:16:29.467762399Z ERROR: failed to read configmap ws-workspace-craigjohnson/c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map: (404)\n2026-02-03T12:16:29.467770956Z Reason: Not Found\n2026-02-03T12:16:29.467780184Z HTTP response headers: HTTPHeaderDict({'Audit-Id': '9b6f45e1-bd8d-4786-a6b5-9669df675812', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Kubernetes-Pf-Flowschema-Uid': 'e446a219-d5b2-4714-b2d6-2164c78d66c3', 'X-Kubernetes-Pf-Prioritylevel-Uid': 'ff8a36c8-077f-4994-a64a-d668198052df', 'Date': 'Tue, 03 Feb 2026 12:16:29 GMT', 'Content-Length': '288'})\n2026-02-03T12:16:29.467785824Z HTTP response body: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"configmaps \\\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\\\" not found\",\"reason\":\"NotFound\",\"details\":{\"name\":\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\",\"kind\":\"configmaps\"},\"code\":404}\n2026-02-03T12:16:29.467788059Z \n2026-02-03T12:16:29.467790073Z",
       "template": "netlab/_e2e/minimal",
       "deployType": "netlab-c9s",
-      "taskId": 164,
-      "error": "job failed: 2026-02-03T12:16:29.441287007Z stage: load kube config\n2026-02-03T12:16:29.441875216Z stage: fetch generator manifest\n2026-02-03T12:16:29.451525960Z stage: reassemble netlab output tarball\n2026-02-03T12:16:29.455141533Z stage: extract netlab output\n2026-02-03T12:16:29.461142336Z /app/netlab_apply.py:59: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\n2026-02-03T12:16:29.461165471Z   tar.extractall(dest, members=members)\n2026-02-03T12:16:29.462965868Z stage: reconstruct node_files\n2026-02-03T12:16:29.465643395Z stage: load node name mapping\n2026-02-03T12:16:29.467762399Z ERROR: failed to read configmap ws-workspace-craigjohnson/c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map: (404)\n2026-02-03T12:16:29.467770956Z Reason: Not Found\n2026-02-03T12:16:29.467780184Z HTTP response headers: HTTPHeaderDict({'Audit-Id': '9b6f45e1-bd8d-4786-a6b5-9669df675812', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Kubernetes-Pf-Flowschema-Uid': 'e446a219-d5b2-4714-b2d6-2164c78d66c3', 'X-Kubernetes-Pf-Prioritylevel-Uid': 'ff8a36c8-077f-4994-a64a-d668198052df', 'Date': 'Tue, 03 Feb 2026 12:16:29 GMT', 'Content-Length': '288'})\n2026-02-03T12:16:29.467785824Z HTTP response body: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"configmaps \\\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\\\" not found\",\"reason\":\"NotFound\",\"details\":{\"name\":\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\",\"kind\":\"configmaps\"},\"code\":404}\n2026-02-03T12:16:29.467788059Z \n2026-02-03T12:16:29.467790073Z",
-      "notes": "deployment failed"
+      "taskId": 167,
+      "notes": "deploy+ssh ok"
     },
     "vptx": {
       "device": "vptx",
@@ -238,16 +236,14 @@
     },
     {
       "device": "vmx",
-      "status": "fail",
-      "updatedAt": "2026-02-03T12:16:35Z",
-      "last_ok_at": "2026-02-02T16:47:37Z",
+      "status": "pass",
+      "updatedAt": "2026-02-03T12:27:38Z",
+      "last_ok_at": "2026-02-03T12:27:38Z",
       "last_fail_at": "2026-02-03T12:16:35Z",
-      "last_error": "job failed: 2026-02-03T12:16:29.441287007Z stage: load kube config\n2026-02-03T12:16:29.441875216Z stage: fetch generator manifest\n2026-02-03T12:16:29.451525960Z stage: reassemble netlab output tarball\n2026-02-03T12:16:29.455141533Z stage: extract netlab output\n2026-02-03T12:16:29.461142336Z /app/netlab_apply.py:59: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\n2026-02-03T12:16:29.461165471Z   tar.extractall(dest, members=members)\n2026-02-03T12:16:29.462965868Z stage: reconstruct node_files\n2026-02-03T12:16:29.465643395Z stage: load node name mapping\n2026-02-03T12:16:29.467762399Z ERROR: failed to read configmap ws-workspace-craigjohnson/c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map: (404)\n2026-02-03T12:16:29.467770956Z Reason: Not Found\n2026-02-03T12:16:29.467780184Z HTTP response headers: HTTPHeaderDict({'Audit-Id': '9b6f45e1-bd8d-4786-a6b5-9669df675812', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Kubernetes-Pf-Flowschema-Uid': 'e446a219-d5b2-4714-b2d6-2164c78d66c3', 'X-Kubernetes-Pf-Prioritylevel-Uid': 'ff8a36c8-077f-4994-a64a-d668198052df', 'Date': 'Tue, 03 Feb 2026 12:16:29 GMT', 'Content-Length': '288'})\n2026-02-03T12:16:29.467785824Z HTTP response body: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"configmaps \\\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\\\" not found\",\"reason\":\"NotFound\",\"details\":{\"name\":\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\",\"kind\":\"configmaps\"},\"code\":404}\n2026-02-03T12:16:29.467788059Z \n2026-02-03T12:16:29.467790073Z",
       "template": "netlab/_e2e/minimal",
       "deployType": "netlab-c9s",
-      "taskId": 164,
-      "error": "job failed: 2026-02-03T12:16:29.441287007Z stage: load kube config\n2026-02-03T12:16:29.441875216Z stage: fetch generator manifest\n2026-02-03T12:16:29.451525960Z stage: reassemble netlab output tarball\n2026-02-03T12:16:29.455141533Z stage: extract netlab output\n2026-02-03T12:16:29.461142336Z /app/netlab_apply.py:59: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.\n2026-02-03T12:16:29.461165471Z   tar.extractall(dest, members=members)\n2026-02-03T12:16:29.462965868Z stage: reconstruct node_files\n2026-02-03T12:16:29.465643395Z stage: load node name mapping\n2026-02-03T12:16:29.467762399Z ERROR: failed to read configmap ws-workspace-craigjohnson/c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map: (404)\n2026-02-03T12:16:29.467770956Z Reason: Not Found\n2026-02-03T12:16:29.467780184Z HTTP response headers: HTTPHeaderDict({'Audit-Id': '9b6f45e1-bd8d-4786-a6b5-9669df675812', 'Cache-Control': 'no-cache, private', 'Content-Type': 'application/json', 'X-Kubernetes-Pf-Flowschema-Uid': 'e446a219-d5b2-4714-b2d6-2164c78d66c3', 'X-Kubernetes-Pf-Prioritylevel-Uid': 'ff8a36c8-077f-4994-a64a-d668198052df', 'Date': 'Tue, 03 Feb 2026 12:16:29 GMT', 'Content-Length': '288'})\n2026-02-03T12:16:29.467785824Z HTTP response body: {\"kind\":\"Status\",\"apiVersion\":\"v1\",\"metadata\":{},\"status\":\"Failure\",\"message\":\"configmaps \\\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\\\" not found\",\"reason\":\"NotFound\",\"details\":{\"name\":\"c9s-workspace-craigjohnson-vmx-minimal-r20723-name-map\",\"kind\":\"configmaps\"},\"code\":404}\n2026-02-03T12:16:29.467788059Z \n2026-02-03T12:16:29.467790073Z",
-      "notes": "deployment failed"
+      "taskId": 167,
+      "notes": "deploy+ssh ok"
     },
     {
       "device": "vptx",
