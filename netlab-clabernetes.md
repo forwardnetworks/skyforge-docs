@@ -21,7 +21,9 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
    - Run `netlab create` (and/or `netlab up --dry-run` if needed) to generate:
      - `clab.yml` (Containerlab topology)
      - `hosts.yml`, `node_files/`, `group_vars/`, etc.
-   - Skyforge uses `netlab clab-tarball` to export a tarball containing `clab.yml` + `node_files/`.
+   - Skyforge runs `netlab create --plugin files` in-cluster and persists:
+     - `clab.yml` + `node_files/` (for clabernetes deploy)
+     - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
 
 ## Generator modes
 
@@ -42,10 +44,12 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
   - `C9sGeneratorMode`: `"k8s"`
   - `GeneratorImage`: netlab generator image (required for `netlab-c9s`)
-  - Ansible runner: removed (post-up config is Go-only; Linux scripts run in-pod and NOS uses startup configs)
+  - `ApplierImage`: netlab applier image (required for `netlab initial` apply)
 - Helm values (recommended):
   - `skyforge.netlabC9s.generatorImage`
   - `skyforge.netlabC9s.generatorPullPolicy`
+  - `skyforge.netlabC9s.applierImage`
+  - `skyforge.netlabC9s.applierPullPolicy`
 
 ### Build the generator image
 
@@ -53,6 +57,15 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 cd netlab/generator
 docker buildx build --platform linux/amd64 \
   -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
+  --push .
+```
+
+### Build the applier image
+
+```bash
+cd netlab/applier
+docker buildx build --platform linux/amd64 \
+  -t ghcr.io/forwardnetworks/skyforge-netlab-applier:<tag> \
   --push .
 ```
 
@@ -71,7 +84,14 @@ docker buildx build --platform linux/amd64 \
      - pod states
      - controller events
 
-7) **Export to Forward (devices/IPs)**
+7) **Apply post-deploy config (`netlab initial`)**
+   - Skyforge runs a Kubernetes Job that:
+     - reconstructs `node_files/` locally from per-node ConfigMaps
+     - patches netlab inventory/snapshot to use k8s Service DNS names
+     - waits for an SSH banner on all NOS nodes (vrnetlab pods can be "Running" long before SSH is ready)
+     - runs `netlab initial` (Ansible playbooks)
+
+8) **Export to Forward (devices/IPs)**
    - Extract the device list + reachable management endpoints.
    - In k8s, the “mgmt” address might be:
      - a Service per node (stable name, cluster IP), or
@@ -79,24 +99,15 @@ docker buildx build --platform linux/amd64 \
      - a LoadBalancer/NodePort (unlikely in this environment)
    - For the MVP, define a consistent “connection” strategy and document it (e.g. `ssh <node>.<ns>.svc` via a Service, or a bastion model).
 
-## MVP scope (recommended)
+## Notes
 
-Start with “works end-to-end” for topologies that use only images that are already cluster-accessible:
-
-- Linux nodes (`kind: linux`) + public images (alpine/frr) only
-- No vendor images (ceos/junos) in the first iteration
-- No `netlab initial` / SSH readiness / device config push (avoid the hardest part initially)
-- Still generate and upload the “devices + mgmt endpoints” list so Forward upload can be validated
-
-## Phase 2 / Phase 3
-
-- Phase 2: support vendor images where licensing allows (private registry / on-cluster preloading).
-- Phase 3: support Netlab “initial configuration” semantics:
-  - Prefer startup-config/configmaps mounted into containers over SSH-driven config
-  - Any SSH-based approach should be optional and best-effort
-  - Add an **optional post-deploy Ansible phase**:
-    - Netlab generates Ansible inventory + playbooks
-    - Skyforge executes Ansible against the running topology (connectivity model TBD)
+- `netlab initial` uses netlab’s Ansible task library (`netsim/ansible/...`) and requires
+  the corresponding Ansible network collections (Junos/NXOS/IOS/EOS/etc.) to be present
+  in the applier image.
+- Skyforge must remain cluster-native: no Docker socket mounts and no `docker exec` paths.
+- SSH readiness gating:
+  - Controlled by `SKYFORGE_NETLAB_INITIAL_SSH_READY_SECONDS` (defaults to `SKYFORGE_FORWARD_SSH_READY_SECONDS`, default 900s).
+  - Uses an SSH banner check (reads `SSH-`), not just a TCP connect, to reduce false positives.
 
 ## Open questions
 
