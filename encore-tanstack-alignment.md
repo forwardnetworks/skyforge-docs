@@ -82,6 +82,9 @@ Preferred approach (Encore-native):
 - Use a Skyforge backend endpoint that proxies Kubernetes `exec` into the clabernetes pod/container.
 - Frontend uses `xterm.js` and a WebSocket to stream IO.
 
+Notes:
+- For `vrnetlab`-based nodes, the network OS CLI is typically exposed via a console on `telnet 127.0.0.1 5000` inside the node container. Skyforge normalizes the legacy `command=cli` terminal request to that telnet console to avoid hard-coding per-NOS binaries.
+
 Why not GoTTY:
 - GoTTY is fine for demos, but becomes another moving piece with its own auth/session model.
 - A native “kube exec terminal” works uniformly for clabernetes-backed labs.
