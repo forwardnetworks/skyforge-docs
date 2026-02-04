@@ -1,76 +1,76 @@
 {
-  "generated_at": "2026-02-03T12:27:38Z",
+  "generated_at": "2026-02-04T09:55:43Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "asav": {
       "device": "asav",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "cat8000v": {
       "device": "cat8000v",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "csr": {
       "device": "csr",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "cumulus": {
       "device": "cumulus",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "dellos10": {
       "device": "dellos10",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "eos": {
       "device": "eos",
       "status": "skip",
-      "updatedAt": "2026-02-02T08:44:40Z",
+      "updatedAt": "2026-02-04T09:53:05Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "fortios": {
       "device": "fortios",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "iol": {
       "device": "iol",
-      "status": "skip",
-      "updatedAt": "2026-02-02T08:44:40Z",
-      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
+      "status": "pass",
+      "updatedAt": "2026-02-04T09:55:16Z",
+      "last_ok_at": "2026-02-04T09:55:16Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 49,
+      "notes": "deploy+ssh ok"
     },
     "iosv": {
       "device": "iosv",
-      "status": "fail",
-      "updatedAt": "2026-02-02T09:07:34Z",
+      "status": "skip",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "last_fail_at": "2026-02-02T09:07:34Z",
       "last_error": "clabernetes deploy timed out after 15m0s",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 543,
-      "error": "clabernetes deploy timed out after 15m0s",
-      "notes": "deployment failed"
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "iosvl2": {
       "device": "iosvl2",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "linux": {
@@ -81,31 +81,28 @@
     },
     "nxos": {
       "device": "nxos",
-      "status": "pass",
-      "updatedAt": "2026-02-02T14:22:07Z",
+      "status": "skip",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "last_ok_at": "2026-02-02T14:22:07Z",
       "last_fail_at": "2026-02-02T14:03:09Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 37,
-      "notes": "deploy+collector-ssh ok"
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "sros": {
       "device": "sros",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vjunos-router": {
       "device": "vjunos-router",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vjunos-switch": {
       "device": "vjunos-switch",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vmx": {
@@ -122,7 +119,7 @@
     "vptx": {
       "device": "vptx",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     }
   },
@@ -130,73 +127,73 @@
     {
       "device": "arubacx",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "asav",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "cat8000v",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "csr",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "cumulus",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "dellos10",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "eos",
       "status": "skip",
-      "updatedAt": "2026-02-02T08:44:40Z",
+      "updatedAt": "2026-02-04T09:53:05Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "fortios",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "iol",
-      "status": "skip",
-      "updatedAt": "2026-02-02T08:44:40Z",
-      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
+      "status": "pass",
+      "updatedAt": "2026-02-04T09:55:16Z",
+      "last_ok_at": "2026-02-04T09:55:16Z",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 49,
+      "notes": "deploy+ssh ok"
     },
     {
       "device": "iosv",
-      "status": "fail",
-      "updatedAt": "2026-02-02T09:07:34Z",
+      "status": "skip",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "last_fail_at": "2026-02-02T09:07:34Z",
       "last_error": "clabernetes deploy timed out after 15m0s",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 543,
-      "error": "clabernetes deploy timed out after 15m0s",
-      "notes": "deployment failed"
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "iosvl2",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
@@ -207,31 +204,28 @@
     },
     {
       "device": "nxos",
-      "status": "pass",
-      "updatedAt": "2026-02-02T14:22:07Z",
+      "status": "skip",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "last_ok_at": "2026-02-02T14:22:07Z",
       "last_fail_at": "2026-02-02T14:03:09Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 37,
-      "notes": "deploy+collector-ssh ok"
+      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "sros",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "vjunos-router",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "vjunos-switch",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
@@ -248,7 +242,7 @@
     {
       "device": "vptx",
       "status": "skip",
-      "updatedAt": "2026-02-02T01:37:34Z",
+      "updatedAt": "2026-02-04T09:55:43Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     }
   ]
