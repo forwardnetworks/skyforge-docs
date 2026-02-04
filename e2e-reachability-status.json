@@ -1,68 +1,72 @@
 {
-  "generated_at": "2026-02-04T09:55:43Z",
+  "generated_at": "2026-02-04T11:27:27Z",
   "devices": {
     "arubacx": {
       "device": "arubacx",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "asav": {
       "device": "asav",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "cat8000v": {
       "device": "cat8000v",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "csr": {
       "device": "csr",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "cumulus": {
       "device": "cumulus",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "dellos10": {
       "device": "dellos10",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "eos": {
       "device": "eos",
-      "status": "skip",
-      "updatedAt": "2026-02-04T09:53:05Z",
-      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
+      "status": "pass",
+      "updatedAt": "2026-02-04T11:27:27Z",
+      "last_ok_at": "2026-02-04T11:27:27Z",
+      "last_fail_at": "2026-02-04T11:16:16Z",
+      "last_error": "job failed: 2026-02-04T11:14:31.470628202Z stage: load kube config\n2026-02-04T11:14:31.470928965Z stage: fetch generator manifest\n2026-02-04T11:14:31.479685880Z stage: reassemble netlab output tarball\n2026-02-04T11:14:31.482549468Z stage: extract netlab output\n2026-02-04T11:14:31.491256216Z stage: reconstruct node_files\n2026-02-04T11:14:31.493512257Z stage: load node name mapping\n2026-02-04T11:14:31.495996430Z stage: patch hosts.yml + snapshot for k8s service DNS\n2026-02-04T11:14:31.502025881Z stage: netlab initial (apply configs)\n2026-02-04T11:14:32.003386901Z  [INFO] Creating configuration snippets\n2026-02-04T11:14:32.031732459Z [CREATED] r1: normalize,initial\n2026-02-04T11:14:32.045755187Z  [INFO] Checking SSH servers on r1\n2026-02-04T11:16:12.104380321Z [SSH] SSH server on node r1 (device eos) is not ready after 100.1 seconds\n2026-02-04T11:16:13.105022585Z FatalError in topology: SSH server did not start in time on node(s) r1\n2026-02-04T11:16:13.105044197Z ERROR: netlab initial failed (SystemExit 1)",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 71,
+      "error": "job failed: 2026-02-04T11:14:31.470628202Z stage: load kube config\n2026-02-04T11:14:31.470928965Z stage: fetch generator manifest\n2026-02-04T11:14:31.479685880Z stage: reassemble netlab output tarball\n2026-02-04T11:14:31.482549468Z stage: extract netlab output\n2026-02-04T11:14:31.491256216Z stage: reconstruct node_files\n2026-02-04T11:14:31.493512257Z stage: load node name mapping\n2026-02-04T11:14:31.495996430Z stage: patch hosts.yml + snapshot for k8s service DNS\n2026-02-04T11:14:31.502025881Z stage: netlab initial (apply configs)\n2026-02-04T11:14:32.003386901Z  [INFO] Creating configuration snippets\n2026-02-04T11:14:32.031732459Z [CREATED] r1: normalize,initial\n2026-02-04T11:14:32.045755187Z  [INFO] Checking SSH servers on r1\n2026-02-04T11:16:12.104380321Z [SSH] SSH server on node r1 (device eos) is not ready after 100.1 seconds\n2026-02-04T11:16:13.105022585Z FatalError in topology: SSH server did not start in time on node(s) r1\n2026-02-04T11:16:13.105044197Z ERROR: netlab initial failed (SystemExit 1)",
+      "notes": "verified manually (run 75). Note: e2e netlab initial SSH check previously flaked"
     },
     "fortios": {
       "device": "fortios",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "iol": {
       "device": "iol",
       "status": "pass",
-      "updatedAt": "2026-02-04T09:55:16Z",
+      "updatedAt": "2026-02-04T11:27:27Z",
       "last_ok_at": "2026-02-04T09:55:16Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 49,
-      "notes": "deploy+ssh ok"
+      "notes": "deploy+ssh ok (e2e taskIds 45/49)"
     },
     "iosv": {
       "device": "iosv",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "last_fail_at": "2026-02-02T09:07:34Z",
       "last_error": "clabernetes deploy timed out after 15m0s",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
@@ -70,7 +74,7 @@
     "iosvl2": {
       "device": "iosvl2",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "linux": {
@@ -82,7 +86,7 @@
     "nxos": {
       "device": "nxos",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "last_ok_at": "2026-02-02T14:22:07Z",
       "last_fail_at": "2026-02-02T14:03:09Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
@@ -90,19 +94,19 @@
     "sros": {
       "device": "sros",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vjunos-router": {
       "device": "vjunos-router",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vjunos-switch": {
       "device": "vjunos-switch",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     "vmx": {
@@ -119,7 +123,7 @@
     "vptx": {
       "device": "vptx",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     }
   },
@@ -127,65 +131,69 @@
     {
       "device": "arubacx",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "asav",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "cat8000v",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "csr",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "cumulus",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "dellos10",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "eos",
-      "status": "skip",
-      "updatedAt": "2026-02-04T09:53:05Z",
-      "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
+      "status": "pass",
+      "updatedAt": "2026-02-04T11:27:27Z",
+      "last_ok_at": "2026-02-04T11:27:27Z",
+      "last_fail_at": "2026-02-04T11:16:16Z",
+      "last_error": "job failed: 2026-02-04T11:14:31.470628202Z stage: load kube config\n2026-02-04T11:14:31.470928965Z stage: fetch generator manifest\n2026-02-04T11:14:31.479685880Z stage: reassemble netlab output tarball\n2026-02-04T11:14:31.482549468Z stage: extract netlab output\n2026-02-04T11:14:31.491256216Z stage: reconstruct node_files\n2026-02-04T11:14:31.493512257Z stage: load node name mapping\n2026-02-04T11:14:31.495996430Z stage: patch hosts.yml + snapshot for k8s service DNS\n2026-02-04T11:14:31.502025881Z stage: netlab initial (apply configs)\n2026-02-04T11:14:32.003386901Z  [INFO] Creating configuration snippets\n2026-02-04T11:14:32.031732459Z [CREATED] r1: normalize,initial\n2026-02-04T11:14:32.045755187Z  [INFO] Checking SSH servers on r1\n2026-02-04T11:16:12.104380321Z [SSH] SSH server on node r1 (device eos) is not ready after 100.1 seconds\n2026-02-04T11:16:13.105022585Z FatalError in topology: SSH server did not start in time on node(s) r1\n2026-02-04T11:16:13.105044197Z ERROR: netlab initial failed (SystemExit 1)",
+      "template": "netlab/_e2e/minimal",
+      "deployType": "netlab-c9s",
+      "taskId": 71,
+      "error": "job failed: 2026-02-04T11:14:31.470628202Z stage: load kube config\n2026-02-04T11:14:31.470928965Z stage: fetch generator manifest\n2026-02-04T11:14:31.479685880Z stage: reassemble netlab output tarball\n2026-02-04T11:14:31.482549468Z stage: extract netlab output\n2026-02-04T11:14:31.491256216Z stage: reconstruct node_files\n2026-02-04T11:14:31.493512257Z stage: load node name mapping\n2026-02-04T11:14:31.495996430Z stage: patch hosts.yml + snapshot for k8s service DNS\n2026-02-04T11:14:31.502025881Z stage: netlab initial (apply configs)\n2026-02-04T11:14:32.003386901Z  [INFO] Creating configuration snippets\n2026-02-04T11:14:32.031732459Z [CREATED] r1: normalize,initial\n2026-02-04T11:14:32.045755187Z  [INFO] Checking SSH servers on r1\n2026-02-04T11:16:12.104380321Z [SSH] SSH server on node r1 (device eos) is not ready after 100.1 seconds\n2026-02-04T11:16:13.105022585Z FatalError in topology: SSH server did not start in time on node(s) r1\n2026-02-04T11:16:13.105044197Z ERROR: netlab initial failed (SystemExit 1)",
+      "notes": "verified manually (run 75). Note: e2e netlab initial SSH check previously flaked"
     },
     {
       "device": "fortios",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "iol",
       "status": "pass",
-      "updatedAt": "2026-02-04T09:55:16Z",
+      "updatedAt": "2026-02-04T11:27:27Z",
       "last_ok_at": "2026-02-04T09:55:16Z",
-      "template": "netlab/_e2e/minimal",
-      "deployType": "netlab-c9s",
-      "taskId": 49,
-      "notes": "deploy+ssh ok"
+      "notes": "deploy+ssh ok (e2e taskIds 45/49)"
     },
     {
       "device": "iosv",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "last_fail_at": "2026-02-02T09:07:34Z",
       "last_error": "clabernetes deploy timed out after 15m0s",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
@@ -193,7 +201,7 @@
     {
       "device": "iosvl2",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
@@ -205,7 +213,7 @@
     {
       "device": "nxos",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "last_ok_at": "2026-02-02T14:22:07Z",
       "last_fail_at": "2026-02-02T14:03:09Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
@@ -213,19 +221,19 @@
     {
       "device": "sros",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "vjunos-router",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
       "device": "vjunos-switch",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     },
     {
@@ -242,7 +250,7 @@
     {
       "device": "vptx",
       "status": "skip",
-      "updatedAt": "2026-02-04T09:55:43Z",
+      "updatedAt": "2026-02-04T11:16:22Z",
       "notes": "skipped by SKYFORGE_E2E_DEVICES filter"
     }
   ]
