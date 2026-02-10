@@ -1,6 +1,9 @@
 # Docker-based image builds for k3s (Skyforge)
 
-Goal: build Skyforge images using the local Docker daemon (including `encore build docker` for the server), push them to a registry used by k3s, and optionally roll deployments.
+Goal: build Skyforge images (including `encore build docker` for the server), push them to a registry used by k3s, and optionally roll deployments.
+
+If your workstation is low on disk/RAM, consider using the remote build mode:
+`./scripts/build-push-skyforge-server.sh --tag <tag> --remote-host <ssh-host>`.
 
 ## How it works
 - Source: local working tree (monorepo with `server/`, `portal-tanstack/`, and `k8s/`).

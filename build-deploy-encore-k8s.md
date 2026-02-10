@@ -27,6 +27,12 @@ Use the repo script to avoid shipping a server image with stale embedded UI asse
 
 ```bash
 ./scripts/build-push-skyforge-server.sh --registry "${SKYFORGE_REGISTRY}" --tag "${TAG}"
+
+# Optional: offload builds to a remote builder (recommended if your laptop is low on disk/RAM).
+#
+# This runs the full build (portal + encore build docker) on the remote host via rsync+ssh.
+# The remote host must have `pnpm`, `encore`, and Docker configured (including registry login).
+./scripts/build-push-skyforge-server.sh --registry "${SKYFORGE_REGISTRY}" --tag "${TAG}" --remote-host ubuntu@netlab.local.forwardnetworks.com
 ```
 
 For private GHCR, ensure you can push from your build machine:
