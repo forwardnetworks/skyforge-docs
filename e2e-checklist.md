@@ -71,5 +71,5 @@ From an authenticated session, click each tool and confirm you land inside the t
 - Nautobot
 - S3 (MinIO Console)
 - DNS (Technitium; first-time flow may prompt for a Technitium password)
-- Swagger UI
+- API Docs (ReDoc)
 - API Testing (Hoppscotch) launches correctly

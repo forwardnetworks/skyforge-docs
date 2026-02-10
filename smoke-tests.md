@@ -32,8 +32,8 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 - Git UI: `https://<hostname>/git/`
 - NetBox UI: `https://<hostname>/netbox/`
 - Nautobot UI: `https://<hostname>/nautobot/`
-- Swagger UI: `https://<hostname>/swagger/`
-- Swagger schema: `https://<hostname>/swagger/openapi.json` (should include a `servers` entry with `url: /api/skyforge`)
+- API Docs (ReDoc): `https://<hostname>/docs/`
+- OpenAPI schema: `https://<hostname>/openapi.json` (should include a `servers` entry with `url: /api/skyforge`)
 - API testing: `https://<hostname>/api-testing/` (routes to Yaade on the same hostname)
   - First login uses `admin` / `password`; change the password immediately in Yaade.
 

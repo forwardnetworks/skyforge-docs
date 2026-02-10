@@ -13,7 +13,7 @@ These are set by the Helm chart in `charts/skyforge/templates/encore-cfg-secret.
 | `skyforge.dex.enabled` | `features.dexEnabled` | Enables OIDC login (Dex). |
 | `skyforge.coder.enabled` | `features.coderEnabled` | Enables Coder SSO links. |
 | `skyforge.yaade.enabled` | `features.yaadeEnabled` | Enables API testing (Yaade) SSO link. |
-| `skyforge.swaggerUI.enabled` | `features.swaggerUIEnabled` | Enables Swagger UI link. |
+| `skyforge.apiDocs.enabled` (or deprecated `skyforge.swaggerUI.enabled`) | `features.swaggerUIEnabled` | Enables the API docs UI (ReDoc). |
 | `skyforge.forward.enabled` | `features.forwardEnabled` | Enables Forward collector + sync UI. |
 | `skyforge.netbox.enabled` | `features.netboxEnabled` | Enables NetBox link/SSO plumbing (when deployed). |
 | `skyforge.nautobot.enabled` | `features.nautobotEnabled` | Enables Nautobot link/SSO plumbing (when deployed). |

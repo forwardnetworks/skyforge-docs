@@ -13,7 +13,7 @@ The deployed OpenAPI schema must include a `servers` entry with:
 
 Check:
 ```bash
-curl -sk https://<hostname>/swagger/openapi.json | head
+curl -sk https://<hostname>/openapi.json | head
 ```
 
 ## LDAP (StartTLS) issues
