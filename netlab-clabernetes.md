@@ -51,6 +51,15 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `skyforge.netlabC9s.applierImage`
   - `skyforge.netlabC9s.applierPullPolicy`
 
+#### Resource policy defaults (k8s)
+
+- Skyforge injects per-node Kubernetes **requests** for clabernetes topologies by default.
+- Limits are disabled by default (`SKYFORGE_CLABERNETES_ENABLE_LIMITS=false`) to preserve containerlab-like burst behavior.
+- If a node image has no known profile, fallback behavior is controlled by `SKYFORGE_CLABERNETES_RESOURCE_FALLBACK`:
+  - `conservative` (default): apply fallback requests
+  - `none`: skip unresolved nodes
+  - `fail`: reject deployment
+
 ### Build the generator image
 
 ```bash

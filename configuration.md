@@ -131,6 +131,20 @@ For per-server overrides in `SKYFORGE_NETLAB_SERVERS_JSON`, you can set:
 - `SKYFORGE_HEALTH_HTTP_CHECKS`: semicolon-separated checks (`Name|Icon|URL|Hint`).
 - `SKYFORGE_HEALTH_CODE_CHECKS`: semicolon-separated checks (`Name|Icon|Token|Hint`).
 
+### 8a) Clabernetes resource policy (netlab-c9s)
+
+By default, Skyforge applies Kubernetes **requests-only** for clabernetes nodes (no limits),
+which aligns with containerlab-style burst behavior while avoiding `BestEffort` pod scheduling.
+
+- `SKYFORGE_CLABERNETES_ENABLE_RESOURCES`: enable per-node resource injection (default `true`).
+- `SKYFORGE_CLABERNETES_ENABLE_LIMITS`: include CPU/memory limits when profiles define them (default `false`).
+- `SKYFORGE_CLABERNETES_RESOURCE_FALLBACK`: behavior when no profile is found for a node:
+  - `conservative` (default): apply fallback requests and continue.
+  - `none`: skip requests for unresolved nodes.
+  - `fail`: fail deployment if any node is unresolved.
+- `SKYFORGE_CLABERNETES_FALLBACK_CPU_REQUEST`: fallback CPU request when mode is `conservative` (default `500m`).
+- `SKYFORGE_CLABERNETES_FALLBACK_MEMORY_REQUEST`: fallback memory request when mode is `conservative` (default `1Gi`).
+
 ## 9) Service base URLs
 - `GITEA_ROOT_URL`: base URL for Git UI.
 - `MINIO_BROWSER_REDIRECT_URL`: redirect target for the object storage console.
