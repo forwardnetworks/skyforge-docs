@@ -60,6 +60,21 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `none`: skip unresolved nodes
   - `fail`: reject deployment
 
+#### Netlab 26.02 native config modes
+
+- Skyforge now sets default netlab `--set` overrides for `netlab_config_mode` in netlab-c9s:
+  - `devices.eos.clab.group_vars.netlab_config_mode=sh`
+  - `devices.frr.clab.group_vars.netlab_config_mode=sh`
+  - `devices.linux.clab.group_vars.netlab_config_mode=sh`
+  - `devices.ios.clab.group_vars.netlab_config_mode=startup`
+  - `devices.junos.clab.group_vars.netlab_config_mode=startup`
+  - `devices.dellos10.clab.group_vars.netlab_config_mode=startup`
+  - `devices.arubacx.clab.group_vars.netlab_config_mode=startup`
+- For devices switched to native modes, Skyforge disables its custom startup-config synthesis/injection
+  and relies on netlab/containerlab-native behavior.
+- Rollback toggle: set `SKYFORGE_NETLAB_C9S_NATIVE_CONFIG_MODES=false` to restore legacy startup-config
+  injection behavior.
+
 ### Build the generator image
 
 ```bash
