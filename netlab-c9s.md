@@ -16,6 +16,17 @@ deploys the resulting Containerlab topology via Clabernetes.
      and Skyforge applies any netlab-generated post-up config snippets (cfglets/modules) using Kubernetes exec
      (still Go-only; no Ansible).
 
+## Forward sync behavior
+
+- On Forward network ensure/create, Skyforge updates
+  `PATCH /api/networks/{networkId}/performance/settings` to enable global SNMP
+  performance collection.
+- Skyforge no longer starts Forward connectivity tests explicitly via
+  `connectivityTests/bulkStart`.
+- After topology/device sync and SSH-readiness gating, Skyforge starts Forward
+  collection; Forward then runs its normal connectivity validation as part of
+  collection.
+
 Linux node extras (optional, controlled by env vars):
 
 - `SKYFORGE_NETLAB_C9S_LINUX_ENABLE_SSH=true`: enable password-based SSH inside Linux pods (used by Forward endpoints).
