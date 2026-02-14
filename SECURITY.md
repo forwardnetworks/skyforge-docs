@@ -1,12 +1,5 @@
 # Security Policy
 
-## Reporting a Vulnerability
-Please report security issues privately.
+If you discover a security issue, please report it privately to maintainers.
 
-Preferred: open a GitHub Security Advisory for this repository.
-Alternative: email the maintainers at `security@skyforge.dev`.
-
-If you are using a fork, update this contact address to match your organization.
-
-## Supported Versions
-Security fixes are applied to the `main` branch. If you are running an older release, please upgrade to the latest commit on `main`.
+Do not disclose sensitive vulnerabilities publicly before coordinated remediation.
