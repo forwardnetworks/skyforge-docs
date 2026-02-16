@@ -76,3 +76,11 @@ If worker node hostnames changed, preserve compatibility by keeping worker node 
 - `skyforge-worker-3 -> kubernetes.io/hostname=skyforge-3`
 
 Without this, pods using pre-existing PVCs can remain unschedulable.
+
+To audit/reconcile labels with explicit legacy mapping:
+
+```bash
+cd <skyforge-repo-root>
+./scripts/ops/reconcile-node-identity.sh --mode audit \
+  --map-csv 'skyforge-worker-1=skyforge-1,skyforge-worker-2=skyforge-2,skyforge-worker-3=skyforge-3'
+```
