@@ -10,6 +10,7 @@ This repository contains public-facing documentation for Skyforge.
 - `docs/architecture/native-alignment.md`
 - `docs/architecture/native-gap-register.md`
 - `docs/operations/deploy-upgrade.md`
+- `docs/operations/cluster-performance.md`
 - `docs/integrations/forward-onprem.md`
 - `docs/development/local-dev.md`
 - `docs/troubleshooting/common-issues.md`
