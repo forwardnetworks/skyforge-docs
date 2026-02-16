@@ -28,5 +28,5 @@ helm lint components/charts/skyforge
 ## First checks
 
 - Open `/status` in the portal.
-- Verify a workspace can be created.
+- Verify personal scope access is available.
 - Verify a simple deployment can be queued.
