@@ -12,6 +12,6 @@
 
 ## Pull requests
 
-- Keep PR scope narrow.
+- Keep PR changes narrow.
 - Include exact file paths changed.
 - Include validation commands you ran.
