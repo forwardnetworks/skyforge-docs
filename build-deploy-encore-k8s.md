@@ -29,6 +29,28 @@ Use the repo script to avoid shipping a server image with stale embedded UI asse
 ./scripts/build-push-skyforge-server.sh --registry "${SKYFORGE_REGISTRY}" --tag "${TAG}"
 ```
 
+Recommended hardened invocation (timeouts + automatic diagnostics on failure):
+
+```bash
+./scripts/build-push-skyforge-server.sh \
+  --registry "${SKYFORGE_REGISTRY}" \
+  --tag "${TAG}" \
+  --timeout-seconds 1800
+```
+
+Failure diagnostics are written under:
+
+```bash
+artifacts/encore-build/<timestamp>-<tag>/
+```
+
+The script now:
+- starts a dedicated Encore daemon for the build run,
+- enforces per-image timeout boundaries,
+- captures Encore trace + host diagnostics on timeout/failure,
+- auto-builds from a standalone mirrored server checkout when the server repo is a submodule gitfile (prevents known Encore `.git` stat-loop hangs),
+- verifies pushed image manifests before reporting success.
+
 For private GHCR, ensure you can push from your build machine:
 ```bash
 gh auth refresh -h github.com -s read:packages,write:packages
@@ -55,6 +77,16 @@ encore build docker --arch amd64 --config ../charts/skyforge/files/infra.api.con
 encore build docker --arch amd64 --config infra.config.json \
   --services=skyforge,health,storage,worker \
   "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}-worker" --push
+```
+
+If your GHCR token is stored on disk, you can also let the script perform login:
+
+```bash
+./scripts/build-push-skyforge-server.sh \
+  --registry "${SKYFORGE_REGISTRY}" \
+  --tag "${TAG}" \
+  --github-token-file /home/<user>/github.token \
+  --standalone-mirror auto
 ```
 
 Go toolchain note: `server/go.mod` pins `toolchain go1.26rc2`. If your local Go version differs, the Go tool will fetch/use 1.26rc2 automatically (or set `GOTOOLCHAIN=go1.26rc2`).

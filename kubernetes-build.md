@@ -6,6 +6,23 @@ Goal: build Skyforge images using the local Docker daemon (including `encore bui
 - Source: local working tree (monorepo with `server/`, `portal-tanstack/`, and `k8s/`).
 - Builder: local Docker daemon.
 - Server image: built with Encore (`encore build docker ...`) because Encore owns the build pipeline.
+
+Preferred command path:
+
+```bash
+./scripts/build-push-skyforge-server.sh \
+  --registry "${SKYFORGE_REGISTRY}" \
+  --tag "${TAG}" \
+  --timeout-seconds 1800
+```
+
+By default, the script uses `--standalone-mirror auto`, which mirrors `components/server` into a standalone checkout for the build when needed. This avoids known Encore hangs when building directly from a submodule gitfile.
+
+On failure, collect and inspect diagnostics from:
+
+```bash
+artifacts/encore-build/<timestamp>-<tag>/
+```
 - Registry: **recommended** `ghcr.io/forwardnetworks` (private GHCR).
 
 ## Recommended: Private GHCR (forwardnetworks)
