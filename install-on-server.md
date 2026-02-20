@@ -45,13 +45,17 @@ sudo -E ./scripts/install-on-host.sh
 
 5) Upload templates (blueprints) to Gitea
 
-If the UI shows “failed to load templates”, sync the bundled `blueprints/` catalog:
+If the UI shows “failed to load templates”, reseed the bundled
+`components/blueprints/` catalog:
 
 ```bash
 export SKYFORGE_HOST="skyforge-qa.local.forwardnetworks.com"
 export GITEA_SKIP_TLS_VERIFY=true
 ./scripts/push-blueprints-to-gitea.sh
 ```
+
+By default, `scripts/push-blueprints-to-gitea.sh` uses the local
+`components/blueprints` directory as source-of-truth.
 
 ## What the installer does
 

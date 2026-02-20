@@ -14,29 +14,20 @@ In the Gitea UI:
 - Make it **public** if you want unauthenticated BYOS servers to fetch templates by URL.
 - Ensure the default branch is `main`.
 
-## 2) Push the repo contents from the Skyforge blueprints directory
+## 2) Push the repo contents from this repo's blueprints source
 
-From a machine that has this repository checked out (for example, the Skyforge host VM):
+Canonical method (from the repo root):
 
 ```bash
-cd skyforge-private/blueprints
-
-# Initialize a new repo locally (one time only)
-git init
-git branch -M main
-
-# Add and commit the blueprints
-git add .
-git commit -m "Seed Skyforge blueprints"
-
-# Add the Gitea remote and push
-git remote add origin https://<gitea-host>/skyforge/blueprints.git
-git push -u origin main
+export SKYFORGE_HOST="<gitea-host>"
+./scripts/push-blueprints-to-gitea.sh
 ```
 
 Notes:
-- Use the correct owner in the URL (`skyforge/blueprints.git` above is just an example).
-- If you prefer SSH: use the Gitea SSH clone URL instead of HTTPS.
+- The script uses `components/blueprints` as source-of-truth by default.
+- Override owner/repo/branch with `BLUEPRINTS_OWNER`, `BLUEPRINTS_REPO`,
+  and `BLUEPRINTS_TARGET_BRANCH`.
+- For external catalog sources, use `BLUEPRINTS_SRC_MODE=git`.
 
 ## 3) Confirm Skyforge can list templates
 

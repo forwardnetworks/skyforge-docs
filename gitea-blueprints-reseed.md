@@ -1,60 +1,56 @@
 # Reseed the public `skyforge/blueprints` repo (Gitea)
 
-Skyforge expects the public blueprints repo (`skyforge/blueprints`) to contain top-level template folders like:
+Skyforge expects the public blueprints repo (`skyforge/blueprints`) to contain
+top-level template folders like:
 
 - `netlab/…`
-- `eve-ng/…`
+- `eve-ng/…` (optional if you do not use EVE-NG)
 - `containerlab/…`
 - `terraform/…`
 
-If template pickers show “No templates” and the Skyforge server is healthy, it usually means the Gitea repo contents are missing or incomplete.
+If template pickers show “No templates” and the Skyforge server is healthy, the
+Gitea blueprints repo is usually missing content or out-of-sync.
 
-## Prod (skyforge)
+`components/blueprints` in this repo is the source-of-truth.
 
-1) Create a temporary git repo from the `blueprints/` directory contents:
+## Canonical reseed command
 
-```bash
-cd skyforge-private
-rm -rf /tmp/skyforge-blueprints-seed
-mkdir -p /tmp/skyforge-blueprints-seed
-rsync -a --delete blueprints/ /tmp/skyforge-blueprints-seed/
-cat > /tmp/skyforge-blueprints-seed/README.md <<'EOF'
-# Skyforge Blueprints
-
-This repository contains public starter templates (“blueprints”) used by Skyforge.
-
-Source-of-truth: the `blueprints/` directory in the private Skyforge repo.
-EOF
-
-cd /tmp/skyforge-blueprints-seed
-git init
-git checkout -b main
-git add .
-git -c user.email=skyforge@local -c user.name=skyforge commit -m "Seed blueprints"
-```
-
-2) Push it to Gitea (force-push):
-
-- Remote: `https://skyforge.local.forwardnetworks.com/git/skyforge/blueprints.git`
-- Auth: use the configured Gitea admin credentials (`SKYFORGE_GITEA_USERNAME` + `SKYFORGE_GITEA_PASSWORD`).
-
-One non-interactive approach is `GIT_ASKPASS` with `GIT_TERMINAL_PROMPT=0`.
-
-## QA (skyforge-qa)
-
-If `skyforge-qa.local.forwardnetworks.com` isn’t reachable from your workstation, port-forward Gitea through the QA cluster and push over `http://127.0.0.1:<port>`.
-
-Example:
+From the repo root:
 
 ```bash
-KUBECONFIG=.kubeconfig-skyforge-qa kubectl -n skyforge port-forward svc/gitea 13000:3000 --address 127.0.0.1
+export SKYFORGE_HOST="skyforge.local.forwardnetworks.com"
+export GITEA_SKIP_TLS_VERIFY=true
+./scripts/push-blueprints-to-gitea.sh
 ```
 
-Then use:
+Defaults:
 
-- Remote: `http://127.0.0.1:13000/skyforge/blueprints.git`
+- Source mode: `BLUEPRINTS_SRC_MODE=local`
+- Source directory: `components/blueprints`
+- Target repo: `skyforge/blueprints`
+- Target branch: `main`
+
+## Optional: reseed from an external git source
+
+```bash
+export SKYFORGE_HOST="skyforge.local.forwardnetworks.com"
+export BLUEPRINTS_SRC_MODE=git
+export BLUEPRINTS_GIT_URL="https://github.com/forwardnetworks/skyforge-blueprints.git"
+export BLUEPRINTS_GIT_REF="main"
+./scripts/push-blueprints-to-gitea.sh
+```
+
+## Optional overrides
+
+- `BLUEPRINTS_OWNER` (default: `skyforge`)
+- `BLUEPRINTS_REPO` (default: `blueprints`)
+- `BLUEPRINTS_TARGET_BRANCH` (default: `main`)
+- `GITEA_USERNAME` / `GITEA_PASSWORD`
+- `KUBECONFIG` (used only when reading password from k8s secret)
 
 ## Notes
 
-- This is intentionally a force-push: the repo is treated as a published catalog, and `skyforge-private/blueprints/` remains the source-of-truth.
-- Keeping the top-level layout (`netlab/…`, not `blueprints/netlab/…`) is required for the “Blueprints” template source to work without extra path prefixes.
+- Reseed is a force-push by design: the published catalog should exactly match
+  the chosen source snapshot.
+- Keep top-level layout as `netlab/...`, `containerlab/...`, `terraform/...`
+  (not `blueprints/netlab/...`) for `source=blueprints` API paths.
