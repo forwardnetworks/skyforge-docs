@@ -80,7 +80,7 @@ Goal:
 ### Helm changes required
 - Render the `ENCORE_RUNTIME_CONFIG` secret from Helm values (or manage it out-of-band) so the
   cluster deployment does not depend on environment-variable parsing.
-  - Chart support exists but is disabled by default: `charts/skyforge/values.yaml` (`skyforge.encoreRuntimeConfig`).
+  - Chart support exists but is disabled by default: `components/charts/skyforge/values.yaml` (`skyforge.encoreRuntimeConfig`).
 
 ## 3) Logging
 
@@ -95,7 +95,7 @@ Status:
 - The system relies on Encore Cron jobs for periodic maintenance:
   - Republishing queued task events (reconcile queue).
   - Marking stuck running tasks as failed (reconcile running).
-  - Workspace sync and cloud credential checks (published to the maintenance PubSub topic).
+  - Project sync and cloud credential checks (published to the maintenance PubSub topic).
   - Task queue metrics refresh.
 - Legacy Kubernetes CronJobs have been removed from the Helm chart. Self-hosted setups must ensure Encore cron jobs are running, or provide an external scheduler that triggers the private cron endpoints.
 

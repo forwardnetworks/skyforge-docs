@@ -94,9 +94,8 @@ sudo systemctl restart logrotate.timer
 ## Verify recovery
 
 ```bash
-kubectl -n skyforge get pods | rg 'skyforge-worker|workspace-sync'
+kubectl -n skyforge get pods | rg 'skyforge-worker|user-scope-sync'
 kubectl describe node skyforge-1 | rg 'DiskPressure|Ready'
 kubectl describe node skyforge-2 | rg 'DiskPressure|Ready'
 kubectl describe node skyforge-3 | rg 'DiskPressure|Ready'
 ```
-

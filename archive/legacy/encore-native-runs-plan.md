@@ -8,7 +8,7 @@ Current state (as implemented):
 - The Skyforge API provides raw SSE endpoints for streaming without portal-side polling:
   - `GET /api/runs/:id/events` (task output)
   - `GET /api/dashboard/events` (dashboard snapshot stream)
-  - Additional inbox streams (notifications/webhooks/syslog/snmp/workspaces) exist for the UI.
+  - Additional inbox streams (notifications/webhooks/syslog/snmp/accounts) exist for the UI.
 - Streaming uses Postgres `LISTEN/NOTIFY` as a lightweight wake-up signal and replays from DB by cursor.
 
 Target state:
@@ -28,7 +28,7 @@ Target state:
 
 - Rewriting every existing runner implementation at once.
 - Removing existing API endpoints; keep current UX stable.
-- Perfect ordering across independent workspaces; correctness > ordering.
+- Perfect ordering across independent accounts; correctness > ordering.
 
 ## Proposed primitives
 
@@ -37,7 +37,7 @@ Target state:
 Keep existing run/task schema, but add (or emulate) these concepts:
 
 - `runs` (one row per run)
-  - `id`, `workspace_id`, `deployment_id`, `status`, `created_at`, `started_at`, `finished_at`, `error`
+  - `id`, `scope_id`, `deployment_id`, `status`, `created_at`, `started_at`, `finished_at`, `error`
   - `active_step` (optional), `attempt` (optional)
   - `last_event_seq` (monotonic for replay)
 
@@ -147,7 +147,7 @@ Refactor “start deployment” to become “request a run”:
 - API handler:
   - validates inputs
   - creates run row (status `queued`)
-  - publishes `RunRequestedTopic` with `{run_id, workspace_id, deployment_id, action, config_hash}`
+  - publishes `RunRequestedTopic` with `{run_id, scope_id, deployment_id, action, config_hash}`
   - returns immediately
 
 Subscriber for `RunRequestedTopic`:

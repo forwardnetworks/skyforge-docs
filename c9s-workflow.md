@@ -10,7 +10,7 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 - User selects a **Containerlab topology** template (YAML) from either:
   - public blueprints (`blueprints/containerlab`), or
-  - the workspace repo.
+  - the user repo.
 - Skyforge creates a `Topology` custom resource:
   - `apiVersion: clabernetes.containerlab.dev/v1alpha1`
   - `kind: Topology`
@@ -19,7 +19,7 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 Notes:
 - There is no separate “conversion” step required: clabernetes accepts the Containerlab YAML directly via `spec.definition.containerlab`.
-- Skyforge places each workspace into its own Kubernetes namespace by default: `ws-<workspaceSlug>` (sanitized).
+- Skyforge places each user scope into its own Kubernetes namespace by default: `user-<username>` (sanitized).
 
 ### 2) Netlab → C9s (deployment type: `netlab-c9s`)
 
@@ -67,6 +67,6 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - ensure the clabernetes manager image is built with the “restart on config hash” fix (Skyforge tags around `20260119-restart-hash-*`).
 - If you see `topology capture failed: Access Denied`:
   - the Skyforge worker stores topology graph artifacts in the `skyforge-files` bucket.
-  - ensure the MinIO service account referenced by `SKYFORGE_OBJECT_STORAGE_ACCESS_KEY` has write access to `skyforge-files/*`.
+  - ensure the configured object-storage principal referenced by `SKYFORGE_OBJECT_STORAGE_ACCESS_KEY` has write access to `skyforge-files/*`.
 - If Netlab-C9s deploy fails early:
   - confirm the Netlab server can run `netlab create` and produce `clab.yml` and `node_files/`.
