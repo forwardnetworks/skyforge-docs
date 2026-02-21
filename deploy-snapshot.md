@@ -50,7 +50,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 ## Values highlights
 - DNS: Technitium DNS enabled (`/dns/`), NodePorts `30053` (DNS) and `30380` (web UI).
 - EVE-NG runs via the native Encore task engine (no external runner required).
-- Scheduling: periodic maintenance (task reconcile, user sync, cloud checks, metrics refresh) uses Encore Cron jobs (no Kubernetes CronJobs in the chart).
+- Scheduling: periodic maintenance uses Kubernetes CronJobs that call token-guarded internal bridge endpoints (task reconcile, user sync, cloud checks, Forward analytics refresh).
 - Secrets: `secrets.create: false` (environment-specific secrets are managed out-of-band).
 
 ## Notes
