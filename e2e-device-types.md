@@ -75,5 +75,4 @@ export SKYFORGE_E2E_BYOS=true
 export SKYFORGE_E2E_BYOS_NETLAB_API_URL=https://netlab.local.forwardnetworks.com/netlab
 ```
 
-The E2E runner will configure the workspace’s Netlab server list via the Skyforge API before launching a BYOS deployment.
-
+The E2E runner will configure the user’s Netlab server list (single user scope) via the Skyforge API before launching a BYOS deployment.

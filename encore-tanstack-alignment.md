@@ -14,8 +14,8 @@ Note:
 - **Stable platform contracts:** no URL/path collisions with other tools (Coder, Git, etc).
 
 ## Contracts to lock down (don’t break)
-- **Portal assets:** served under `/assets/skyforge/*` (avoid Traefik `/assets/*` → Coder).
-- **Encore API base (browser):** `/api/skyforge/api/*` (Traefik rewrites to the Encore service).
+- **Portal assets:** served under `/assets/skyforge/*` (avoid edge route collisions with Coder/tool paths).
+- **Encore API base (browser):** `/api/skyforge/api/*` (Gateway API routes to the Encore service).
 - **Platform status:** `/status/summary` (plus SSE at `/status/summary/events`).
 - (Legacy) **Platform health JSON:** `/data/platform-health.json` (served from live checks; no filesystem dependency).
 - **OIDC login entry:** `GET /api/oidc/login?next=<path>`.

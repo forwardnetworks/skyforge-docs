@@ -12,7 +12,7 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
 ## High-level flow
 
 1) **Template selection**
-   - User selects a Netlab example folder (e.g. `netlab/EVPN/ebgp`) from blueprints/workspace repo.
+   - User selects a Netlab example folder (e.g. `netlab/EVPN/ebgp`) from blueprints/user repo.
 
 2) **Sync template into workdir**
    - Copy selected template folder contents into a workdir root (same convention as the runner flow so `cd workdir && netlab up` works locally).
@@ -33,7 +33,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 
 ### In-cluster generator (required)
 
-- Skyforge runs a Kubernetes Job (in the workspace namespace) that executes Netlab to generate artifacts.
+- Skyforge runs a Kubernetes Job (in the user namespace) that executes Netlab to generate artifacts.
 - The generator writes:
   - a manifest ConfigMap (`c9s-<topology>-manifest`) containing `manifest.json`
   - per-node ConfigMaps containing `node_files/<node>/...` text files
@@ -75,7 +75,7 @@ docker buildx build --platform linux/amd64 \
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
-   - Uses a per-workspace namespace (`ws-<workspaceSlug>`) to isolate resources.
+   - Uses a per-user namespace (`user-<username>`) to isolate resources.
    - Applies the `Topology` CR; waits for `status.topologyReady=true`.
 
 6) **Status + logs**
@@ -124,7 +124,7 @@ docker buildx build --platform linux/amd64 \
 
 4) **Forward device upload**
    - What stable management endpoint do we record for each node?
-   - For “ssh/https/snmp”, do we model a per-workspace placeholder credential set?
+   - For “ssh/https/snmp”, do we model a per-user placeholder credential set?
 
 5) **Namespace lifecycle**
    - Create namespace on deployment create?

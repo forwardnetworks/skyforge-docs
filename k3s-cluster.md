@@ -23,7 +23,7 @@ This doc captures the current multi-node k3s setup for Skyforge.
 - `10.128.16.55`
 - `10.128.16.58`
 
-This is intended for the **user-facing HTTPS** entrypoint (Traefik runs on all nodes).
+This is intended for the **user-facing HTTPS** entrypoint (Cilium Envoy/Gateway API runs on all nodes).
 
 ## Storage
 
@@ -42,7 +42,7 @@ To keep the root disk small and avoid DiskPressure, we bind-mount Kubernetes dat
 Skyforge’s repo kubeconfig expects a local port-forward to the Kubernetes API.
 
 Notes:
-- Skyforge’s user-facing URL can be round-robin across nodes (Traefik runs on all nodes).
+- Skyforge’s user-facing URL can be round-robin across nodes (Cilium Envoy/Gateway API runs on all nodes).
 - The Kubernetes API endpoint used by agents (`K3S_URL`) should be a stable VIP/LB (not round-robin),
   or you risk agents pinning to a dead/rotated IP.
 

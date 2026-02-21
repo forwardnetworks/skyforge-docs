@@ -30,5 +30,5 @@ The admin UI can list and update routes.
 ## Ports and networking
 
 - Syslog is received on **UDP/514** on each node (`hostPort` / `hostNetwork`).
-- Traefik is not involved.
+- Edge ingress is not involved.
 - Ensure firewalls/security groups allow inbound UDP/514 from your lab sources.

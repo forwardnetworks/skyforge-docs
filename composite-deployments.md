@@ -98,4 +98,4 @@ To implement composites without rewriting everything:
 
 - How to expose stage outputs in the UI (per-stage “Outputs” panel vs one merged view)?
 - Which tunnel type do we standardize first (WireGuard vs IPsec vs Tailscale)?
-- Do we want reusable “connection templates” per workspace (like variable groups)?
+- Do we want reusable “connection templates” per user scope (like variable groups)?

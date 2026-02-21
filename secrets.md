@@ -4,9 +4,16 @@ Skyforge is designed to be self-hosted and OSS-friendly. **Do not commit secrets
 
 ## Where secrets should live
 
-Preferred (Kubernetes):
-- Use Kubernetes Secrets referenced by the Helm chart (`charts/skyforge/values.yaml`).
-- Keep secret material out of `values.yaml`; use Secret refs (name/key) instead.
+Preferred (Kubernetes, OSS baseline):
+- Pre-create Kubernetes Secrets in the target namespace.
+- Deploy Helm with `secrets.create=false` so secret literals do not land in Helm
+  release values/history.
+- Keep secret material out of tracked files (`values.yaml`, docs examples, etc.).
+
+Compatibility mode (local/dev only):
+- `secrets.create=true` with a local, untracked secrets values file is still
+  supported for quick bootstrap drills.
+- Do not use this mode for production/OSS release baselines.
 
 Local development:
 - Use `.env` locally (it is gitignored by default via `.gitignore`).
@@ -29,3 +36,9 @@ If you accidentally committed a secret:
 1. Rotate it immediately.
 2. Remove it from git history (if required for public release).
 
+## Example: pre-create a secret
+
+```bash
+kubectl -n skyforge create secret generic skyforge-admin-shared \
+  --from-literal=password='<admin-password>'
+```

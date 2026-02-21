@@ -166,5 +166,5 @@ Run the following commands on the host to verify readiness:
 
 ## 7. Troubleshooting
 
-- **Root-owned artifacts:** If you see `root`-owned files in user workspaces (`~/netlab/...`), ensure the Netlab API service is not running as `root` (and that users have passwordless sudo for the required binaries).
+- **Root-owned artifacts:** If you see `root`-owned files in per-user directories (`~/netlab/...`), ensure the Netlab API service is not running as `root` (and that users have passwordless sudo for the required binaries).
 \

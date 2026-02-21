@@ -7,9 +7,11 @@ This checklist is intended to quickly validate cluster wiring without using the 
 kubectl -n skyforge get pods
 ```
 
-## Ingress + middleware present
+## Cilium Gateway API objects present
 ```bash
-kubectl -n skyforge get ingressroute,middleware
+kubectl -n skyforge get gateway,httproute
+kubectl -n skyforge get gateway skyforge -o jsonpath='{range .status.conditions[*]}{.type}={.status}{" ("}{.reason}{")\n"}{end}'
+kubectl -n skyforge get svc cilium-gateway-skyforge
 ```
 
 ## ConfigMap wiring
@@ -23,21 +25,63 @@ kubectl -n skyforge run skyforge-health --rm -i --restart=Never --image=curlimag
   sh -lc 'curl -fsS http://skyforge-server:8085/api/health'
 ```
 
-## DNS (Technitium) health (optional)
+## External edge sanity (from a trusted workstation)
 ```bash
-kubectl -n skyforge get deploy,svc,ingressroute technitium-dns
+curl -kI https://skyforge.local.forwardnetworks.com/
+curl -k https://skyforge.local.forwardnetworks.com/dex/.well-known/openid-configuration
 ```
+
+## Sidebar route sanity (no browser)
+Run the sidebar link probe from the repo root:
+
+```bash
+./scripts/check-sidebar-links.sh https://skyforge.local.forwardnetworks.com
+```
+
+Expected:
+- `/fwd` returns `302` to `/api/oidc/login?next=%2Ffwd%2F` when unauthenticated.
+- Tool links either return a login redirect (`302`) or an app response (`200`) depending on auth state.
 
 ## Quick SSO sanity (no browser)
 This validates that the Skyforge server can mint sessions and that protected services are reachable.
 
 ```bash
-kubectl -n skyforge get secret skyforge-admin-shared
-kubectl -n skyforge get deploy skyforge-server
-kubectl -n skyforge get deploy gitea netbox nautobot
+kubectl -n skyforge get secret skyforge-admin-shared dex-google-client-secret proxy-tls
+kubectl -n skyforge get deploy skyforge-server skyforge-server-worker dex db gitea s3gw
 ```
 
 ## Yaade sanity (optional)
 ```bash
 kubectl -n skyforge rollout status deploy/yaade
+```
+
+## Forward analytics strict gate (API + UI)
+Run the portal E2E script with an admin E2E token. This now validates the full analytics API flow for:
+- `/api/forward/cloud/*`
+- `/api/forward/security/*`
+- `/api/forward/routing/*`
+- `/api/forward/capacity/*`
+
+and then verifies the Network Analytics UI route/tabs.
+
+Competitive gate assertions enforced by this check:
+- Cloud: overall `>= 90`, freshness/drift `>= 4`
+- Security: overall `>= 90`, freshness/drift `>= 4`
+- Routing: overall `>= 88`, freshness/drift `>= 4`
+- Capacity: overall `>= 85`, freshness/drift `>= 3`
+- All modules require:
+  - `coverage >= 4`
+  - `explainability >= 4`
+  - `actionability >= 4`
+  - `evidenceDepth >= 4`
+  - `competitiveGatePassed=true`
+  - `competitiveTier in {leader,strong}`
+  - priorities include rationale/recommendations/evidence
+
+```bash
+cd components/portal
+SKYFORGE_UI_E2E_BASE_URL="https://skyforge.local.forwardnetworks.com" \
+SKYFORGE_UI_E2E_API_URL="https://skyforge.local.forwardnetworks.com" \
+SKYFORGE_UI_E2E_ADMIN_TOKEN="<admin-e2e-token>" \
+pnpm exec node scripts/ui-e2e.mjs
 ```

@@ -20,29 +20,29 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
 - Confirm DNS link is only visible when authenticated.
 - Open `EVE-NG` section and confirm the configured hosts appear.
 
-## Workspace + deployments
+## User scope + deployments
 
-### Create workspace
-- Create a workspace as the non-admin user.
+### Create user scope
+- Create a user scope as the non-admin user.
 
 ### Netlab deployment (create → up → info → down → destroy → delete)
 - Create a Netlab deployment:
   - Pick the Netlab server (required).
-  - Pick a template source (blueprints repo or workspace repo).
+  - Pick a template source (blueprints repo or user repo).
   - Pick a template.
 - Run actions in order:
-  - `Create` (should provision workspace/files without starting lab)
+  - `Create` (should provision user-scope files without starting lab)
   - `Start` / `Up`
   - `Info` (should show `netlab status` output with IPs/topology)
   - `Stop` / `Down`
-  - `Destroy` (should remove the workspace on the runner)
+  - `Destroy` (should remove user-scope artifacts on the runner)
   - Delete the deployment record in Skyforge
 - Confirm logs are readable in the single “Logs” modal.
 
 ### Containerlab deployment (create → up → info → down → destroy → delete)
 - Create a Containerlab deployment:
   - Pick the Containerlab server (required).
-  - Pick a template source (blueprints repo or workspace repo).
+  - Pick a template source (blueprints repo or user repo).
   - Pick a template.
 - Run actions in order:
   - `Create`
@@ -69,7 +69,7 @@ From an authenticated session, click each tool and confirm you land inside the t
 - Git (Gitea)
 - NetBox
 - Nautobot
-- S3 (MinIO Console)
+- S3 artifact path (`/files`)
 - DNS (Technitium; first-time flow may prompt for a Technitium password)
 - Swagger UI
 - API Testing (Hoppscotch) launches correctly

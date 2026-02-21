@@ -1,6 +1,6 @@
 # Authoritative DNS for labs (Technitium DNS)
 
-Skyforge’s Traefik edge is HTTP(S)-only; authoritative DNS (UDP/TCP 53) is best exposed as a Kubernetes `NodePort` on the single-node k3s host.
+Skyforge’s Gateway API edge is HTTP(S)-only; authoritative DNS (UDP/TCP 53) is best exposed as a Kubernetes `NodePort` on the single-node k3s host.
 
 This repo includes an optional Technitium DNS deployment (authoritative + UI) that you can enable when you need lab zones and controlled AXFR for your lab domains.
 

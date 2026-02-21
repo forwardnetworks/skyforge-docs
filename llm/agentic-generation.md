@@ -77,7 +77,7 @@ This makes iteration fast and reduces drift.
 ## Stop conditions
 
 Success:
-- All validation steps pass in the sandbox workspace.
+- All validation steps pass in the sandbox user scope.
 
 Failure (after retry budget):
 - Return:
@@ -95,7 +95,7 @@ Failure (after retry budget):
 ## Suggested “v2” implementation sketch
 
 - `LLM Provider`: pluggable (local OpenAI-compatible server first; cloud optional fallback)
-- `Workspace Manager`: creates per-run sandbox dirs, collects artifacts, produces diffs
+- `Project Manager`: creates per-run sandbox dirs, collects artifacts, produces diffs
 - `Validator Runner`: runs a fixed set of validators per “generator type”
 - `Repair Orchestrator`: retries with strict patch-only outputs after the first generation
 - `Audit Trail`: stores inputs, prompts (redacted), validation results, diffs, and final artifacts

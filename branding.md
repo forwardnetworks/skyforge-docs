@@ -1,22 +1,20 @@
 # Branding assets
 
-Skyforge UI branding is driven by environment variables and a small set of assets.
+Skyforge UI branding is driven by Helm values and the `skyforge-config` ConfigMap.
 
-## 1) Config values
-Set these in `k8s/overlays/k3s-traefik-secrets/config.env` (or the `skyforge-config` ConfigMap):
-- `SKYFORGE_UI_PRODUCT_NAME`
-- `SKYFORGE_UI_PRODUCT_SUBTITLE`
-- `SKYFORGE_UI_LOGO_URL`
-- `SKYFORGE_UI_LOGO_ALT`
-- `SKYFORGE_UI_HEADER_BG_URL`
-- `SKYFORGE_UI_SUPPORT_TEXT`
-- `SKYFORGE_UI_SUPPORT_URL`
+## Config values
+Set in `deploy/skyforge-values.yaml`:
+- `skyforge.ui.productName`
+- `skyforge.ui.productSubtitle`
+- `skyforge.ui.logoUrl`
+- `skyforge.ui.logoAlt`
+- `skyforge.ui.headerBgUrl`
+- `skyforge.ui.supportText`
+- `skyforge.ui.supportUrl`
 
-## 2) Default assets (safe to replace)
-- `docs/assets/skyforge/skyforge-mark.svg` (product mark)
-- `docs/assets/skyforge/header-background.png` (header image)
-- `docs/assets/skyforge/FN-logo.svg` (optional alternate logo)
-- `server/static/brand/logo.svg` (legacy brand asset for server-side pages)
-- `server/static/brand/skyforge.css` (brand styling)
-
-If you replace assets, keep filenames the same or update the corresponding config values.
+## Default assets (safe to replace)
+- `docs/assets/skyforge/skyforge-mark.svg`
+- `docs/assets/skyforge/header-background.png`
+- `docs/assets/skyforge/FN-logo.svg`
+- `server/static/brand/logo.svg`
+- `server/static/brand/skyforge.css`

@@ -1,6 +1,6 @@
 # Fork maintenance (Netlab + Clabernetes)
 
-Skyforge intentionally vendors **very little**. When we must patch upstream projects to fit our deployment model, we do it as a fork with a minimal delta and a clear upgrade path.
+Skyforge intentionally vendors **very little**. When we must patch upstream components to fit our deployment model, we do it as a fork with a minimal delta and a clear upgrade path.
 
 ## Goals
 

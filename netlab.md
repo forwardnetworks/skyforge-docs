@@ -21,7 +21,7 @@ Endpoints (from upstream docs):
 
 - `GET /healthz` – health check
 - `GET /templates?dir=<path>` – list YAML templates in a directory
-- `POST /jobs` – start a job (`action`, `workdir`, `workspaceRoot`, `topologyPath`, `topologyUrl`, `cleanup`)
+- `POST /jobs` – start a job (`action`, `workdir`, `projectRoot`, `topologyPath`, `topologyUrl`, `cleanup`)
 - `GET /jobs/{id}` – job details
 - `GET /jobs/{id}/log` – job log output
 - `POST /jobs/{id}/cancel` – cancel queued job

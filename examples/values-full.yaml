@@ -1,11 +1,11 @@
-# Example “full” Skyforge install (Helm values overlay).
+# Example "full" Skyforge install (Helm values overlay).
 #
 # This mirrors the default chart behavior: in-cluster tools enabled.
 # Keep this file around as a reference for explicitly enabling everything.
 skyforge:
   gitea:
     enabled: true
-  minio:
+  s3gw:
     enabled: true
   dex:
     enabled: true
@@ -13,7 +13,7 @@ skyforge:
     enabled: true
   yaade:
     enabled: true
-  swaggerUI:
+  redoc:
     enabled: true
   forward:
     enabled: true

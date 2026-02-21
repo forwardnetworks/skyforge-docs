@@ -1,6 +1,6 @@
 # Deploying Skyforge (QA → Prod)
 
-Skyforge is deployed with Helm from `charts/skyforge`.
+Skyforge is deployed with Helm from `components/charts/skyforge`.
 
 Policy: always deploy to QA first, validate, then deploy to prod.
 
@@ -38,7 +38,7 @@ export KUBECONFIG=$PWD/skyforge-private/.kubeconfig-skyforge-qa
 ```bash
 cd skyforge-private
 scripts/preflight-packaging.sh
-helm upgrade --install skyforge charts/skyforge -n skyforge --create-namespace \
+helm upgrade --install skyforge components/charts/skyforge -n skyforge --create-namespace \
   -f deploy/skyforge-values.yaml \
   -f deploy/skyforge-values-qa.yaml \
   -f deploy/skyforge-secrets.yaml \
@@ -58,7 +58,7 @@ If a Helm deploy is stuck waiting, check for a failed `netbox-admin-bootstrap` j
 
 ```bash
 kubectl -n skyforge delete job netbox-admin-bootstrap --ignore-not-found
-kubectl -n skyforge apply -f charts/skyforge/files/kompose/netbox-admin-bootstrap-job.yaml
+kubectl -n skyforge apply -f components/charts/skyforge/files/manifests/netbox-admin-bootstrap-job.yaml
 kubectl -n skyforge wait --for=condition=complete job/netbox-admin-bootstrap --timeout=10m
 ```
 
@@ -83,7 +83,7 @@ export KUBECONFIG=$PWD/skyforge-private/.kubeconfig-skyforge
 ```bash
 cd skyforge-private
 scripts/preflight-packaging.sh
-helm upgrade --install skyforge charts/skyforge -n skyforge --create-namespace \
+helm upgrade --install skyforge components/charts/skyforge -n skyforge --create-namespace \
   -f deploy/skyforge-values.yaml \
   -f deploy/skyforge-secrets.yaml \
   --wait --timeout 20m

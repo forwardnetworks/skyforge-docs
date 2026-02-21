@@ -30,6 +30,5 @@ Configure devices to send traps to:
 ## Ports and networking
 
 - Traps are received on **UDP/162** on each node (`hostPort` / `hostNetwork`).
-- Traefik is not involved.
+- Edge ingress is not involved.
 - Ensure firewalls/security groups allow inbound UDP/162 from your lab sources.
-

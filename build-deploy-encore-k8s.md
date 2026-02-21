@@ -49,6 +49,7 @@ The script now:
 - enforces per-image timeout boundaries,
 - captures Encore trace + host diagnostics on timeout/failure,
 - auto-builds from a standalone mirrored server checkout when the server repo is a submodule gitfile (prevents known Encore `.git` stat-loop hangs),
+- verifies that every `/assets/skyforge/*` reference in the embedded `frontend_dist/index.html` exists before building images (prevents blank-screen hash drift),
 - verifies pushed image manifests before reporting success.
 
 For private GHCR, ensure you can push from your build machine:
@@ -69,7 +70,7 @@ cd ../server
 # Ensure the LabPP CLI code is bundled into the server image.
 rsync -a --delete ../fwd/ ./fwd/
 # API image (excludes worker subscriptions).
-encore build docker --arch amd64 --config ../charts/skyforge/files/infra.api.config.json \
+encore build docker --arch amd64 --config ../components/charts/skyforge/files/infra.api.config.json \
   --services=skyforge,health,storage \
   "${SKYFORGE_REGISTRY}/skyforge-server:${TAG}" --push
 

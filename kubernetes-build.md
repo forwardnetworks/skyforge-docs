@@ -17,6 +17,7 @@ Preferred command path:
 ```
 
 By default, the script uses `--standalone-mirror auto`, which mirrors `components/server` into a standalone checkout for the build when needed. This avoids known Encore hangs when building directly from a submodule gitfile.
+It also validates that all `/assets/skyforge/*` files referenced by the embedded `frontend_dist/index.html` exist before image build/push, preventing UI blank-screen asset drift.
 
 On failure, collect and inspect diagnostics from:
 

@@ -36,7 +36,7 @@ We should be able to enable/disable features cleanly at chart install time.
 - [ ] `components.nautobot.enabled`
 - [ ] `components.yaade.enabled`
 - [ ] `components.coder.enabled`
-- [ ] `components.minio.enabled` (or replace with external S3 settings)
+- [ ] `components.s3gw.enabled` (or replace with external S3 settings)
 - [ ] `components.nsq.enabled` / `components.redis.enabled` (if ever externalized)
 - [ ] `features.forwardCollector.enabled`
 - [ ] `features.syslogInbox.enabled`
@@ -71,7 +71,7 @@ We should be able to enable/disable features cleanly at chart install time.
 ### 6) CI Gates (Catch breakage before cluster)
 
 - [ ] Add CI job(s) to run:
-  - `helm lint charts/skyforge`
+  - `helm lint components/charts/skyforge`
   - `helm template` (both minimal + full) and ensure it renders
   - optional: `kubectl apply --dry-run=server` on rendered output
   - template validators:

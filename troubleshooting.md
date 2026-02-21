@@ -1,7 +1,7 @@
 # Troubleshooting
 
 ## API base path confusion
-Skyforge’s external API is served behind Traefik under:
+Skyforge’s external API is served behind Cilium Gateway API routes under:
 - `https://<hostname>/api/skyforge/*`
 
 If you try `https://<hostname>/auth/login` it will 404; the correct path is:
@@ -13,7 +13,7 @@ The deployed OpenAPI schema must include a `servers` entry with:
 
 Check:
 ```bash
-curl -sk https://<hostname>/swagger/openapi.json | head
+curl -sk https://<hostname>/openapi.json | head
 ```
 
 ## LDAP (StartTLS) issues

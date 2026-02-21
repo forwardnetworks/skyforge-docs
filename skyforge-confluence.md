@@ -24,18 +24,18 @@ Skyforge is optimized for:
 
 ## Core concepts
 
-### Workspace
-Your workspace is your scoped area in Skyforge:
+### Project
+Your user scope is your scoped area in Skyforge:
 
-- **Isolation:** deployments, artifacts, and runs are scoped to your workspace.
-- **Git integration:** each workspace has a repo for your private blueprints/inputs.
-- **State:** providers store generated state under a workspace-owned directory/backing storage.
+- **Isolation:** deployments, artifacts, and runs are scoped to your user scope.
+- **Git integration:** each user scope has a repo for your private blueprints/inputs.
+- **State:** providers store generated state under a user-scope-owned directory/backing storage.
 
 ### Blueprint
 A blueprint is a template that defines what gets built. Skyforge typically exposes:
 
 - A **public blueprint catalog** (shared, read-only reference set)
-- Your **workspace blueprint repo** (fork/modify here)
+- Your **user-scope blueprint repo** (fork/modify here)
 
 ### Deployment
 A deployment is a configured instance of a blueprint (provider + template + target server + parameters).
@@ -101,10 +101,10 @@ Skyforge includes an experimental path for Kubernetes-based containerlab orchest
 
 1. **Log in**
    - Use SSO/LDAP credentials.
-2. **Pick a workspace**
-   - Create a new workspace (or select an existing one you own).
+2. **Pick a user scope**
+   - Create a user scope (or select an existing one you own).
 3. **Choose a blueprint**
-   - Pick from public catalog or your workspace repo.
+   - Pick from public catalog or your user repo.
 4. **Create a deployment**
    - Choose provider (Netlab/LabPP/Terraform/etc.), target server, and template.
 5. **Run actions**
@@ -120,7 +120,7 @@ Skyforge includes an experimental path for Kubernetes-based containerlab orchest
 
 Depending on your environment configuration, you may see:
 
-- **Git (Gitea):** your workspace repo (and optionally the public blueprint repo)
+- **Git (Gitea):** your user repo (and optionally the public blueprint repo)
 - **NetBox / Nautobot:** lab asset inventory and IPAM (permission-scoped)
 - **DNS:** Technitium DNS UI (SSO bridge)
 - **Coder / VS Code:** browser-based dev environment (where enabled)
@@ -135,9 +135,9 @@ If a tool loads but you have limited navigation, that usually indicates permissi
 
 Skyforge is multi-user. Please:
 
-- Keep destructive actions scoped to your own workspace/deployments.
+- Keep destructive actions scoped to your own user scope/deployments.
 - Destroy labs you’re not using to free capacity.
-- Avoid “shared scratch” workspaces unless explicitly coordinated.
+- Avoid “shared scratch user scopes unless explicitly coordinated.
 
 ---
 
@@ -195,7 +195,7 @@ Access: hosted on Epic; reachable via Cato VPN at `https://skyforge.local.forwar
 
 When reporting issues, include:
 
-- Workspace name
+- Project name
 - Deployment name
 - Run ID and provider (Netlab/LabPP/Terraform/etc.)
 - Copy/paste of the relevant error section from logs
@@ -205,7 +205,7 @@ When reporting issues, include:
 ## FAQ
 
 ### Can I add my own Netlab or EVE/LabPP server?
-This may be enabled per workspace. If allowed, you can add your own server endpoint and use it as the deployment target. If it’s not visible in the UI, ask an admin to enable it.
+This may be enabled per user scope. If allowed, you can add your own server endpoint and use it as the deployment target. If it’s not visible in the UI, ask an admin to enable it.
 
 ### Why do some tools redirect or require SSO again?
 Some tools use different session mechanisms (cookies vs. localStorage tokens) and require a bridge/redirect. If you see unexpected login loops, report the tool name and approximate timestamp.

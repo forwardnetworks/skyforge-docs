@@ -6,7 +6,7 @@ This file captures a known-good deployment configuration so we can reproduce the
 ### 2026-01-13 (demo)
 - Date: 2026-01-13
 - Hostname: `skyforge.local.forwardnetworks.com`
-- Helm chart (repo): `charts/skyforge`
+- Helm chart (repo): `components/charts/skyforge`
 - Helm chart version: `0.2.205`
 - Helm release revision: `759`
 - Images:
@@ -21,12 +21,12 @@ This file captures a known-good deployment configuration so we can reproduce the
 - Demo-critical behavior verified:
   - Netlab: per-device Forward CLI creds created (`{deployment}-{device}`), device type hints sent when known (`linux_os_ssh`, `arista_eos_ssh`), Linux SSH enabled on Alpine/python-based hosts.
   - EVE-NG: EVE upload/config works, Forward configuration is skipped as desired.
-  - Gitea: shared `skyforge/blueprints` repo is public/visible in Explore; workspace repos are private by default.
+  - Gitea: shared `skyforge/blueprints` repo is public/visible in Explore; user-scope repos are private by default.
 
 ### 2026-01-12
 - Date: 2026-01-12
 - Hostname: `skyforge.local.forwardnetworks.com`
-- Helm chart (repo): `charts/skyforge`
+- Helm chart (repo): `components/charts/skyforge`
 - Helm chart version: `0.2.195`
 - Images:
   - `ghcr.io/forwardnetworks/skyforge-server:20260112-0547`
@@ -50,11 +50,11 @@ This file captures a known-good deployment configuration so we can reproduce the
 ## Values highlights
 - DNS: Technitium DNS enabled (`/dns/`), NodePorts `30053` (DNS) and `30380` (web UI).
 - EVE-NG runs via the native Encore task engine (no external runner required).
-- Scheduling: periodic maintenance (task reconcile, workspace sync, cloud checks, metrics refresh) uses Encore Cron jobs (no Kubernetes CronJobs in the chart).
+- Scheduling: periodic maintenance (task reconcile, user sync, cloud checks, metrics refresh) uses Encore Cron jobs (no Kubernetes CronJobs in the chart).
 - Secrets: `secrets.create: false` (environment-specific secrets are managed out-of-band).
 
 ## Notes
-- Skyforge’s external API is served behind Traefik under `https://<hostname>/api/skyforge/*`.
+- Skyforge’s external API is served via Cilium Gateway API under `https://<hostname>/api/skyforge/*`.
   - The embedded OpenAPI schema `servers` includes `url: /api/skyforge` so Swagger “Try it out” works.
 - API Testing is linked via `https://<hostname>/api-testing/` and routes to Yaade.
 - Netlab: template sync happens on deployment definition create (best-effort prefetch) and sync is scoped to the selected template subtree for faster starts.
@@ -68,7 +68,7 @@ gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --pass
 
 2) Upgrade using the repo chart + values file:
 ```bash
-helm upgrade --install skyforge charts/skyforge \
+helm upgrade --install skyforge components/charts/skyforge \
   -n skyforge --create-namespace \
   -f deploy/skyforge-values.yaml -f deploy/skyforge-secrets.yaml \
   --wait --timeout 10m

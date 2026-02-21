@@ -77,7 +77,7 @@ Status keys:
 ## 4) Security review (pre-public)
 
 ⬜ **AuthN/AuthZ**
-- Confirm workspace ownership/sharing rules are enforced on every API path.
+- Confirm user-scope ownership/sharing rules are enforced on every API path.
 - Ensure terminal/kube-exec endpoints cannot be used to escape namespace boundaries.
 
 ⬜ **RBAC + Kubernetes safety**
@@ -99,7 +99,7 @@ Status keys:
 - Include troubleshooting for common issues (OIDC redirect mismatch, ingress, image pulls).
 
 ⬜ **User guide**
-- Workspaces + deployments overview
+- Projects + deployments overview
 - Deployment methods: Netlab (C9s), Containerlab, Terraform (optional)
 - How to bring your own templates (Git-based)
 
@@ -118,8 +118,8 @@ Status keys:
 - Container image build verification
 
 ⬜ **Smoke tests**
-- Provide a public smoke test that doesn’t require internal accounts:
-  - health, login, create workspace, create & destroy a basic deployment.
+- Provide a public smoke test that doesn’t require internal identity providers:
+  - health, login, create user scope, create & destroy a basic deployment.
 
 ## 7) Public launch prep (Autocon / demos)
 
@@ -130,4 +130,3 @@ Status keys:
 ⬜ **Demo topology pack**
 - Provide a small set of templates that use freely available container images.
 - Ensure demo works on a small cluster footprint.
-

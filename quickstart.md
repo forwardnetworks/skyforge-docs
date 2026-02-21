@@ -1,82 +1,50 @@
-# Quickstart (k3s)
+# Quickstart (k3s + Cilium Gateway API)
 
 This is the minimal single-node k3s deployment path.
 
-If you want a repeatable “install drill” workflow (recommended), use `docs/install-on-server.md` instead.
+If you want a repeatable install workflow, use `docs/install-on-server.md`.
 
 ## 1) Prereqs
 - k3s installed and `kubectl` works.
+- Cilium installed as the cluster CNI (Gateway API enabled).
 - A DNS name for Skyforge (or `/etc/hosts` entry).
-- TLS certs available under `certs/` (self-signed is fine for dev).
+- TLS cert + key available for `proxy-tls`.
 
-## 2) Configure
-Copy the overlay config and set the hostname/branding:
+## 2) Configure values + secrets
+Edit deployment values and local-only secrets:
 
 ```bash
-cp k8s/overlays/k3s-traefik-secrets/config.env.example \
-   k8s/overlays/k3s-traefik-secrets/config.env
-$EDITOR k8s/overlays/k3s-traefik-secrets/config.env
+$EDITOR deploy/skyforge-values.yaml
+$EDITOR deploy/skyforge-secrets.yaml
 ```
 
 Minimum values to update:
-- `SKYFORGE_HOSTNAME`
-- `SKYFORGE_ADMIN_EMAIL`
-- `SKYFORGE_GITEA_URL`, `SKYFORGE_GITEA_API_URL`
+- `skyforge.hostname`
+- `skyforge.domain`
+- `skyforge.gateway.addresses` (recommended for node-IP ingress, example `type: IPAddress`, `value: 10.128.16.60`)
+- `skyforge.gitea.url`
+- `skyforge.gitea.apiUrl`
+- If using Google login: `skyforge.dex.authMode=google` and `skyforge.dex.google.clientID`
 
-If you use LDAP, provide the LDAP secrets (`k8s/overlays/k3s-traefik-secrets/secrets/skyforge_ldap_url`,
-`k8s/overlays/k3s-traefik-secrets/secrets/skyforge_ldap_bind_template`, and the Gitea LDAP secrets).
-If you do not use LDAP, leave those secrets empty and skip the LDAP init pods.
+Minimum secrets to populate:
+- `secrets.items.skyforge-session-secret.skyforge-session-secret`
+- `secrets.items.skyforge-admin-shared.password`
+- DB passwords
+- object storage keys (`object-storage-root-user`, `object-storage-root-password`)
+- `proxy-tls` (`tls.crt`, `tls.key`)
 
-## 3) Secrets
-Secrets are file-backed and gitignored. See
-`k8s/overlays/k3s-traefik-secrets/kustomization.yaml` for the full list. At
-minimum you need:
-- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_session_secret`
-- `k8s/overlays/k3s-traefik-secrets/secrets/skyforge_admin_shared_password`
-- Postgres + object storage secrets
-- TLS certs under `k8s/overlays/k3s-traefik-secrets/certs/`
-
-The shared admin password is used to seed Skyforge, Gitea, NetBox, Nautobot,
-and Coder. LDAP credentials are separate and only required if you enable LDAP.
-
-
-## 4) Deploy (Helm, preferred)
-Preferred for install drills: run the installer on the node:
+## 3) Deploy (Helm)
 
 ```bash
-cd /opt/skyforge/skyforge-private
-export SKYFORGE_ENV=prod
-export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
-sudo -E ./scripts/install-on-host.sh
-```
-
-Legacy / manual flow:
-
-```bash
-gh auth refresh -h github.com -s read:packages
-gh auth token | helm registry login ghcr.io -u "$(gh api user -q .login)" --password-stdin
-
-scp ./deploy/skyforge-values.yaml ./deploy/skyforge-secrets.yaml skyforge.local.forwardnetworks.com:/tmp/
-
-ssh skyforge.local.forwardnetworks.com "helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
+helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
   -n skyforge --create-namespace \
   --reset-values \
-  --version <chart-version> \
-  -f /tmp/skyforge-values.yaml \
-  -f /tmp/skyforge-secrets.yaml"
-
-ssh skyforge.local.forwardnetworks.com "rm -f /tmp/skyforge-values.yaml /tmp/skyforge-secrets.yaml"
+  -f deploy/skyforge-values.yaml \
+  -f deploy/skyforge-secrets.yaml
 ```
 
-## 4b) Deploy (kustomize, fallback)
-```bash
-kubectl create namespace skyforge
-kubectl apply -f k8s/traefik/helmchartconfig-plugins.yaml
-kubectl apply -k k8s/overlays/k3s-quickstart
-```
-
-## 5) Smoke tests
+## 4) Smoke tests
 Follow `docs/smoke-tests.md`.
 
-## 6) Workspace sync
-See `docs/workspaces.md` for how the Coder workspace directories and S3 placeholders are organized.
+## 5) User data sync
+See `docs/user-data-sync.md` for per-user paths and user-scoped object-storage artifact flow.

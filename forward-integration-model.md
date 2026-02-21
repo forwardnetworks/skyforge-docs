@@ -1,11 +1,11 @@
 # Skyforge ↔ Forward Integration Model (Proposed)
 
-This document outlines a model for connecting Skyforge deployments (netlab-c9s/clabernetes/eve-ng/byos) to Forward (network creation + classic device onboarding) without tying the configuration to a single workspace.
+This document outlines a model for connecting Skyforge deployments (netlab-c9s/clabernetes/eve-ng/byos) to Forward (network creation + classic device onboarding) without tying the configuration to a single deployment.
 
 ## Goals
 
-- Avoid re-entering Forward credentials per workspace.
-- Support multiple concurrent workspaces per user.
+- Avoid re-entering Forward credentials per user scope.
+- Support multiple concurrent deployments per user.
 - Work with in-cluster (c9s) deployments without inbound connectivity requirements.
 - Keep secrets local to Skyforge (stored server-side; never committed).
 
@@ -20,14 +20,14 @@ Store these per authenticated user:
 - Preferred collector (optional) if using a shared collector fleet.
 
 Why per-user:
-- A user’s Forward account is independent of a particular workspace.
-- Workspaces often come/go; the integration should persist.
+- A user’s Forward identity is independent of a particular deployment.
+- Deployments come and go; the integration should persist.
 
 ### 2) In-cluster Forward Collector (preferred data-plane)
 
 For deployments that live in the Kubernetes cluster (netlab-c9s/clabernetes), the simplest and most reliable approach is to run a Forward collector **inside the cluster**:
 
-- One collector per user (recommended), or one collector per workspace (simpler isolation).
+- One collector per user (recommended), or one collector per user scope (simpler isolation).
 - The collector establishes outbound connectivity to Forward, and uses in-cluster networking to reach the device management IPs (pod IPs / services).
 
 Benefits:
@@ -47,7 +47,7 @@ Two options:
 
 ### Option B: Skyforge provides a jump/bastion endpoint
 
-- Skyforge deploys a per-user (or per-workspace) SSH bastion inside the cluster and exposes it (NodePort/LoadBalancer/cloudflared TCP).
+- Skyforge deploys a per-user SSH bastion inside the cluster and exposes it (NodePort/LoadBalancer/cloudflared TCP).
 - The collector (outside) uses the bastion as a jump host to reach internal device addresses.
 
 Tradeoffs:
@@ -60,7 +60,7 @@ Tradeoffs:
   - Configure token and (optional) collector preference.
   - Test connection.
 - **Deployment run**: uses the user’s Forward profile by default.
-  - Still allow overrides (advanced) per workspace/deployment if needed.
+  - Still allow overrides (advanced) per user scope/deployment if needed.
 
 ## Implementation sketch (high level)
 

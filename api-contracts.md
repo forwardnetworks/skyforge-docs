@@ -67,7 +67,7 @@ OIDC login entry point:
 ## URL prefix contract (UI + API)
 
 Browser API base:
-- `/api/skyforge/api/*` (Traefik route to Encore service)
+- `/api/skyforge/api/*` (Gateway API route to Encore service)
 
 Static assets:
 - `/assets/skyforge/*`

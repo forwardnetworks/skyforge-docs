@@ -6,7 +6,7 @@ Skyforge uses a **blueprints** Git repository as the canonical catalog for:
 - Containerlab / Netlab templates
 - Cloud Terraform starter modules (AWS/Azure/GCP)
 
-Deployments reference these templates by **repo + folder path**; Skyforge does not need to copy templates into each workspace.
+Deployments reference these templates by **repo + folder path**; Skyforge does not need to copy templates into each user scope.
 
 ```mermaid
 flowchart LR
@@ -14,7 +14,7 @@ flowchart LR
   ui --> api[Skyforge Server]
 
   api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
-  api -->|creates| proj[Workspace repos<br/>{user}/{workspace}]
+  api -->|creates| proj[User repos<br/>{user}]
   api --> runner[Native task engine<br/>(Tofu / Netlab / EVE‑NG / Containerlab / Clabernetes)]
 
   runner -->|clones| proj
@@ -31,7 +31,7 @@ Keep the catalog predictable so the UI can offer sensible defaults:
 - `cloud/terraform/azure/…`
 - `cloud/terraform/gcp/…`
 - `eve-ng/<template-name>/…` (blueprints repo)
-- `blueprints/eve-ng/<template-name>/…` (workspace repo override)
+- `blueprints/eve-ng/<template-name>/…` (user repo override)
 - `netlab/<template>.yml`
 - `containerlab/<template>.yml`
 - `containerlab/<template>.yml` (also used by Clabernetes)
@@ -44,7 +44,7 @@ Notes:
 - Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
 - Clabernetes templates are Containerlab YAML topology files, deployed to Kubernetes via the clabernetes controller.
-- Project repos can keep templates under `blueprints/eve-ng/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for workspace-scoped customization.
+- User repos can keep templates under `blueprints/eve-ng/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for user-scoped customization.
 - EVE‑NG templates should include the `.unl` lab file (or a `.zip` containing it).
 - The bundled `blueprints/netlab/netlab-examples` is synced from the upstream Netlab examples; refresh it when updating Netlab to avoid template/filter mismatches.
 

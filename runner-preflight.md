@@ -18,13 +18,13 @@ systemctl is-active apache2.service netlab-api.service containerlab-api.service
 
 If any of these fail, fix host parity before running E2E so the failures don’t happen late in the workflow.
 
-## Fix root-owned Netlab workspace artifacts
+## Fix root-owned Netlab user artifacts
 
 If user workdirs under `/home/<user>/netlab/...` contain root-owned artifacts (commonly `netlab.lock` and `clab-*`), Netlab is likely running under `root` (or via `sudo`) and writing into the user tree.
 
 Recommended approach:
 
-- Run the upstream Netlab API (`netlab api ...`) under the same user that owns the lab workspace directory.
+- Run the upstream Netlab API (`netlab api ...`) under the same user that owns the lab user directory.
 - Ensure users have the required sudoers entries (see below) so Netlab does not require an interactive password prompt.
 
 ```bash

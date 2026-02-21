@@ -39,23 +39,23 @@ In practice, that means Netlab BYOS needs one of:
 - a pre-synced local working directory on the BYOS host (recommended), or
 - a future enhancement that stages template directories from git (outside the upstream netlab API scope).
 
-## Workspace configuration
+## Project configuration
 
-In workspace settings, BYOS is enabled per provider:
+In user-scope settings, BYOS is enabled per provider:
 
 - Netlab BYOS
   - `api_url` (e.g. `https://netlab.local.forwardnetworks.com`)
   - `api_auth` (token or user/pass)
   - `ssh_host` (optional; can be same host as `api_url`)
   - `ssh_user` + auth method (SSH key preferred; password fallback)
-  - `work_root` (e.g. `/home/<user>/netlab/<workspace>/`)
+  - `work_root` (e.g. `/home/<user>/netlab/<scope>/`)
 
 - Containerlab BYOS
   - `api_url` + auth
   - `ssh_host` (optional)
   - `work_root`
 
-Credential storage should match existing patterns (like EVE credentials): encrypted-at-rest, scoped to the workspace, never logged.
+Credential storage should match existing patterns (like EVE credentials): encrypted-at-rest, scoped to the user scope, never logged.
 
 ## Template delivery
 

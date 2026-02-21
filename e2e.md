@@ -29,6 +29,5 @@ Outputs are written under `skyforge-private/docs/` by default:
 - `skyforge-private/docs/e2e-reachability-status.md`
 
 ## Notes
-- Workspaces created by the E2E runner are deleted automatically at the end of the run (and on Ctrl+C).
-- To reuse an existing workspace (no auto-delete), set `SKYFORGE_E2E_WORKSPACE_ID`.
-
+- User-scope resources created by the E2E runner are deleted automatically at the end of the run (and on Ctrl+C).
+- To reuse an existing user scope (no auto-delete), set `SKYFORGE_E2E_SCOPE_ID`.

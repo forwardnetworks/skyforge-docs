@@ -1,4 +1,4 @@
-# Example “minimal” Skyforge install (Helm values overlay).
+# Example "minimal" Skyforge install (Helm values overlay).
 #
 # Notes:
 # - This disables most optional in-cluster tools.
@@ -9,7 +9,7 @@ skyforge:
     enabled: false
     apiUrl: "https://git.example/api/v1"
     url: "https://git.example"
-  minio:
+  s3gw:
     enabled: false
   objectStorage:
     endpoint: "s3.example.com:9000"
@@ -20,7 +20,7 @@ skyforge:
     enabled: false
   yaade:
     enabled: false
-  swaggerUI:
+  redoc:
     enabled: false
   forward:
     enabled: false

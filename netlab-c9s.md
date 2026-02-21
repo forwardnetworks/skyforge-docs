@@ -5,7 +5,7 @@ deploys the resulting Containerlab topology via Clabernetes.
 
 ## Phases
 
-1. **Generator (netlab create)**: runs inside the workspace namespace using
+1. **Generator (netlab create)**: runs inside the user namespace using
    `ENCORE_CFG_SKYFORGE.NetlabGenerator.GeneratorImage`.
 2. **Clabernetes deploy**: Skyforge sanitizes node names for Kubernetes, then
    deploys the generated `clab.yml`.

@@ -30,7 +30,7 @@ If either requirement is missing, the API call returns per-node errors in the re
 
 Endpoint:
 
-- `POST /api/workspaces/:id/deployments/:deploymentID/links/impair`
+- `POST /api/deploy/:deploymentID/links/impair`
 
 Example request:
 
@@ -53,4 +53,3 @@ To clear:
   "action": "clear"
 }
 ```
-
