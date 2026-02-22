@@ -51,3 +51,4 @@ Artifacts and merged reports are written to `artifacts/e2e-nos/<run-id>/`.
 - User-scope resources created by the E2E runner are deleted automatically at the end of the run (and on Ctrl+C).
 - To reuse an existing user scope (no auto-delete), set `SKYFORGE_E2E_SCOPE_ID`.
 - IOS-XR deploy validation requires elevated inotify limits on cluster nodes. Use the Helm chart option `skyforge.clabernetes.nodeSysctl.enabled=true` (recommended) or tune host sysctls manually.
+- Deployment tasks no longer gate on Forward SSH readiness. Forward sync is a separate task, so baseline deploy E2E validates topology + SSH probe directly.
