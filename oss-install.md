@@ -11,7 +11,7 @@ This is the “curl a script” style path intended to be easy to repeat on fres
 ## Recommended: run on the host (no tunnels)
 Run the installer **on the node** that will host k3s. This avoids SSH tunnel / kubeconfig issues during install drills.
 
-From a checkout of `skyforge-private/` on the node:
+From a checkout of `skyforge/` on the node:
 
 ```bash
 ./scripts/gen-secrets.sh --hostname "<skyforge-hostname>" --out ./deploy/skyforge-secrets.yaml

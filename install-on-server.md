@@ -10,8 +10,8 @@ This guide is optimized for **repeatable** installs and â€œclean install drillsâ
 sudo mkdir -p /opt
 sudo chown "$(id -u):$(id -g)" /opt
 cd /opt
-git clone https://github.com/forwardnetworks/skyforge-private.git skyforge-private
-cd /opt/skyforge-private
+git clone https://github.com/forwardnetworks/skyforge.git skyforge
+cd /opt/skyforge
 ```
 
 2) Create a secrets file

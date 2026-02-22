@@ -37,7 +37,7 @@ For k0s/containerd nodes, prefer `k0s ctr` (it uses the correct socket at `/run/
 You can SSH to each node and run the helper script:
 
 ```sh
-cd skyforge-private
+cd skyforge
 sudo ./scripts/preseed-images.sh --all --helm
 ```
 

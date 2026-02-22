@@ -2,7 +2,7 @@
 
 This checklist captures the work required to make Skyforge safe and practical to open source.
 
-Scope: `skyforge-private` as the current source-of-truth. This document assumes the goal is a
+Scope: `skyforge` as the current source-of-truth. This document assumes the goal is a
 public repo that can be deployed by external users without Forward Networks infrastructure.
 
 Status keys:

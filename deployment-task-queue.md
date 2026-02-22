@@ -59,6 +59,6 @@ Encore PubSub requires the Helm-shipped `infra.config.json` to stay in sync with
 To check drift locally:
 
 ```bash
-cd skyforge-private
+cd skyforge
 ./scripts/check-infra-config-sync.sh
 ```

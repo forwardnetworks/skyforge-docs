@@ -9,7 +9,7 @@ Skyforge PVCs.
 From your workstation:
 
 ```bash
-export KUBECONFIG=skyforge-private/.kubeconfig-skyforge
+export KUBECONFIG=skyforge/.kubeconfig-skyforge
 helm repo add longhorn https://charts.longhorn.io
 helm repo update
 helm upgrade --install longhorn longhorn/longhorn -n longhorn-system --create-namespace -f deploy/longhorn-values.yaml --wait --timeout 10m

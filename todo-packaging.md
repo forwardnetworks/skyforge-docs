@@ -82,7 +82,7 @@ We should be able to enable/disable features cleanly at chart install time.
 Local equivalent (run before any QA deploy):
 
 ```bash
-cd skyforge-private
+cd skyforge
 scripts/preflight-packaging.sh
 ```
 

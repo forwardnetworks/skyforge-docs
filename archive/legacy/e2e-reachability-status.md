@@ -29,7 +29,7 @@ Legend: ✅ pass · ❌ fail · ⏭ skipped · ❔ unknown
 
 ## How to run
 
-Run from `skyforge-private/server`:
+Run from `skyforge/server`:
 
 ```bash
 SKYFORGE_E2E_DEPLOY=true \

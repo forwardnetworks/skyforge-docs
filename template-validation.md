@@ -12,7 +12,7 @@ This runs `netlab create` inside the Netlab generator image, without deploying a
 
 ### CLI (bulk validate all Netlab templates)
 
-From `skyforge-private/`:
+From `skyforge/`:
 
 ```bash
 python3 scripts/validate_netlab_templates.py > /tmp/netlab-validate-report.md

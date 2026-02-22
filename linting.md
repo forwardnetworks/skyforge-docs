@@ -19,7 +19,7 @@ govulncheck ./...
 
 ## Portal (TanStack / Vite / TS)
 
-From `portal-tanstack`:
+From `components/portal`:
 
 ```bash
 pnpm install
@@ -46,5 +46,5 @@ From repo root:
 ```
 
 See also:
-- `docs/dev-workflow.md`
+- CI workflow docs in this repo's current `.github/workflows/` (if present)
 - `docs/secrets.md`

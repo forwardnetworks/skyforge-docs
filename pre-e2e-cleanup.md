@@ -21,7 +21,7 @@ Skyforge exposes an admin-only purge endpoint.
 This logs in as the shared admin user and calls the purge endpoint.
 
 ```bash
-cd skyforge-private/server
+cd skyforge/server
 go run ./cmd/purgeuser <username>
 ```
 
@@ -48,4 +48,4 @@ Body:
 If a prior run left state behind (e.g. a failed job), clean the user directory on the relevant EVE host before rerunning.
 
 ## 5) Cluster sanity (kubectl only)
-Run `skyforge-private/docs/post-install-verify.md` before starting E2E.
+Run `skyforge/docs/post-install-verify.md` before starting E2E.

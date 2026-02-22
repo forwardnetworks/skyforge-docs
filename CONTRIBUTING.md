@@ -12,7 +12,7 @@ By participating, you agree to the Code of Conduct in `CODE_OF_CONDUCT.md`.
 
 ## Repo layout
 - `server/` — Encore service code (API, integrations, orchestration).
-- `portal-tanstack/` — TanStack Router + Vite UI.
+- `components/portal/` — TanStack Router + Vite UI.
 - `k8s/` — Kubernetes manifests and overlays (k3s-first).
 - `docs/` — deployment + maintenance docs.
 
@@ -30,7 +30,7 @@ By participating, you agree to the Code of Conduct in `CODE_OF_CONDUCT.md`.
 - Use the smoke checks in `docs/smoke-tests.md` for validation.
 - If you touch API contracts, re-generate the OpenAPI spec and TypeScript client:
   - `./scripts/gen-openapi.sh`
-  - `cd portal-tanstack && pnpm gen:openapi`
+  - `cd components/portal && pnpm gen:openapi`
 
 ## Issues & PRs
 - File bugs or feature requests via GitHub issues.

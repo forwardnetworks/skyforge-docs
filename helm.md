@@ -42,7 +42,7 @@ OCI artifact and install directly from `ghcr.io`.
 ### Publish (dev machine)
 
 ```bash
-cd skyforge-private
+cd skyforge
 
 # Login (uses your existing gh auth)
 gh auth refresh -h github.com -s write:packages,read:packages

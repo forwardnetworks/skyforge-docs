@@ -33,14 +33,14 @@ Netlab is installed into the netlab generator image from:
 3) Build and push a new generator image:
 
 ```bash
-cd skyforge-private/netlab/generator
+cd skyforge/netlab/generator
 docker buildx build --platform linux/amd64 \
   -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
   --push .
 ```
 
 4) Update `deploy/skyforge-values.yaml` to point to the new `generatorImage`.
-5) Deploy QA then prod (see `docs/deploy-qa-then-prod.md`).
+5) Deploy using the current Helm + k3s workflow docs (`install-on-server.md`, `helm.md`, and `post-install-verify.md`).
 
 ## Clabernetes fork
 
@@ -115,6 +115,6 @@ Build/push and then bump the Helm values to match.
 Before any QA deploy, run:
 
 ```bash
-cd skyforge-private
+cd skyforge
 scripts/preflight-packaging.sh
 ```
