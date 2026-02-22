@@ -1,6 +1,6 @@
 # Device-type E2E tests (Netlab + Containerlab)
 
-This doc describes the **device-type** end-to-end tests implemented in `skyforge-private/server/cmd/e2echeck`.
+This doc describes the **device-type** end-to-end tests implemented in `components/server/cmd/e2echeck`.
 
 Goal: quickly answer **“do the device types we ship actually work?”** (template validates, and optionally deploys + accepts SSH).
 
@@ -12,6 +12,7 @@ By default, the E2E matrix targets a curated list of “onboarded” device type
 
 - Use `SKYFORGE_E2E_DEVICE_SET=all` to instead generate tests from the upstream Netlab catalog (`internal/taskengine/netlab_device_defaults.json`).
 - `vsrx` is explicitly excluded (out of scope).
+- Onboarded hard-gate set: `arubacx,asav,iol,iol,cumulus,dellos10,eos,fortios,iol,iol,ioll2,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
 
 ### Default depth: validate-only
 
@@ -38,7 +39,7 @@ They are auto-seeded into the `skyforge/blueprints` repo by Skyforge bootstrap.
 
 ## Running locally against Skyforge (in-cluster)
 
-From `skyforge-private/server`:
+From `components/server`:
 
 ```bash
 go run ./cmd/e2echeck --generate-matrix > /tmp/skyforge-e2e-matrix.json
@@ -47,7 +48,6 @@ go run ./cmd/e2echeck --generate-matrix > /tmp/skyforge-e2e-matrix.json
 ### Validate device types (fast)
 
 ```bash
-export SKYFORGE_E2E_MATRIX_FILE=/tmp/skyforge-e2e-matrix.json
 export SKYFORGE_E2E_DEPLOY=false
 go run ./cmd/e2echeck --run-generated
 ```
@@ -55,9 +55,8 @@ go run ./cmd/e2echeck --run-generated
 ### Deploy + SSH probe (slow)
 
 ```bash
-export SKYFORGE_E2E_MATRIX_FILE=/tmp/skyforge-e2e-matrix.json
 export SKYFORGE_E2E_DEPLOY=true
-export SKYFORGE_E2E_DEPLOY_DEVICES=eos,iol,iosv
+export SKYFORGE_E2E_DEPLOY_DEVICES=eos,iol,iol
 go run ./cmd/e2echeck --run-generated
 ```
 
@@ -65,6 +64,22 @@ Notes:
 
 - SSH probing uses a Kubernetes Job by default (`SKYFORGE_E2E_SSH_PROBE_MODE=job`).
 - If your local `kubectl` can’t reach the cluster, run the E2E command *from a Skyforge node* (or fix kube access) so `kubectl` works.
+
+## Full NOS certification (hard gate)
+
+Run from repo root:
+
+```bash
+make e2e-nos-full
+```
+
+This performs:
+
+- `scripts/e2e-netlab-nos-preflight.sh` (tools + cluster + image ref checks)
+- `scripts/e2e-netlab-nos-full.sh` (sharded deploy+SSH runs across all onboarded NOS)
+- `scripts/e2e-netlab-nos-report.sh` (merged pass/fail summary)
+
+Artifacts are written under `artifacts/e2e-nos/<run-id>/`.
 
 ## BYOS runners (netlab.local.forwardnetworks.com)
 

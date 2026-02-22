@@ -25,8 +25,8 @@
       "error": "gitea provisioning is not configured",
       "notes": "deployment failed"
     },
-    "cat8000v": {
-      "device": "cat8000v",
+    "iol": {
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:40:29Z",
       "last_fail_at": "2026-02-19T10:40:29Z",
@@ -37,8 +37,8 @@
       "error": "gitea provisioning is not configured",
       "notes": "deployment failed"
     },
-    "csr": {
-      "device": "csr",
+    "iol": {
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:41:45Z",
       "last_fail_at": "2026-02-19T10:41:45Z",
@@ -111,8 +111,8 @@
       "error": "gitea provisioning is not configured",
       "notes": "deployment failed"
     },
-    "iosv": {
-      "device": "iosv",
+    "iol": {
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:48:12Z",
       "last_fail_at": "2026-02-19T10:48:12Z",
@@ -123,8 +123,8 @@
       "error": "gitea provisioning is not configured",
       "notes": "deployment failed"
     },
-    "iosvl2": {
-      "device": "iosvl2",
+    "ioll2": {
+      "device": "ioll2",
       "status": "fail",
       "updatedAt": "2026-02-19T10:50:01Z",
       "last_fail_at": "2026-02-19T10:50:01Z",
@@ -248,7 +248,7 @@
       "notes": "deployment failed"
     },
     {
-      "device": "cat8000v",
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:40:29Z",
       "last_fail_at": "2026-02-19T10:40:29Z",
@@ -260,7 +260,7 @@
       "notes": "deployment failed"
     },
     {
-      "device": "csr",
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:41:45Z",
       "last_fail_at": "2026-02-19T10:41:45Z",
@@ -334,7 +334,7 @@
       "notes": "deployment failed"
     },
     {
-      "device": "iosv",
+      "device": "iol",
       "status": "fail",
       "updatedAt": "2026-02-19T10:48:12Z",
       "last_fail_at": "2026-02-19T10:48:12Z",
@@ -346,7 +346,7 @@
       "notes": "deployment failed"
     },
     {
-      "device": "iosvl2",
+      "device": "ioll2",
       "status": "fail",
       "updatedAt": "2026-02-19T10:50:01Z",
       "last_fail_at": "2026-02-19T10:50:01Z",

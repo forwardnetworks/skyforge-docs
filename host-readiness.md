@@ -10,7 +10,7 @@ This guide details the requirements and configuration steps to prepare a compute
 - **Disk:** SSD recommended for image storage and IO performance.
 - **Virtualization:**
   - If running on **Bare Metal**: VT-x/AMD-V enabled in BIOS.
-  - If running as a **VM**: **Nested Virtualization** must be enabled to run VM-based network nodes (e.g., vEOS, IOSv).
+  - If running as a **VM**: **Nested Virtualization** must be enabled to run VM-based network nodes (e.g., vEOS, iol).
 
 ### Operating System
 - **Linux:** Ubuntu 22.04 LTS or Debian 11/12 recommended.

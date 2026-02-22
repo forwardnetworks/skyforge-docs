@@ -35,3 +35,7 @@ Skyforge does not rely on Ansible for Netlab C9s post-up configuration.
 
 Skyforge rewrites generated NOS images (for example, `ceos:*`, `vrnetlab/*`) to
 use the `ghcr.io/forwardnetworks/*` mirror so Clabernetes can pull them.
+
+For Cumulus VX in native mode, Skyforge pins the netlab default image to:
+
+- `ghcr.io/forwardnetworks/networkop-cx:5.3.0` (mirror of `networkop/cx:5.3.0`)
