@@ -1,7 +1,7 @@
 # Skyforge User-Only Hard Cutover Plan
 
 ## Goal
-Move Skyforge to true user-only scope. Remove workspace/project/account architecture and all backward-compatibility paths.
+Move Skyforge to true user-only scope. Remove userScope/project/account architecture and all backward-compatibility paths.
 
 ## Decisions
 - Database strategy: data reset + clean schema.
@@ -9,7 +9,7 @@ Move Skyforge to true user-only scope. Remove workspace/project/account architec
 
 ## Target state
 - Ownership key is username.
-- No workspace/project/account context in API contracts, task contracts, or UI state.
+- No userScope/project/account context in API contracts, task contracts, or UI state.
 - No account chooser/selector in portal.
 - Admin paths are explicitly username-scoped.
 
@@ -26,7 +26,7 @@ Move Skyforge to true user-only scope. Remove workspace/project/account architec
 - Introduce user-scoped canonical paths:
   - `/api/...` for authenticated user operations.
   - `/api/admin/users/:username/...` for admin operations.
-- Remove account/project/workspace fields from request/response DTOs.
+- Remove account/project/userScope fields from request/response DTOs.
 
 ### 3) Task engine and worker
 - Replace task ownership (`ProjectID`) with `Username`.
@@ -46,11 +46,11 @@ Move Skyforge to true user-only scope. Remove workspace/project/account architec
 ### 6) Charts/scripts/docs
 - Regenerate OpenAPI and chart swagger for user-only API.
 - Update smoke/e2e scripts for user-only endpoints.
-- Remove compatibility docs/mentions for workspace/project/account architecture.
+- Remove compatibility docs/mentions for userScope/project/account architecture.
 
 ### 7) Guardrails
 - CI check fails if forbidden scope terms are reintroduced in source paths.
-- OpenAPI schema check fails if Skyforge scope contracts include account/project/workspace IDs.
+- OpenAPI schema check fails if Skyforge scope contracts include account/project/userScope IDs.
 
 ## One-shot execution order
 1. Schema reset migration.
@@ -61,7 +61,7 @@ Move Skyforge to true user-only scope. Remove workspace/project/account architec
 6. Smoke + manual verification.
 
 ## Acceptance criteria
-- No user flow requires account/project/workspace scope.
+- No user flow requires account/project/userScope scope.
 - API contracts expose only user-scoped identifiers.
 - Server + portal checks pass.
 - Deployed system passes smoke checks with Dex login and core workflows.
@@ -92,7 +92,7 @@ Move Skyforge to true user-only scope. Remove workspace/project/account architec
 - [x] API/Portal hard-cut slice: deployment contracts now emit `scopeId` (deployment list/action/info, deployment inventory/forward/ui-events, and dashboard deployment snapshots), with portal deployment/designer consumers updated for `scopeId` + legacy fallback.
 - [x] API/Portal hard-cut slice: policy report contracts now emit `scopeId` (networks + governance campaigns/assignments/exceptions), with portal API typings updated to `scopeId` canonical.
 - [x] Portal hard-cut slice: designer import/draft/save/map flows now pin to local user scope and no longer rehydrate foreign legacy `accountId`/`scopeId` from persisted payloads.
-- [x] Chart hard-cut slice: removed legacy workspace-compat SQL stubs (`drop/ensure legacy_workspace_id`, `project_hard_cutover`) from migrate ConfigMap/atlas manifest.
+- [x] Chart hard-cut slice: removed legacy userScope-compat SQL stubs (`drop/ensure legacy_userScope_id`, `project_hard_cutover`) from migrate ConfigMap/atlas manifest.
 - [x] API hard-cut slice: variable-group list response no longer exposes `accountId`.
 - [x] API hard-cut slice: removed legacy scope `accountId` response fields from user artifacts/templates/runs/netlab-config/designer/eve endpoints (keeping provider account identifiers where required).
 - [x] Portal hard-cut slice: removed account-scoped policy-reports e2e route and accountId fallbacks in run/admin views; scope-typed client models no longer carry compatibility `accountId` fields for scope-based responses.

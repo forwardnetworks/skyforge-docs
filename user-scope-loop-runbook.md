@@ -1,6 +1,6 @@
 # User-Scope Cleanup Loop Runbook
 
-This runbook defines the repeatable loop to remove remaining legacy ownership semantics (`workspace/project/account`) from active Skyforge runtime code.
+This runbook defines the repeatable loop to remove remaining legacy ownership semantics (`userScope/project/account`) from active Skyforge runtime code.
 
 ## Loop command
 

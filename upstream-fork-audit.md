@@ -51,7 +51,7 @@ This document captures the current fork status for the Skyforge vendored project
 
 ### Remaining high-churn cleanup
 
-- `Workspace*` API operation naming in server and portal-generated client symbols (hard-cut migration planned)
+- `UserScope*` API operation naming in server and portal-generated client symbols (hard-cut migration planned)
 
 ## Clean PR and deployment gates
 

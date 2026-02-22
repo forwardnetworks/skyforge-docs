@@ -12,7 +12,7 @@ This repository is user-scoped by default. Internal Skyforge architecture must u
 
 ## Forbidden Legacy Architecture Terms
 
-- `workspace`
+- `userScope`
 - `project` (unless provider-native)
 - `account` (unless provider-native)
 
@@ -31,4 +31,4 @@ This repository is user-scoped by default. Internal Skyforge architecture must u
 ## Enforcement
 
 - CI/local checks run `scripts/check-portal-terminology.sh`.
-- New code should not introduce account/project/workspace naming for Skyforge-owned scope concepts.
+- New code should not introduce account/project/userScope naming for Skyforge-owned scope concepts.
