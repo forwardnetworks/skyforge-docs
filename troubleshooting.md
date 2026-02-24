@@ -43,3 +43,22 @@ Skyforge uses Gitea’s versioned REST API under:
 - `http://gitea:3000/api/v1`
 
 Do not attempt to “remove v1” from Gitea URLs.
+
+## Encore docker build hangs locally
+Symptom:
+- `encore build docker --push` appears to stall indefinitely with no progress.
+
+Cause:
+- Local Encore daemon/workspace state can deadlock in direct-build mode.
+
+Required fix path:
+- Do not run raw `encore build docker` for Skyforge server images.
+- Use the canonical script only:
+
+```bash
+./scripts/build-push-skyforge-server.sh --tag <tag>
+```
+
+Notes:
+- The script enforces standalone mirror builds and dedicated daemon isolation.
+- This is the supported local build path for deterministic results.
