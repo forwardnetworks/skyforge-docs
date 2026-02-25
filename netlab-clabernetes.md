@@ -98,7 +98,7 @@ docker buildx build --platform linux/amd64 \
   in the runtime image.
 - Skyforge must remain cluster-native: no Docker socket mounts and no `docker exec` paths.
 - SSH readiness gating:
-  - Controlled by `SKYFORGE_NETLAB_INITIAL_SSH_READY_SECONDS` (defaults to `SKYFORGE_FORWARD_SSH_READY_SECONDS`, default 900s).
+  - Controlled by internal taskengine readiness windows derived from deployed device types.
   - Uses an SSH banner check (reads `SSH-`), not just a TCP connect, to reduce false positives.
 
 ## Open questions
