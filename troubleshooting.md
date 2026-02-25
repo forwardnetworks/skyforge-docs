@@ -74,7 +74,7 @@ Guardrails:
 - The deploy script hard-fails if:
   - worker tag is not `<server-tag>-worker`,
   - the deployed image refs do not match requested refs,
-  - the live `/assets/skyforge/*` entrypoint hash does not match the running server pod.
+  - the live `/assets/skyforge/*` entrypoint hash does not match local built `components/server/skyforge/frontend_dist`.
 
 Recommended production flow:
 ```bash
