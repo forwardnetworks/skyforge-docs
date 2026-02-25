@@ -28,6 +28,18 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 - Create a deployment.
 - Delete the deployment and confirm it disappears.
 
+## Deployment action idempotency smoke (API-level)
+```bash
+cd components/server
+SKYFORGE_BASE_URL="https://<hostname>" \
+SKYFORGE_SECRETS_FILE="../../deploy/skyforge-secrets.yaml" \
+SKYFORGE_SMOKE_ACTION_CHECK=true \
+go run ./cmd/smokecheck
+```
+
+This exercises `/api/users/:id/deployments/:deploymentID/action` with
+`stop/create/start` and validates idempotency reason behavior.
+
 ## Optional integration checks
 - Git UI: `https://<hostname>/api/gitea/public`
 - NetBox UI: `https://<hostname>/netbox/`

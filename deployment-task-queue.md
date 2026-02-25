@@ -87,3 +87,10 @@ cd skyforge
 ./scripts/check-deployment-action-contract.sh
 ./scripts/check-deployment-action-matrix.sh
 ```
+
+Generated contract drift check:
+
+```bash
+cd skyforge
+./scripts/check-generated-drift.sh
+```
