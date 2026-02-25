@@ -62,3 +62,25 @@ Required fix path:
 Notes:
 - The script enforces standalone mirror builds and dedicated daemon isolation.
 - This is the supported local build path for deterministic results.
+
+## Prevent stale UI/image deploy drift
+Symptom:
+- A deploy "succeeds" but the UI still reflects older routes/pages.
+
+Guardrails:
+- `scripts/deploy-skyforge-prod-safe.sh` now requires explicit image refs by default:
+  - `SKYFORGE_SERVER_IMAGE=<repo>:<tag>`
+  - `SKYFORGE_SERVER_WORKER_IMAGE=<repo>:<tag>-worker`
+- The deploy script hard-fails if:
+  - worker tag is not `<server-tag>-worker`,
+  - the deployed image refs do not match requested refs,
+  - the live `/assets/skyforge/*` entrypoint hash does not match the running server pod.
+
+Recommended production flow:
+```bash
+./scripts/build-push-skyforge-server.sh --tag <tag>
+
+SKYFORGE_SERVER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag> \
+SKYFORGE_SERVER_WORKER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag>-worker \
+./scripts/deploy-skyforge-prod-safe.sh
+```
