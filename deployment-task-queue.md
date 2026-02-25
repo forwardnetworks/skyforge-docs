@@ -7,8 +7,18 @@ Canonical deployment operation endpoint:
 
 - `POST /api/users/:id/deployments/:deploymentID/action`
   - body: `{"action":"create|start|stop|destroy|export"}`
+  - action parsing is strict and typed:
+    - accepted: `create`, `start`, `stop`, `destroy`, `export`
+    - empty action defaults to `start`
+    - unknown values return `invalid_argument`
   - response may include idempotency metadata:
     - `idempotent`, `noOp`, `reason`, `state.desired`, `state.observed`
+    - `reason`: `queued`, `already_present`, `already_absent`, `in_flight_duplicate`, `cooldown_suppressed`
+    - `state.desired|observed`: `present`, `absent`, `unknown`
+
+Deployment config decoding is strict per provider type; unknown fields in
+`deployment.config` are rejected with `failed_precondition` instead of being
+silently ignored.
 
 ## Why this exists
 
@@ -68,4 +78,12 @@ To check drift locally:
 ```bash
 cd skyforge
 ./scripts/check-infra-config-sync.sh
+```
+
+Deployment action contract + matrix checks:
+
+```bash
+cd skyforge
+./scripts/check-deployment-action-contract.sh
+./scripts/check-deployment-action-matrix.sh
 ```
