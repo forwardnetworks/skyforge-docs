@@ -49,7 +49,7 @@ Symptom:
 - `encore build docker --push` appears to stall indefinitely with no progress.
 
 Cause:
-- Local Encore daemon/workspace state can deadlock in direct-build mode.
+- Running `encore build docker` directly from `components/server` (a submodule with a `.git` indirection file) can trigger an Encore workspace-root resolution loop.
 
 Required fix path:
 - Do not run raw `encore build docker` for Skyforge server images.
