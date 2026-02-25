@@ -43,13 +43,10 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
   - `C9sGeneratorMode`: `"k8s"`
-  - `GeneratorImage`: netlab generator image (required for `netlab-c9s`)
-  - `ApplierImage`: netlab applier image (required for `netlab initial` apply)
+  - `GeneratorImage`: netlab runtime image (required for `netlab-c9s` generation and `netlab initial` apply)
 - Helm values (recommended):
-  - `skyforge.netlabC9s.generatorImage`
-  - `skyforge.netlabC9s.generatorPullPolicy`
-  - `skyforge.netlabC9s.applierImage`
-  - `skyforge.netlabC9s.applierPullPolicy`
+  - `skyforge.netlabC9s.image`
+  - `skyforge.netlabC9s.pullPolicy`
 - SR OS license injection (required when deploying `sros`):
   - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
   - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
@@ -61,15 +58,6 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 cd netlab/generator
 docker buildx build --platform linux/amd64 \
   -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
-  --push .
-```
-
-### Build the applier image
-
-```bash
-cd netlab/applier
-docker buildx build --platform linux/amd64 \
-  -t ghcr.io/forwardnetworks/skyforge-netlab-applier:<tag> \
   --push .
 ```
 
@@ -107,7 +95,7 @@ docker buildx build --platform linux/amd64 \
 
 - `netlab initial` uses netlab’s Ansible task library (`netsim/ansible/...`) and requires
   the corresponding Ansible network collections (Junos/NXOS/IOS/EOS/etc.) to be present
-  in the applier image.
+  in the runtime image.
 - Skyforge must remain cluster-native: no Docker socket mounts and no `docker exec` paths.
 - SSH readiness gating:
   - Controlled by `SKYFORGE_NETLAB_INITIAL_SSH_READY_SECONDS` (defaults to `SKYFORGE_FORWARD_SSH_READY_SECONDS`, default 900s).

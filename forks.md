@@ -24,7 +24,7 @@ Netlab is installed into the netlab generator image from:
 
 - `netlab/generator/requirements.txt` (git URL pinned to a commit)
 - Generator image built/pushed to GHCR
-- Helm values set `skyforge.netlabC9s.generatorImage`
+- Helm values set `skyforge.netlabC9s.image`
 
 ### Updating netlab in Skyforge
 
@@ -39,7 +39,7 @@ docker buildx build --platform linux/amd64 \
   --push .
 ```
 
-4) Update `deploy/skyforge-values.yaml` to point to the new `generatorImage`.
+4) Update `deploy/skyforge-values.yaml` to point to the new `skyforge.netlabC9s.image`.
 5) Deploy using the current Helm + k3s workflow docs (`install-on-server.md`, `helm.md`, and `post-install-verify.md`).
 
 ## Clabernetes fork
