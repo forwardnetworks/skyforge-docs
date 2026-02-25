@@ -50,6 +50,10 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `skyforge.netlabC9s.generatorPullPolicy`
   - `skyforge.netlabC9s.applierImage`
   - `skyforge.netlabC9s.applierPullPolicy`
+- SR OS license injection (required when deploying `sros`):
+  - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
+  - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
+  - Skyforge mounts this as `/.license` for SR OS nodes so vrnetlab can load it as `/tftpboot/license.txt`.
 
 ### Build the generator image
 

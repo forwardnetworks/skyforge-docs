@@ -50,6 +50,20 @@ kubectl -n skyforge get secret skyforge-admin-shared dex-google-client-secret pr
 kubectl -n skyforge get deploy skyforge-server skyforge-server-worker dex db gitea s3gw
 ```
 
+## Queue / worker sanity (recommended)
+From a logged-in admin session, verify task queue diagnostics are healthy:
+
+```bash
+curl -k https://skyforge.local.forwardnetworks.com/api/admin/tasks/diag
+```
+
+Expected at idle:
+- `status` is `ok`
+- `queued=0`
+- `running=0`
+- `publishFailures10m=0`
+- `stuckQueuedCandidates=0`
+
 ## Yaade sanity (optional)
 ```bash
 kubectl -n skyforge rollout status deploy/yaade

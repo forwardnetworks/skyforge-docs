@@ -12,7 +12,7 @@ By default, the E2E matrix targets a curated list of “onboarded” device type
 
 - Use `SKYFORGE_E2E_DEVICE_SET=all` to instead generate tests from the upstream Netlab catalog (`internal/taskengine/netlab_device_defaults.json`).
 - `vsrx` is explicitly excluded (out of scope).
-- Onboarded hard-gate set: `arubacx,asav,iol,iol,cumulus,dellos10,eos,fortios,iol,iol,ioll2,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
+- Onboarded hard-gate set: `arubacx,asav,cumulus,dellos10,eos,fortios,iol,iosxr,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
 
 ### Default depth: validate-only
 
@@ -21,21 +21,13 @@ By default the matrix contains **only `netlab_validate` tests**. Deploy tests ar
 - Enable in-cluster deploy + SSH probe with `SKYFORGE_E2E_DEPLOY=true`.
 - Limit which device types are deployed with `SKYFORGE_E2E_DEPLOY_DEVICES=...`.
 
-### Optional depth: advanced routing templates
+### SNMPv3 hard-cut gates
 
-Enable additional templates (OSPF + BGP) with:
+- Per-NOS individual templates: `make e2e-snmpv3-nos`
+- Full-mesh release baseline: `make e2e-baseline-fullmesh`
+- Combined release gate: `make e2e-release-gate`
 
-```bash
-export SKYFORGE_E2E_ADVANCED=true
-```
-
-These templates exist under the shared blueprint catalog as:
-
-- `netlab/_e2e/minimal/topology.yml`
-- `netlab/_e2e/routing-ospf/topology.yml`
-- `netlab/_e2e/routing-bgp/topology.yml`
-
-They are auto-seeded into the `skyforge/blueprints` repo by Skyforge bootstrap.
+Both gates require Forward deep verification and fail when any non-linux node is not SNMPv3-enabled.
 
 ## Running locally against Skyforge (in-cluster)
 
@@ -62,8 +54,13 @@ go run ./cmd/e2echeck --run-generated
 
 Notes:
 
-- SSH probing uses a Kubernetes Job by default (`SKYFORGE_E2E_SSH_PROBE_MODE=job`).
-- If your local `kubectl` can’t reach the cluster, run the E2E command *from a Skyforge node* (or fix kube access) so `kubectl` works.
+- SSH probing for release gates should use API mode:
+  - `SKYFORGE_E2E_SSH_PROBE_MODE=api`
+  - `SKYFORGE_E2E_REQUIRE_API_PROBE=true`
+- Queue and worker health should be enforced in gate runs:
+  - `SKYFORGE_E2E_GATE_QUEUE_HEALTH=true`
+  - `SKYFORGE_E2E_QUEUE_MAX_AGE_SECONDS=300`
+  - `SKYFORGE_E2E_HEARTBEAT_MAX_AGE_SECONDS=120`
 
 ## Full NOS certification (hard gate)
 
