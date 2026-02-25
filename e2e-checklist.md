@@ -31,6 +31,7 @@ This checklist is meant to be run **after** a deploy (Helm) when you want a sing
   - Pick a template source (blueprints repo or user repo).
   - Pick a template.
 - Run actions in order:
+  - Use the canonical deployment action endpoint: `POST /api/users/:id/deployments/:deploymentID/action`
   - `Create` (should provision user-scope files without starting lab)
   - `Start` / `Up`
   - `Info` (should show `netlab status` output with IPs/topology)

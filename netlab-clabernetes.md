@@ -79,7 +79,7 @@ docker buildx build --platform linux/amd64 \
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
-   - Uses a per-user namespace (`user-<username>`) to isolate resources.
+   - Uses a per-user namespace (`ws-<userScopeSlug>`) to isolate resources.
    - Applies the `Topology` CR; waits for `status.topologyReady=true`.
 
 6) **Status + logs**

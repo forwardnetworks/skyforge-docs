@@ -19,15 +19,16 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 Notes:
 - There is no separate “conversion” step required: clabernetes accepts the Containerlab YAML directly via `spec.definition.containerlab`.
-- Skyforge places each user scope into its own Kubernetes namespace by default: `user-<username>` (sanitized).
+- Skyforge places each user scope into its own Kubernetes namespace by default:
+  `ws-<userScopeSlug>` (sanitized).
 
 ### 2) Netlab → C9s (deployment type: `netlab-c9s`)
 
 Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then deploys those artifacts to Kubernetes via clabernetes:
 
-1. Skyforge syncs the Netlab template folder and runs Netlab generation in one of two modes:
-   - **remote (default):** BYOS Netlab server over the Netlab API
-   - **k8s (planned):** in-cluster generator Job (see `docs/netlab-clabernetes.md`)
+1. Skyforge syncs the Netlab template folder and runs Netlab generation in-cluster
+   via Kubernetes Job (`netlab-c9s` native mode). BYOS Netlab server mode is not
+   used for this path.
 2. Runs `netlab create` to generate:
    - `clab.yml`
    - `node_files/…` (startup configs and related files)

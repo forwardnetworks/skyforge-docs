@@ -3,6 +3,13 @@
 Skyforge stores all deployment operations as tasks in `sf_tasks`. Tasks are
 queued per deployment and run FIFO (first in, first out).
 
+Canonical deployment operation endpoint:
+
+- `POST /api/users/:id/deployments/:deploymentID/action`
+  - body: `{"action":"create|start|stop|destroy|export"}`
+  - response may include idempotency metadata:
+    - `idempotent`, `noOp`, `reason`, `state.desired`, `state.observed`
+
 ## Why this exists
 
 If a user clicks an action multiple times (or multiple users act on the same
