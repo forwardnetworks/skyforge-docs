@@ -21,13 +21,13 @@ By default the matrix contains **only `netlab_validate` tests**. Deploy tests ar
 - Enable in-cluster deploy + SSH probe with `SKYFORGE_E2E_DEPLOY=true`.
 - Limit which device types are deployed with `SKYFORGE_E2E_DEPLOY_DEVICES=...`.
 
-### SNMPv3 hard-cut gates
+### SNMPv2 hard-cut gates
 
-- Per-NOS individual templates: `make e2e-snmpv3-nos`
+- Per-NOS individual templates: `make e2e-snmpv2-nos`
 - Full-mesh release baseline: `make e2e-baseline-fullmesh`
 - Combined release gate: `make e2e-release-gate`
 
-Both gates require Forward deep verification and fail when any non-linux node is not SNMPv3-enabled.
+Both gates require Forward deep verification and fail when any non-linux node is not SNMPv2-enabled.
 
 ## Running locally against Skyforge (in-cluster)
 

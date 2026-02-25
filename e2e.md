@@ -49,7 +49,7 @@ make e2e-nos-full
 
 Artifacts and merged reports are written to `artifacts/e2e-nos/<run-id>/`.
 
-## Release baseline gates (SNMPv3 hard-cut)
+## Release baseline gates (SNMPv2 hard-cut)
 
 Run from repo root:
 
@@ -59,8 +59,8 @@ make e2e-release-gate
 
 This runs:
 
-- `make e2e-snmpv3-nos` (per-NOS individual templates; hard fail if SNMPv3 is not wired)
-- `make e2e-baseline-fullmesh` (all NOS in one mesh; hard fail on Forward/SNMPv3 checks)
+- `make e2e-snmpv2-nos` (per-NOS individual templates; hard fail if SNMPv2 is not wired)
+- `make e2e-baseline-fullmesh` (all NOS in one mesh; hard fail on Forward/SNMPv2 checks)
 
 Required Forward env vars for deep verify:
 
