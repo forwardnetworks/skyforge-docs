@@ -32,6 +32,10 @@ Examples:
 - Object storage access/secret keys
 - Any private keys/certificates (TLS/SSH CA keys, etc.)
 
+Quick Deploy specific:
+- `SKYFORGE_QUICK_DEPLOY_FORWARD_USERNAME`
+- `SKYFORGE_QUICK_DEPLOY_FORWARD_PASSWORD`
+
 If you accidentally committed a secret:
 1. Rotate it immediately.
 2. Remove it from git history (if required for public release).
