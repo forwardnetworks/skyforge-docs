@@ -16,6 +16,13 @@ Canonical deployment operation endpoint:
     - `reason`: `queued`, `already_present`, `already_absent`, `in_flight_duplicate`, `cooldown_suppressed`
     - `state.desired|observed`: `present`, `absent`, `unknown`
 
+Canonical deployment preflight endpoint:
+
+- `POST /api/users/:id/deployments/:deploymentID/preflight`
+  - body: `{"action":"create|start|stop|destroy"}`
+  - no queue side-effects
+  - emits the same idempotency metadata contract (`idempotent`, `noOp`, `reason`, `state`)
+
 Deployment config decoding is strict per provider type; unknown fields in
 `deployment.config` are rejected with `failed_precondition` instead of being
 silently ignored.
@@ -80,13 +87,18 @@ cd skyforge
 ./scripts/check-infra-config-sync.sh
 ```
 
-Deployment action contract + matrix checks:
+Deployment action/preflight contract + matrix checks:
 
 ```bash
 cd skyforge
 ./scripts/check-deployment-action-contract.sh
 ./scripts/check-deployment-action-matrix.sh
 ```
+
+`check-deployment-action-contract.sh` enforces:
+- no legacy `/start|/stop|/destroy` wrapper endpoints in server/chart OpenAPI
+- required canonical `/action` and `/preflight` endpoints in OpenAPI
+- no legacy wrapper endpoint usage in first-party clients (`portal` API helper, `cmd/e2echeck`, `cmd/smokecheck`)
 
 Generated contract drift check:
 

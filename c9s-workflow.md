@@ -42,6 +42,61 @@ Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then de
 
 This gives an end-to-end “Netlab template → k8s lab” path without needing an external Containerlab host.
 
+### Deploy policy + phased task events
+
+- For `clabernetes-run` deploy actions, Skyforge resolves deploy policy once per task
+  (connectivity, expose mode, scheduling mode, resource flags, deploy timeout) and stores it
+  in task metadata as `clabernetesDeployPolicy`.
+- Retries/resume of the same task re-use this persisted policy to prevent mid-run behavior drift
+  when environment inputs change.
+- Deploy tasks emit phased events under `clabernetes.deploy.phase`:
+  - `policy.resolved`
+  - `cr.applied`
+  - `pods.ready`
+  - `native_mode.verified`
+  - `topology_graph.captured`
+  - `ssh_ready.completed` (only when SSH readiness gating is enabled)
+
+### Source of truth chain (Netlab → Skyforge → Clabernetes)
+
+- Netlab device metadata is generated from upstream `vendor/netlab/netsim/devices/*.yml` into
+  `internal/taskengine/netlab_device_defaults.json` (and API copy).
+- Skyforge resolves node device identity strictly from this generated catalog in order:
+  1. exact `device`
+  2. `clab_kind`
+  3. `image_prefix`
+- Unknown or alias-only devices fail preflight (fail-closed).
+- Netlab-C9s tasks persist catalog provenance in task metadata/event:
+  - metadata key: `netlabCatalogProvenance`
+  - task event: `netlab.catalog.provenance`
+- Netlab-C9s tasks also persist node resolution summary:
+  - metadata key: `netlabNodeResolutionSummary`
+  - task event: `netlab.node_resolution.summary`
+- Clabernetes apply step persists handoff checksum/provenance:
+  - metadata key: `clabernetesApplySummary`
+  - task event: `clabernetes.apply.summary`
+- Netlab generator handoff uses a versioned manifest contract:
+  - contract version: `skyforge.netlab-c9s.manifest/v1`
+  - required fields: `contractVersion`, `bundleSha256`, `clabYAML`
+  - contract validation is hard-required (no runtime fallback toggle)
+- Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
+  passed as typed task metadata (not environment overrides).
+- Preflight now runs at API-time before runs are queued:
+  - API/CRD compatibility preflight (default enabled in `deployPolicy.compatibilityPreflight`)
+  - capacity preflight (default hard-fail in `deployPolicy.failOnInsufficientResources`)
+  - capacity preflight compares requested topology resources vs current allocatable-minus-requested node headroom
+- Skyforge also exposes an explicit preflight endpoint (no queue side-effects):
+  - `POST /api/users/:id/deployments/:deploymentID/preflight`
+  - supported for `clabernetes` and `netlab-c9s` deployment types
+  - returns no-op/idempotent reasons when deployment state already matches requested action
+- Deployment action/preflight requests now use a short-lived advisory operation lock keyed by
+  deployment operation key, which prevents duplicate clicks from running concurrent
+  preflight+queue paths for the same deploy/destroy operation.
+- The run detail UI (`/dashboard/runs/:runId`) consumes these metadata keys and
+  lifecycle events from:
+  - `/api/runs/:id/events` (stdout/stderr stream)
+  - `/api/runs/:id/lifecycle` (structured phase/provenance events)
+
 ## What’s still “phase 2” / future work
 
 - Post-deploy configuration steps executed *after* the C9s topology becomes ready.

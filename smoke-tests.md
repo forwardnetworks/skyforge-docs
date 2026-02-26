@@ -37,8 +37,14 @@ SKYFORGE_SMOKE_ACTION_CHECK=true \
 go run ./cmd/smokecheck
 ```
 
-This exercises `/api/users/:id/deployments/:deploymentID/action` with
-`stop/create/start` and validates idempotency reason behavior.
+This exercises both:
+- `/api/users/:id/deployments/:deploymentID/preflight`
+- `/api/users/:id/deployments/:deploymentID/action`
+
+for `destroy/create/start` and validates idempotency metadata consistency:
+- `reason` is one of `queued`, `already_present`, `already_absent`, `in_flight_duplicate`, `cooldown_suppressed`
+- `queued` responses must not be `noOp`
+- idempotent reasons must return `noOp=true`
 
 ## Optional integration checks
 - Git UI: `https://<hostname>/api/gitea/public`

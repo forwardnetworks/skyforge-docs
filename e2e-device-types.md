@@ -12,7 +12,7 @@ By default, the E2E matrix targets a curated list of “onboarded” device type
 
 - Use `SKYFORGE_E2E_DEVICE_SET=all` to instead generate tests from the upstream Netlab catalog (`internal/taskengine/netlab_device_defaults.json`).
 - `vsrx` is explicitly excluded (out of scope).
-- Onboarded hard-gate set: `arubacx,asav,cumulus,dellos10,eos,fortios,iol,iosxr,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
+- Onboarded hard-gate set: `arubacx,asav,cumulus,dellos10,eos,fortios,iol,ioll2,iosxr,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
 
 ### Default depth: validate-only
 
@@ -31,6 +31,8 @@ By default the matrix contains **only `netlab_validate` tests**. Deploy tests ar
 Both gates require Forward deep verification and fail when any non-linux node is not SNMPv2-enabled.
 The iterative loop uses in-cluster Forward by default and supports
 `SKYFORGE_E2E_CLEANUP_MODE=pass-only` to keep failed deployments for triage.
+Netlab device readiness defaults are sourced from upstream `vendor/netlab`; run `make test-netlab-defaults-drift` (or `make test-generated-drift`) after updating netlab submodules.
+Skyforge now validates topology node `kind`/`image` mappings against generated netlab defaults in **fail-closed** mode. Unknown or alias-only devices are rejected during validate/deploy preflight.
 
 ## Running locally against Skyforge (in-cluster)
 
