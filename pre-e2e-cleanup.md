@@ -43,6 +43,7 @@ Body:
 
 ## 3) Verify there are no stale tasks
 - Open the Skyforge runs panel and confirm there are no long-running tasks for the test user.
+- For iterative certification loops, prefer `SKYFORGE_E2E_CLEANUP_MODE=pass-only` so failed deployments remain available for debugging.
 
 ## 4) Verify runner-side state (EVE hosts)
 If a prior run left state behind (e.g. a failed job), clean the user directory on the relevant EVE host before rerunning.

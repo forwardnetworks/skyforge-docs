@@ -62,6 +62,22 @@ This runs:
 - `make e2e-snmpv2-nos` (per-NOS individual templates; hard fail if SNMPv2 is not wired)
 - `make e2e-baseline-fullmesh` (all NOS in one mesh; hard fail on Forward/SNMPv2 checks)
 
+## Iterative SNMPv2 + UI certification loop
+
+Run from repo root:
+
+```bash
+SKYFORGE_E2E_CLEANUP_MODE=pass-only \
+SKYFORGE_E2E_MAX_ITERATIONS=3 \
+make e2e-cert-loop
+```
+
+This flow runs per-NOS SNMPv2 + UI checks in iterative loops, narrows to failed
+devices in each retry, then runs one final full-mesh gate when all per-NOS/UI
+checks are green.
+
+See `components/docs/e2e-cert-loop.md` for required environment and artifact layout.
+
 Required Forward env vars for deep verify:
 
 - `SKYFORGE_E2E_FORWARD_BASE_URL`
@@ -70,6 +86,11 @@ Required Forward env vars for deep verify:
 
 ## Notes
 - User-scope resources created by the E2E runner are deleted automatically at the end of the run (and on Ctrl+C).
+- Deployment cleanup mode can be controlled with:
+  - `SKYFORGE_E2E_CLEANUP_MODE=all|pass-only|none`
+  - `all`: always destroy
+  - `pass-only`: destroy successful deployments only
+  - `none`: never destroy
 - To reuse an existing user scope (no auto-delete), set `SKYFORGE_E2E_SCOPE_ID`.
 - Queue health gate defaults:
   - `SKYFORGE_E2E_GATE_QUEUE_HEALTH=true`

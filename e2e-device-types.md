@@ -26,8 +26,11 @@ By default the matrix contains **only `netlab_validate` tests**. Deploy tests ar
 - Per-NOS individual templates: `make e2e-snmpv2-nos`
 - Full-mesh release baseline: `make e2e-baseline-fullmesh`
 - Combined release gate: `make e2e-release-gate`
+- Iterative certification loop (per-NOS + UI + final full-mesh): `make e2e-cert-loop`
 
 Both gates require Forward deep verification and fail when any non-linux node is not SNMPv2-enabled.
+The iterative loop uses in-cluster Forward by default and supports
+`SKYFORGE_E2E_CLEANUP_MODE=pass-only` to keep failed deployments for triage.
 
 ## Running locally against Skyforge (in-cluster)
 
