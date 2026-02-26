@@ -41,3 +41,24 @@ The demo app:
 - Skyforge attempts to create the required schema and assets via ServiceNow Table API.
 - If the ServiceNow instance blocks table creation, setup reports exact manual steps and supports resume.
 - The installer overwrites demo artifact contents by name (scripts, widget, REST message, properties).
+
+## Demo Asset Source-Of-Truth
+
+Skyforge consumes ServiceNow demo assets from:
+
+- `https://github.com/forwardnetworks/forward-servicenow-demo`
+
+Use the sync helper from the Skyforge repo root:
+
+```bash
+# Check-only: fail if local Skyforge assets drift from source repo.
+./scripts/sync-servicenow-demo-assets.sh --check-only
+
+# Write mode: copy source files into Skyforge and update source metadata.
+./scripts/sync-servicenow-demo-assets.sh --write
+```
+
+Defaults:
+
+- source repo path: `~/src/forward-servicenow-demo`
+- metadata file: `components/server/skyforge/servicenow_demo_version.txt`
