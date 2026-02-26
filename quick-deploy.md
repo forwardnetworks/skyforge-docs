@@ -25,14 +25,14 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 ## Lease enforcement
 
 - Lease metadata is stored in deployment config keys:
-  - `executiveLeaseEnabled`
-  - `executiveLeaseHours`
-  - `executiveLeaseExpiresAt`
-  - `executiveLeaseStoppedAt`
-  - `executiveLeaseStopTaskId`
-- Cron job `skyforge-executive-deployment-leases` runs every 5 minutes.
+  - `leaseEnabled`
+  - `leaseHours`
+  - `leaseExpiresAt`
+  - `leaseStoppedAt`
+  - `leaseStopTaskId`
+- Cron job `skyforge-deployment-leases` runs every 5 minutes.
 - For expired leases, Skyforge queues a netlab-c9s stop action and stamps
-  `executiveLeaseStoppedAt` + `executiveLeaseStopTaskId`.
+  `leaseStoppedAt` + `leaseStopTaskId`.
 
 ## Regular deployments
 
@@ -49,4 +49,4 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 - `GET /api/deployment-lifetime/policy`
 - `GET /api/quick-deploy/catalog`
 - `POST /api/quick-deploy/deploy`
-- `POST /internal/cron/deployments/executive-leases` (private cron endpoint)
+- `POST /internal/cron/deployments/leases` (private cron endpoint)

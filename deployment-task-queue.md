@@ -27,6 +27,12 @@ Deployment config decoding is strict per provider type; unknown fields in
 `deployment.config` are rejected with `failed_precondition` instead of being
 silently ignored.
 
+Deployment action/preflight observability metrics:
+
+- `skyforge_deployment_action_decisions_total{action,reason}`
+- `skyforge_deployment_preflight_decisions_total{action,reason}`
+- `skyforge_deployment_operation_lock_total{endpoint,outcome}`
+
 ## Why this exists
 
 If a user clicks an action multiple times (or multiple users act on the same
@@ -78,7 +84,8 @@ These cron jobs are scheduled via Encore Cron and run in the Skyforge backend.
 
 ## Helm infra config
 
-Encore PubSub requires the Helm-shipped `infra.config.json` to stay in sync with `server/infra.config.json` (for example, NSQ PubSub topics/subscriptions).
+Encore PubSub requires the Helm-shipped infra configs (`infra.config.json` and
+derived `infra.api.config.json`) to stay in sync with `components/server/infra.config.json`.
 
 To check drift locally:
 
