@@ -31,14 +31,17 @@ Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then de
    used for this path.
 2. Runs `netlab create` to generate:
    - `clab.yml`
-   - `node_files/…` (startup configs and related files)
+   - `node_files/…`
+   - `config/*.cfg` startup configs (netlab-native output)
+   - Skyforge does not post-process generated `node_files`; device bootstrap content comes from netlab output.
 3. Exports the generated artifacts as a `containerlab-<deployment>.tar.gz` tarball.
 4. Skyforge parses the tarball:
    - extracts `clab.yml`
    - extracts per-node `node_files/<node>/*`
+   - extracts generated startup configs from `config/*.cfg`
 5. Skyforge creates one ConfigMap per node containing that node’s `node_files`, labeled with:
    - `skyforge-c9s-topology=<topologyName>`
-6. Skyforge creates a clabernetes `Topology` that mounts those ConfigMaps using `spec.deployment.filesFromConfigMap`.
+6. Skyforge creates a clabernetes `Topology` that mounts both `node_files` and startup-config ConfigMaps using `spec.deployment.filesFromConfigMap`.
 
 This gives an end-to-end “Netlab template → k8s lab” path without needing an external Containerlab host.
 
@@ -60,11 +63,30 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 ### Source of truth chain (Netlab → Skyforge → Clabernetes)
 
 - Netlab device metadata is generated from upstream `vendor/netlab/netsim/devices/*.yml` into
-  `internal/taskengine/netlab_device_defaults.json` (and API copy).
+  `internal/taskengine/netlab_device_defaults.json`.
+- Catalog generation materializes netlab SSH readiness defaults (`netlab_check_retries=20`,
+  `netlab_check_delay=5`) when upstream device files do not set them, so runtime checks stay
+  catalog-driven.
+- Catalog generation also materializes a concrete `initial_policy` (`always`/`never`) for each
+  supported device using upstream policy/config-mode metadata, so Netlab Initial decisions do not
+  rely on runtime fallback logic.
+- Netlab initial SSH/auth readiness timeout is derived strictly from catalog values
+  (`netlab_check_retries * netlab_check_delay`) per node, using the maximum across the topology.
 - Skyforge resolves node device identity strictly from this generated catalog in order:
   1. exact `device`
   2. `clab_kind`
   3. `image_prefix`
+- For netlab-c9s initial/ready decisions, Skyforge prefers `netlab.snapshot.yml` device IDs from
+  generator manifest. Snapshot metadata is required; there is no runtime fallback to `clab.yml`
+  for initial policy or readiness timeout derivation.
+- Netlab-c9s persists canonical `device_key` and `forward_type` in
+  `sf_netlab_node_status_current`; c9s Forward sync consumes those DB fields directly.
+- Non-c9s Forward sync resolves device identity from node `kind+image` using the same catalog
+  resolver and fails closed when a node cannot be resolved (no kind-only fallback table).
+- SSH/auth readiness gates resolve node refs from topology graph metadata only and fail closed
+  when kind/image metadata is missing.
+- Forward device credential creation for netlab/clabernetes sync is sourced from this same
+  generated netlab catalog (no separate hardcoded credential table).
 - Unknown or alias-only devices fail preflight (fail-closed).
 - Netlab-C9s tasks persist catalog provenance in task metadata/event:
   - metadata key: `netlabCatalogProvenance`

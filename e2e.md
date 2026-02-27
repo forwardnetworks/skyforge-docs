@@ -49,7 +49,7 @@ make e2e-nos-full
 
 Artifacts and merged reports are written to `artifacts/e2e-nos/<run-id>/`.
 
-## Release baseline gates (SNMPv2 hard-cut)
+## Release baseline gates (staged SNMPv2)
 
 Run from repo root:
 
@@ -59,8 +59,20 @@ make e2e-release-gate
 
 This runs:
 
-- `make e2e-snmpv2-nos` (per-NOS individual templates; hard fail if SNMPv2 is not wired)
-- `make e2e-baseline-fullmesh` (all NOS in one mesh; hard fail on Forward/SNMPv2 checks)
+- `make e2e-snmpv2-nos` (safe-set SNMPv2 deep verify; default devices: `eos,vmx`)
+- `make e2e-bringup-other-nos` (bringup-only + SSH + Forward sync for the remaining NOS)
+
+Both targets use `e2echeck --run-generated`; deploy/SSH timeouts are derived from
+the netlab device catalog metadata (`netlab_check_retries` / `netlab_check_delay`)
+instead of static per-device timeout tables.
+The e2e harness now fails closed if the catalog cannot be loaded, to prevent
+falling back to stale hardcoded device behavior.
+
+Override safe-set devices when needed:
+
+```bash
+SKYFORGE_E2E_SNMPV2_SAFE_DEVICES="eos,vmx" make e2e-snmpv2-nos
+```
 
 ## Iterative SNMPv2 + UI certification loop
 
@@ -72,9 +84,9 @@ SKYFORGE_E2E_MAX_ITERATIONS=3 \
 make e2e-cert-loop
 ```
 
-This flow runs per-NOS SNMPv2 + UI checks in iterative loops, narrows to failed
-devices in each retry, then runs one final full-mesh gate when all per-NOS/UI
-checks are green.
+This flow runs SNMPv2 + UI checks for the safe device set in iterative loops,
+narrows to failed devices in each retry, then runs one final full-mesh gate.
+By default, the loop starts with `eos,vmx`.
 
 See `components/docs/e2e-cert-loop.md` for required environment and artifact layout.
 

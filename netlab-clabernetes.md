@@ -20,9 +20,9 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
 3) **Compile with netlab**
    - Run `netlab create` (and/or `netlab up --dry-run` if needed) to generate:
      - `clab.yml` (Containerlab topology)
-     - `hosts.yml`, `node_files/`, `group_vars/`, etc.
-   - Skyforge runs `netlab create --plugin files` in-cluster and persists:
-     - `clab.yml` + `node_files/` (for clabernetes deploy)
+     - `hosts.yml`, `node_files/`, `config/`, `group_vars/`, etc.
+   - Skyforge runs `netlab create` in-cluster (using the generator image defaults at `/etc/netlab/defaults.yml`) and persists:
+     - `clab.yml` + `node_files/` + `config/` (for clabernetes deploy)
      - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
 
 ## Generator modes
@@ -37,6 +37,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 - The generator writes:
   - a manifest ConfigMap (`c9s-<topology>-manifest`) containing `manifest.json`
   - per-node ConfigMaps containing `node_files/<node>/...` text files
+  - startup config ConfigMap(s) containing generated `config/*.cfg` files
 - Skyforge deploys the resulting containerlab definition via clabernetes, mounting the generated files via `filesFromConfigMap`.
 
 ### Configuration knobs
@@ -63,7 +64,7 @@ docker buildx build --platform linux/amd64 \
 
 4) **Deploy via c9s**
    - Skyforge creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
-   - Skyforge also creates per-node ConfigMaps for `node_files/` and mounts them into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
+   - Skyforge mounts generator-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**

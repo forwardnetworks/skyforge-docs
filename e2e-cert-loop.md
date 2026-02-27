@@ -2,7 +2,7 @@
 
 This runbook executes iterative certification for in-cluster Forward only:
 
-1. Per-NOS SNMPv2 + deep Forward verification (`e2echeck` matrix)
+1. Safe-set SNMPv2 + deep Forward verification (`e2echeck` matrix; default `eos,vmx`)
 2. UI deployment verification per NOS (Playwright)
 3. Final full-mesh gate once per-NOS/UI are fully green
 
@@ -11,6 +11,7 @@ This runbook executes iterative certification for in-cluster Forward only:
 - Forward target: in-cluster only
 - Cleanup: keep fails / clean passes (`SKYFORGE_E2E_CLEANUP_MODE=pass-only`)
 - Retry budget: 3 iterations
+- Initial safe-set devices: `eos,vmx` (override with `SKYFORGE_E2E_DEVICES`)
 - Full-mesh runs only after per-NOS/UI pass
 
 ## Required environment
