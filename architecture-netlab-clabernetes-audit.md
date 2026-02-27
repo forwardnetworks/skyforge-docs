@@ -22,7 +22,7 @@ Date: 2026-02-25
 
 - Canonical deployment action endpoint: `POST /api/users/:id/deployments/:deploymentID/action`.
 - Remove wrapper API handlers from server surface (`/start`, `/stop`, `/destroy`).
-- Keep native-only C9s behavior; no BYOS-mode fallback in `netlab-c9s`.
+- Keep native-only C9s behavior; no BYOS-mode fallback in `c9s/netlab`.
 - Require configured netlab generator/applier images at runtime; no taskengine hardcoded fallback images.
 
 ## Implemented Changes
