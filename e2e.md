@@ -7,20 +7,16 @@ This repo includes an API-driven E2E runner that validates and deploys a small n
 - Admin password available via `SKYFORGE_E2E_PASSWORD`, or via `SKYFORGE_SMOKE_PASSWORD`, or via `deploy/skyforge-secrets.yaml` (same logic as the runner).
 - API probe mode (`SKYFORGE_E2E_SSH_PROBE_MODE=api`) for release gates; this avoids local kubecontext dependencies.
 
-## Run One Device (Validate + Deploy + SSH)
+## Run Strict Native Matrix (Validate + Deploy + SSH)
 From `components/server`:
 
 ```bash
 export SKYFORGE_E2E_BASE_URL="https://skyforge.local.forwardnetworks.com"
-export SKYFORGE_E2E_DEVICES=nxos
-export SKYFORGE_E2E_DEPLOY=true
-export SKYFORGE_E2E_DEPLOY_DEVICES=nxos
-export SKYFORGE_E2E_SSH_PROBE=true
 export SKYFORGE_E2E_SSH_PROBE_MODE=api
 export SKYFORGE_E2E_REQUIRE_API_PROBE=true
 export SKYFORGE_E2E_GATE_QUEUE_HEALTH=true
 
-go run ./cmd/e2echeck --run-generated
+go run ./cmd/e2echeck
 ```
 
 Outputs are written under `components/docs/` by default:
@@ -62,7 +58,7 @@ This runs:
 - `make e2e-snmpv2-nos` (safe-set SNMPv2 deep verify; default devices: `eos,vmx`)
 - `make e2e-bringup-other-nos` (bringup-only + SSH + Forward sync for the remaining NOS)
 
-Both targets use `e2echeck --run-generated`; deploy/SSH timeouts are derived from
+Both targets use `e2echeck`; deploy/SSH timeouts are derived from
 the netlab device catalog metadata (`netlab_check_retries` / `netlab_check_delay`)
 instead of static per-device timeout tables.
 The e2e harness now fails closed if the catalog cannot be loaded, to prevent

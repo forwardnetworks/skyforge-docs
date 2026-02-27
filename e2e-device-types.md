@@ -10,16 +10,12 @@ Goal: quickly answer **“do the device types we ship actually work?”** (templ
 
 By default, the E2E matrix targets a curated list of “onboarded” device types (what Skyforge exposes in the UI / what we expect to work in-cluster).
 
-- Use `SKYFORGE_E2E_DEVICE_SET=all` to instead generate tests from the upstream Netlab catalog (`internal/taskengine/netlab_device_defaults.json`).
 - `vsrx` is explicitly excluded (out of scope).
 - Onboarded hard-gate set: `arubacx,asav,cumulus,dellos10,eos,fortios,iol,ioll2,iosxr,linux,nxos,sros,vjunos-router,vjunos-switch,vmx,vptx`.
 
-### Default depth: validate-only
+### Execution depth
 
-By default the matrix contains **only `netlab_validate` tests**. Deploy tests are **opt-in** because they are slow.
-
-- Enable in-cluster deploy + SSH probe with `SKYFORGE_E2E_DEPLOY=true`.
-- Limit which device types are deployed with `SKYFORGE_E2E_DEPLOY_DEVICES=...`.
+- Native strict mode runs validate + deploy + SSH probe for the generated onboarded catalog.
 
 ### SNMPv2 hard-cut gates
 
@@ -45,16 +41,13 @@ go run ./cmd/e2echeck --generate-matrix > /tmp/skyforge-e2e-matrix.json
 ### Validate device types (fast)
 
 ```bash
-export SKYFORGE_E2E_DEPLOY=false
-go run ./cmd/e2echeck --run-generated
+go run ./cmd/e2echeck
 ```
 
 ### Deploy + SSH probe (slow)
 
 ```bash
-export SKYFORGE_E2E_DEPLOY=true
-export SKYFORGE_E2E_DEPLOY_DEVICES=eos,iol,iol
-go run ./cmd/e2echeck --run-generated
+go run ./cmd/e2echeck
 ```
 
 Notes:
@@ -83,13 +76,7 @@ This performs:
 
 Artifacts are written under `artifacts/e2e-nos/<run-id>/`.
 
-## BYOS runners (netlab.local.forwardnetworks.com)
+## Notes
 
-Enable BYOS tests (Netlab + Containerlab) with:
-
-```bash
-export SKYFORGE_E2E_BYOS=true
-export SKYFORGE_E2E_BYOS_NETLAB_API_URL=https://netlab.local.forwardnetworks.com/netlab
-```
-
-The E2E runner will configure the user’s Netlab server list (single user scope) via the Skyforge API before launching a BYOS deployment.
+- `e2echeck` is strict native mode and always uses generated matrix data from `internal/taskengine/netlab_device_defaults.json`.
+- Device/template/matrix filter env vars are intentionally rejected to avoid drift from the native source of truth.
