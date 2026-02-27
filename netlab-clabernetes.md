@@ -27,9 +27,9 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
 
 ## Generator modes
 
-`netlab-c9s` is cluster-native and generates artifacts in-cluster.
+`c9s/netlab` is cluster-native and generates artifacts in-cluster.
 
-Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab server over the Netlab API; it is intentionally not used by `netlab-c9s`.
+Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab server over the Netlab API; it is intentionally not used by `c9s/netlab`.
 
 ### In-cluster generator (required)
 
@@ -44,7 +44,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
   - `C9sGeneratorMode`: `"k8s"`
-  - `GeneratorImage`: netlab runtime image (required for `netlab-c9s` generation and `netlab initial` apply)
+  - `GeneratorImage`: netlab runtime image (required for `c9s/netlab` generation and `netlab initial` apply)
 - Helm values (recommended):
   - `skyforge.netlabC9s.image`
   - `skyforge.netlabC9s.pullPolicy`
@@ -126,7 +126,7 @@ docker buildx build --platform linux/amd64 \
 ## Implementation checklist (Skyforge)
 
 - Server (encore/Go)
-  - Deployment type: `netlab-c9s`.
+  - Deployment family/engine: `c9s` / `netlab`.
   - Runner flow:
     - sync template → runner workdir
     - `netlab create` → `netlab clab-tarball`
@@ -138,7 +138,7 @@ docker buildx build --platform linux/amd64 \
     - delete generated ConfigMaps
 
 - Portal
-  - Add `netlab-c9s` to deployment type picker.
+  - Ensure deployment creation uses `family` + `engine` (`c9s` / `netlab`) for this path.
 
 - Helm / cluster
   - Ensure clabernetes controller installed and CRDs present in the cluster.

@@ -6,7 +6,7 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 ## How it works
 
-### 1) Containerlab → C9s (deployment type: `clabernetes`)
+### 1) Containerlab → C9s (deployment family/engine: `c9s` / `containerlab`)
 
 - User selects a **Containerlab topology** template (YAML) from either:
   - public blueprints (`blueprints/containerlab`), or
@@ -22,12 +22,12 @@ Notes:
 - Skyforge places each user scope into its own Kubernetes namespace by default:
   `ws-<userScopeSlug>` (sanitized).
 
-### 2) Netlab → C9s (deployment type: `netlab-c9s`)
+### 2) Netlab → C9s (deployment family/engine: `c9s` / `netlab`)
 
 Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then deploys those artifacts to Kubernetes via clabernetes:
 
 1. Skyforge syncs the Netlab template folder and runs Netlab generation in-cluster
-   via Kubernetes Job (`netlab-c9s` native mode). BYOS Netlab server mode is not
+   via Kubernetes Job (`c9s/netlab` native mode). BYOS Netlab server mode is not
    used for this path.
 2. Runs `netlab create` to generate:
    - `clab.yml`
@@ -76,10 +76,10 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   1. exact `device`
   2. `clab_kind`
   3. `image_prefix`
-- For netlab-c9s initial/ready decisions, Skyforge prefers `netlab.snapshot.yml` device IDs from
+- For c9s/netlab initial/ready decisions, Skyforge prefers `netlab.snapshot.yml` device IDs from
   generator manifest. Snapshot metadata is required; there is no runtime fallback to `clab.yml`
   for initial policy or readiness timeout derivation.
-- Netlab-c9s persists canonical `device_key` and `forward_type` in
+- C9s/netlab persists canonical `device_key` and `forward_type` in
   `sf_netlab_node_status_current`; c9s Forward sync consumes those DB fields directly.
 - Non-c9s Forward sync resolves device identity from node `kind+image` using the same catalog
   resolver and fails closed when a node cannot be resolved (no kind-only fallback table).
@@ -88,10 +88,10 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 - Forward device credential creation for netlab/clabernetes sync is sourced from this same
   generated netlab catalog (no separate hardcoded credential table).
 - Unknown or alias-only devices fail preflight (fail-closed).
-- Netlab-C9s tasks persist catalog provenance in task metadata/event:
+- C9s/netlab tasks persist catalog provenance in task metadata/event:
   - metadata key: `netlabCatalogProvenance`
   - task event: `netlab.catalog.provenance`
-- Netlab-C9s tasks also persist node resolution summary:
+- C9s/netlab tasks also persist node resolution summary:
   - metadata key: `netlabNodeResolutionSummary`
   - task event: `netlab.node_resolution.summary`
 - Clabernetes apply step persists handoff checksum/provenance:
@@ -109,7 +109,7 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - capacity preflight compares requested topology resources vs current allocatable-minus-requested node headroom
 - Skyforge also exposes an explicit preflight endpoint (no queue side-effects):
   - `POST /api/users/:id/deployments/:deploymentID/preflight`
-  - supported for `clabernetes` and `netlab-c9s` deployment types
+  - supported for deployment family/engine pairs `c9s/containerlab` and `c9s/netlab`
   - returns no-op/idempotent reasons when deployment state already matches requested action
 - Deployment action/preflight requests now use a short-lived advisory operation lock keyed by
   deployment operation key, which prevents duplicate clicks from running concurrent
@@ -146,5 +146,5 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 - If you see `topology capture failed: Access Denied`:
   - the Skyforge worker stores topology graph artifacts in the `skyforge-files` bucket.
   - ensure the configured object-storage principal referenced by `SKYFORGE_OBJECT_STORAGE_ACCESS_KEY` has write access to `skyforge-files/*`.
-- If Netlab-C9s deploy fails early:
+- If C9s/netlab deploy fails early:
   - confirm the Netlab server can run `netlab create` and produce `clab.yml` and `node_files/`.
