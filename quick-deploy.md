@@ -5,7 +5,7 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 ## Scope
 
 - Deployment family/engine: `c9s` / `netlab` only.
-- Template source: curated Netlab blueprints under `netlab/_e2e`.
+- Template source: curated Netlab blueprints under `netlab/_curated`.
 - Forward: always uses in-app Forward (`http://fwd-appserver.forward.svc.cluster.local:8080`)
   with managed credentials from platform secrets.
   - `skyforge-quick-deploy-forward-username.skyforge-quick-deploy-forward-username`
