@@ -143,15 +143,24 @@ cd skyforge
   - Ensure clabernetes controller installed and CRDs present in the cluster.
   - Decide where controller runs (namespace) and what RBAC is needed.
 
-## Notes on “adding c9s to netlab”
+## Netlab plugin migration direction
 
-We likely do **not** need to modify upstream netlab to add a native “c9s” provider to get an MVP:
-- Netlab already emits Containerlab topology (`clab.yml`) via the `clab` provider.
-- Clabernetes consumes containerlab topologies via Kubernetes CRDs/controllers.
-- The simplest integration is therefore a **wrapper**:
-  - `netlab create` → `clab.yml` → clabernetes CR apply
+The current `c9s/netlab` path remains a Skyforge wrapper around native netlab
+artifacts (`netlab create` + `netlab initial`) and clabernetes CR apply.
 
-If we later want a “first-class” experience in netlab itself (e.g., `netlab up --provider c9s`), that would be an upstream effort and should be treated as Phase 3+ after the Skyforge wrapper works reliably.
+The target architecture is to move more deployment semantics into a netlab
+plugin contract over time, while keeping these invariants:
+- Netlab remains source-of-truth for generated topology/config artifacts.
+- Skyforge remains source-of-truth for user/deployment lifecycle, tenancy, and
+  platform policy (leases, quotas, task orchestration, audit trail).
+- No compatibility fallback contract in native mode once plugin contract
+  versions are cut over.
+
+Planned migration phases:
+1. Keep current wrapper path as baseline (already deployed).
+2. Define a strict plugin contract for K8s-native deployment metadata.
+3. Shift wrapper-owned glue into plugin-emitted metadata and generated outputs.
+4. Upstream where possible once contract stabilizes and drift is eliminated.
 
 ## Safety / guardrails
 
