@@ -27,22 +27,23 @@ auditing.
   explicit tar extraction filter handling.
 - Updated docs to reflect plugin-migration direction (no longer framed as
   “maybe later”).
+- Added contract v1 schema lock:
+  - canonical schema file `internal/taskengine/netlab_c9s_manifest.schema.json`
+  - generator validates manifest against schema before publish
+  - taskengine validates incoming manifest JSON against schema before unmarshal
+  - golden schema fixtures enforce fail-closed behavior in CI tests
 
 ## Remaining cleanup before plugin-first rollout
 
-1. Define plugin contract v1 (schema + versioning)
-   - plugin-emitted deployment metadata required by Skyforge taskengine
-   - strict validation at manifest ingestion
-
-2. Move remaining wrapper glue into plugin outputs
+1. Move remaining wrapper glue into plugin outputs
    - device capability/driver hints currently inferred in Go
    - any node behavior currently reconstructed from kind/image where plugin can emit directly
 
-3. Contract-level conformance tests
+2. Contract-level conformance tests
    - golden manifest tests for success/fail-closed cases
    - taskengine tests for reject-on-missing-required-fields
 
-4. Upstream sync strategy
+3. Upstream sync strategy
    - keep `vendor/netlab` fork minimal and replayable
    - document upstream delta and required hooks
 

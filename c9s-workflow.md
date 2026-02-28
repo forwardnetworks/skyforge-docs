@@ -99,7 +99,10 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - task event: `clabernetes.apply.summary`
 - Netlab generator handoff uses a versioned manifest contract:
   - contract version: `skyforge.netlab-c9s.manifest/v1`
-  - required fields: `contractVersion`, `bundleSha256`, `clabYAML`
+  - schema file: `components/server/internal/taskengine/netlab_c9s_manifest.schema.json`
+  - required top-level fields: `contractVersion`, `bundleSha256`, `clabYAML`, `nodes`, `netlabOutput`
+  - generator validates schema before publishing `manifest.json`
+  - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
 - Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
   passed as typed task metadata (not environment overrides).
