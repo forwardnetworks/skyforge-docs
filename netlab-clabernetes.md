@@ -56,10 +56,8 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 ### Build the generator image
 
 ```bash
-cd netlab/generator
-docker buildx build --platform linux/amd64 \
-  -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
-  --push .
+cd skyforge
+./scripts/build-push-skyforge-netlab-generator.sh --tag <tag>
 ```
 
 4) **Deploy via c9s**
@@ -159,3 +157,6 @@ If we later want a “first-class” experience in netlab itself (e.g., `netlab 
 - Default-off behind a feature flag in `deploy/skyforge-values.yaml`.
 - Hard cap: max pods/nodes per topology for MVP.
 - Timeouts and clear error messages when CRDs/controller are missing.
+- Capacity preflight is taint-aware and fit-aware:
+  - excludes nodes with `NoSchedule`/`NoExecute` taints from candidate capacity
+  - fails early when per-node placement cannot fit requested CPU/memory (even when aggregate free capacity looks sufficient)

@@ -20,27 +20,36 @@ Repository: `github.com/forwardnetworks/netlab`
 
 ### Where Skyforge pins netlab
 
-Netlab is installed into the netlab generator image from:
+Netlab runtime is pinned through:
 
-- `netlab/generator/requirements.txt` (git URL pinned to a commit)
-- Generator image built/pushed to GHCR
-- Helm values set `skyforge.netlabC9s.image`
+- `vendor/netlab` submodule SHA (`forwardnetworks/netlab`, branch `skyforge-dev`)
+- Runtime image `ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag>`
+- Helm values:
+  - `components/charts/skyforge/values.yaml`
+  - `components/charts/skyforge/values-prod-skyforge-local.yaml`
 
 ### Updating netlab in Skyforge
 
-1) Merge/push changes to `forwardnetworks/netlab`.
-2) Bump the pin in `netlab/generator/requirements.txt`.
-3) Build and push a new generator image:
+Manual one-shot refresh (recommended):
 
 ```bash
-cd skyforge/netlab/generator
-docker buildx build --platform linux/amd64 \
-  -t ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag> \
-  --push .
+cd skyforge
+./scripts/refresh-netlab-runtime-from-upstream.sh
 ```
 
-4) Update `deploy/skyforge-values.yaml` to point to the new `skyforge.netlabC9s.image`.
-5) Deploy using the current Helm + k3s workflow docs (`install-on-server.md`, `helm.md`, and `post-install-verify.md`).
+This script performs the full atomic update:
+
+1) fast-forwards `vendor/netlab` (`skyforge-dev`) from `upstream/dev`
+2) pushes the fork branch update
+3) regenerates `components/server/internal/taskengine/netlab_device_defaults.json`
+4) builds/pushes a new runtime image
+5) bumps all runtime image pins in Helm + Encore config defaults
+
+Automation:
+
+- Workflow: `.github/workflows/netlab-runtime-refresh.yml`
+- Trigger: weekly schedule + manual dispatch
+- Output: PR with submodule pointer, regenerated defaults, and image pin bumps
 
 ## Clabernetes fork
 
@@ -98,8 +107,8 @@ We ship clabernetes as images (manager + launcher). Helm values control the imag
 
 Update them in:
 
-- `deploy/skyforge-values.yaml` (prod)
-- `deploy/skyforge-values-qa.yaml` (QA)
+- `components/charts/skyforge/values.yaml` (base/defaults)
+- `components/charts/skyforge/values-prod-skyforge-local.yaml` (prod override example)
 
 ### Building/pushing clabernetes images
 

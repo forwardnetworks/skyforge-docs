@@ -19,7 +19,7 @@ python3 scripts/validate_netlab_templates.py > /tmp/netlab-validate-report.md
 ```
 
 Notes:
-- This uses the generator image configured in `deploy/skyforge-values.yaml` (`skyforge.netlabC9s.image`).
+- This uses the generator image configured in `components/charts/skyforge/values.yaml` (`skyforge.netlabC9s.image`).
 - It mirrors Skyforge template listing behavior:
   - root-level `*.yml|*.yaml` files are treated as single-file templates
   - nested templates must be `topology.yml|topology.yaml`
