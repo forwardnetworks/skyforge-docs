@@ -33,6 +33,9 @@ contract while preserving native Skyforge ownership of lifecycle and auditing.
   - golden schema fixtures enforce fail-closed behavior in CI tests
 - Removed c9s/netlab Skyforge-side initial-policy and SSH/auth readiness gating;
   apply sequencing now executes as a netlab runtime phase.
+- Removed c9s Go-side cEOS bootstrap synthesis and bind rewrites from deploy preparation.
+- Removed topology pre-validation patching in taskengine; c9s/netlab now validates against
+  netlab-generated manifest/device metadata post-`netlab create`.
 
 ## Remaining cleanup before plugin-first rollout
 

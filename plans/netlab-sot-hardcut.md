@@ -37,4 +37,6 @@
   - no synthetic `netlab_ready` fallback is emitted in generated metadata,
   - no hardcoded readiness retry/delay defaults (parsed from upstream netlab SSH readiness task),
   - c9s/netlab apply orchestration no longer evaluates Skyforge runtime `initial_policy` or SSH/auth gates,
-  - netlab runtime now owns apply sequencing and per-device config behavior.
+  - netlab runtime now owns apply sequencing and per-device config behavior,
+  - c9s deploy prep no longer synthesizes cEOS startup configs or rewrites node bind semantics in taskengine,
+  - c9s netlab/validate paths no longer patch topology for pre-runtime device checks.

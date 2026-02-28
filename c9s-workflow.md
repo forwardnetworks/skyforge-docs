@@ -67,10 +67,8 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 - Catalog generation materializes netlab SSH readiness defaults (`netlab_check_retries=20`,
   `netlab_check_delay=5`) when upstream device files do not set them, so runtime checks stay
   catalog-driven.
-- Skyforge resolves node device identity strictly from this generated catalog in order:
-  1. exact `device`
-  2. `clab_kind`
-  3. `image_prefix`
+- For c9s/netlab, canonical node device identity is sourced from netlab-generated
+  manifest `nodes.*.deviceKey` and persisted into DB contract rows.
 - For c9s/netlab apply behavior, Skyforge does not evaluate runtime `initial_policy`/SSH-auth
   gates; netlab runtime owns apply sequencing and per-device config semantics.
 - C9s/netlab persists canonical `device_key` and `forward_type` in
