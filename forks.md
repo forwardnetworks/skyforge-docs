@@ -23,7 +23,7 @@ Repository: `github.com/forwardnetworks/netlab`
 Netlab runtime is pinned through:
 
 - `vendor/netlab` submodule SHA (`forwardnetworks/netlab`, branch `skyforge-dev`)
-- Runtime image `ghcr.io/forwardnetworks/skyforge-netlab-generator:<tag>`
+- Runtime image `ghcr.io/forwardnetworks/skyforge-netlab:<tag>`
 - Helm values:
   - `components/charts/skyforge/values.yaml`
   - `components/charts/skyforge/values-prod-skyforge-local.yaml`

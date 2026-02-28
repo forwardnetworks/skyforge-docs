@@ -8,7 +8,7 @@ offline (no cluster required) and expose a Netlab “Validate” action in the U
 ### UI
 
 On `Dashboard → Deployments → Create`, select a Netlab template and click **Validate**.
-This runs `netlab create` inside the Netlab generator image, without deploying anything.
+This runs `netlab create` inside the Netlab runtime image, without deploying anything.
 
 ### CLI (bulk validate all Netlab templates)
 
@@ -19,7 +19,7 @@ python3 scripts/validate_netlab_templates.py > /tmp/netlab-validate-report.md
 ```
 
 Notes:
-- This uses the generator image configured in `components/charts/skyforge/values.yaml` (`skyforge.netlabC9s.image`).
+- This uses the netlab runtime image configured in `components/charts/skyforge/values.yaml` (`skyforge.netlab.image`).
 - It mirrors Skyforge template listing behavior:
   - root-level `*.yml|*.yaml` files are treated as single-file templates
   - nested templates must be `topology.yml|topology.yaml`
@@ -33,7 +33,7 @@ either:
 - licensed images/features not currently bundled (SR Linux ixr6 license), or
 - Netlab plugins/features that are not compatible with the generator’s pinned Netlab version.
 
-These are expected to fail validation until we either update the generator’s Netlab version or
+These are expected to fail validation until we either update the runtime image Netlab version or
 refactor the templates:
 
 - `BGP/Multi-Loopback/topology.yml`

@@ -1,12 +1,12 @@
 # Netlab (C9s) workflow
 
-Skyforge's **Netlab (C9s)** deployment method runs Netlab as a generator and
+Skyforge's **Netlab (C9s)** deployment method runs Netlab in-cluster and
 deploys the resulting Containerlab topology via Clabernetes.
 
 ## Phases
 
-1. **Generator (netlab create)**: runs inside the user namespace using
-   `ENCORE_CFG_SKYFORGE.NetlabGenerator.GeneratorImage`.
+1. **Netlab runtime (netlab create)**: runs inside the user namespace using
+   `ENCORE_CFG_SKYFORGE.Netlab.Image`.
 2. **Clabernetes deploy**: Skyforge sanitizes node names for Kubernetes, then
    deploys the generated `clab.yml`.
 3. **Post-deploy config (Go-only)**:

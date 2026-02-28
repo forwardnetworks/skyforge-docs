@@ -21,20 +21,20 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
    - Run `netlab create` (and/or `netlab up --dry-run` if needed) to generate:
      - `clab.yml` (Containerlab topology)
      - `hosts.yml`, `node_files/`, `config/`, `group_vars/`, etc.
-   - Skyforge runs `netlab create` in-cluster (using the generator image defaults at `/etc/netlab/defaults.yml`) and persists:
+   - Skyforge runs `netlab create` in-cluster (using the netlab runtime image defaults at `/etc/netlab/defaults.yml`) and persists:
      - `clab.yml` + `node_files/` + `config/` (for clabernetes deploy)
      - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
 
-## Generator modes
+## Runtime modes
 
 `c9s/netlab` is cluster-native and generates artifacts in-cluster.
 
 Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab server over the Netlab API; it is intentionally not used by `c9s/netlab`.
 
-### In-cluster generator (required)
+### In-cluster runtime (required)
 
 - Skyforge runs a Kubernetes Job (in the user namespace) that executes Netlab to generate artifacts.
-- The generator writes:
+- The runtime job writes:
   - a manifest ConfigMap (`c9s-<topology>-manifest`) containing `manifest.json`
   - per-node ConfigMaps containing `node_files/<node>/...` text files
   - startup config ConfigMap(s) containing generated `config/*.cfg` files
@@ -42,27 +42,28 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 
 ### Configuration knobs
 
-- Encore config (preferred): `ENCORE_CFG_SKYFORGE.NetlabGenerator`
-  - `C9sGeneratorMode`: `"k8s"`
-  - `GeneratorImage`: netlab runtime image (required for `c9s/netlab` generation and `netlab initial` apply)
+- Encore config (preferred): `ENCORE_CFG_SKYFORGE.Netlab`
+  - `Mode`: `"k8s"`
+  - `Image`: netlab runtime image (required for `c9s/netlab` generation and `netlab initial` apply)
+  - `PullPolicy`: image pull policy for runtime jobs
 - Helm values (recommended):
-  - `skyforge.netlabC9s.image`
-  - `skyforge.netlabC9s.pullPolicy`
+  - `skyforge.netlab.image`
+  - `skyforge.netlab.pullPolicy`
 - SR OS license injection (required when deploying `sros`):
   - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
   - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
   - Skyforge mounts this as `/.license` for SR OS nodes so vrnetlab can load it as `/tftpboot/license.txt`.
 
-### Build the generator image
+### Build the netlab runtime image
 
 ```bash
 cd skyforge
-./scripts/build-push-skyforge-netlab-generator.sh --tag <tag>
+./scripts/build-push-skyforge-netlab.sh --tag <tag>
 ```
 
 4) **Deploy via c9s**
    - Skyforge creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
-   - Skyforge mounts generator-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
+   - Skyforge mounts runtime-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
