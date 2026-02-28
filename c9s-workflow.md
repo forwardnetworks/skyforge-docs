@@ -29,6 +29,8 @@ Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then de
 1. Skyforge syncs the Netlab template folder and runs Netlab generation in-cluster
    via Kubernetes Job (`c9s/netlab` native mode). BYOS Netlab server mode is not
    used for this path.
+   - Runtime entrypoint is unified: `python3 /app/netlab.py generate` for generate
+     and `python3 /app/netlab.py apply` for apply.
 2. Runs `netlab create` to generate:
    - `clab.yml`
    - `node_files/…`
