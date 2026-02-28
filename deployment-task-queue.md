@@ -105,7 +105,7 @@ cd skyforge
 `check-deployment-action-contract.sh` enforces:
 - no legacy `/start|/stop|/destroy` wrapper endpoints in server/chart OpenAPI
 - required canonical `/action` and `/preflight` endpoints in OpenAPI
-- no legacy wrapper endpoint usage in first-party clients (`portal` API helper, `cmd/e2echeck`, `cmd/smokecheck`)
+- no legacy wrapper endpoint usage in first-party clients (`portal` API helper, `cmd/smokecheck`)
 
 Generated contract drift check:
 

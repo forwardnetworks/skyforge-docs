@@ -23,7 +23,7 @@ This document captures the current fork status for the Skyforge vendored project
 
 ### Validation
 
-- `go test` passed for all non-e2e packages
+- `go test` passed for all standard packages
 - no active Multus/NAD references in runtime CRD/controller paths
 
 ## Netlab
@@ -60,7 +60,7 @@ A cleanup cycle is considered complete when all of the following are true:
 1. Fork PRs are repo-split (`clabernetes`, `netlab`, `skyforge-*`, then meta pin).
 2. Skyforge submodule SHAs are pinned to reviewed fork commits.
 3. Build/tests pass:
-   - clabernetes non-e2e `go test`
+   - clabernetes `go test`
    - server targeted `go test`
    - charts `helm lint`
 4. Deployment uses the same SHAs/tags referenced in PRs.

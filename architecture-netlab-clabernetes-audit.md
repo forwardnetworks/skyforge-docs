@@ -8,14 +8,13 @@ Date: 2026-02-25
 - Worker/task engine (`components/server/internal/taskengine`)
 - Portal action clients (`components/portal/src/lib`, deployments routes)
 - Helm typed config rendering (`components/charts/skyforge/templates`)
-- E2E harness (`components/server/cmd/e2echeck`)
+- Manual validation workflows (automated E2E harness retired)
 
 ## Baseline Findings
 
 - Deployment action contract was split across `/action` and wrapper endpoints (`/start`, `/stop`, `/destroy`).
 - Clabernetes naming primitives were duplicated across server and taskengine and could drift.
 - Runtime image defaults were duplicated in taskengine constants and config/chart values.
-- E2E harness still exercised wrapper endpoints instead of canonical action API.
 - C9s docs still referenced older namespace/mode behavior.
 
 ## Hard-Cut Decisions Applied
@@ -34,7 +33,6 @@ Date: 2026-02-25
 - Updated server and taskengine to consume shared naming helpers.
 - Migrated first-party callers to `/action`:
   - portal API helper now routes start/stop/destroy through `/action`
-  - e2echeck now uses `/action` with explicit action payloads.
 - Regenerated OpenAPI and portal typed client:
   - `components/server/skyforge/openapi.json`
   - `components/charts/skyforge/files/openapi.json`
@@ -52,7 +50,7 @@ Date: 2026-02-25
 - `pnpm -s type-check`
 - `helm lint components/charts/skyforge`
 - `./scripts/check-deployment-action-contract.sh`
-- Targeted e2e (`go run ./cmd/e2echeck`) uses `/action` only
+- `go test ./cmd/smokecheck` validates deployment action usage (`/action` + `/preflight`)
 
 ## Residual Follow-ups (Non-blocking)
 

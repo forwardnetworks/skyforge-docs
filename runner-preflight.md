@@ -16,7 +16,7 @@ containerlab version
 systemctl is-active apache2.service netlab-api.service containerlab-api.service
 ```
 
-If any of these fail, fix host parity before running E2E so the failures don’t happen late in the workflow.
+If any of these fail, fix host parity before running manual deployment validation so failures don’t appear late in the workflow.
 
 ## Fix root-owned Netlab user artifacts
 

@@ -1,6 +1,6 @@
 # Post-install verification (kubectl only)
 
-This checklist is intended to quickly validate cluster wiring without using the UI, to avoid doing E2E twice.
+This checklist is intended to quickly validate cluster wiring without relying on the retired automated E2E harness.
 
 ## Pods ready
 ```bash
@@ -69,14 +69,12 @@ Expected at idle:
 kubectl -n skyforge rollout status deploy/yaade
 ```
 
-## Forward analytics strict gate (API + UI)
-Run the portal E2E script with an admin E2E token. This now validates the full analytics API flow for:
+## Forward analytics strict gate (API)
+Run direct API checks for the full analytics API flow:
 - `/api/forward/cloud/*`
 - `/api/forward/security/*`
 - `/api/forward/routing/*`
 - `/api/forward/capacity/*`
-
-and then verifies the Network Analytics UI route/tabs.
 
 Competitive gate assertions enforced by this check:
 - Cloud: overall `>= 90`, freshness/drift `>= 4`
@@ -93,9 +91,8 @@ Competitive gate assertions enforced by this check:
   - priorities include rationale/recommendations/evidence
 
 ```bash
-cd components/portal
-SKYFORGE_UI_E2E_BASE_URL="https://skyforge.local.forwardnetworks.com" \
-SKYFORGE_UI_E2E_API_URL="https://skyforge.local.forwardnetworks.com" \
-SKYFORGE_UI_E2E_ADMIN_TOKEN="<admin-e2e-token>" \
-pnpm exec node scripts/ui-e2e.mjs
+curl -k "https://skyforge.local.forwardnetworks.com/api/forward/cloud/summary?networkId=<id>&snapshotId=<id>"
+curl -k "https://skyforge.local.forwardnetworks.com/api/forward/security/summary?networkId=<id>&snapshotId=<id>"
+curl -k "https://skyforge.local.forwardnetworks.com/api/forward/routing/summary?networkId=<id>&snapshotId=<id>"
+curl -k "https://skyforge.local.forwardnetworks.com/api/forward/capacity/summary?networkId=<id>&snapshotId=<id>"
 ```
