@@ -9,12 +9,10 @@ deploys the resulting Containerlab topology via Clabernetes.
    `ENCORE_CFG_SKYFORGE.Netlab.Image`.
 2. **Clabernetes deploy**: Skyforge sanitizes node names for Kubernetes, then
    deploys the generated `clab.yml`.
-3. **Post-deploy config (Go-only)**:
-   - Linux nodes: Skyforge runs the netlab-generated `node_files/<node>/{initial,routing}` shell scripts
-     directly inside the Linux pods (parallelized).
-   - Network OS nodes (e.g. cEOS): base configuration is applied via startup configs mounted at boot time,
-     and Skyforge applies any netlab-generated post-up config snippets (cfglets/modules) using Kubernetes exec
-     (still Go-only; no Ansible).
+3. **Netlab apply phase**:
+   - Skyforge invokes the netlab runtime apply job after topology bring-up.
+   - Netlab runtime owns post-deploy config behavior (`netlab initial`, cfglets/modules, and
+     device-specific apply semantics).
 
 Linux node extras are handled by the C9s runtime path and are not user-configurable overrides.
 
@@ -25,7 +23,8 @@ stable per-node Service DNS names:
 
 `<topologyName>-<sanitizedNode>.<namespace>.svc`
 
-Skyforge does not rely on Ansible for Netlab C9s post-up configuration.
+Skyforge does not implement device-specific post-up config logic for Netlab C9s;
+that behavior is delegated to netlab runtime.
 
 ## Images
 

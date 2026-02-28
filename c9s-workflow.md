@@ -58,7 +58,7 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - `pods.ready`
   - `native_mode.verified`
   - `topology_graph.captured`
-  - `ssh_ready.completed` (only when SSH readiness gating is enabled)
+  - `ssh_ready.completed` (containerlab-only when SSH readiness gating is enabled)
 
 ### Source of truth chain (Netlab → Skyforge → Clabernetes)
 
@@ -67,18 +67,12 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 - Catalog generation materializes netlab SSH readiness defaults (`netlab_check_retries=20`,
   `netlab_check_delay=5`) when upstream device files do not set them, so runtime checks stay
   catalog-driven.
-- Catalog generation also materializes a concrete `initial_policy` (`always`/`never`) for each
-  supported device using upstream policy/config-mode metadata, so Netlab Initial decisions do not
-  rely on runtime fallback logic.
-- Netlab initial SSH/auth readiness timeout is derived strictly from catalog values
-  (`netlab_check_retries * netlab_check_delay`) per node, using the maximum across the topology.
 - Skyforge resolves node device identity strictly from this generated catalog in order:
   1. exact `device`
   2. `clab_kind`
   3. `image_prefix`
-- For c9s/netlab initial/ready decisions, Skyforge prefers `netlab.snapshot.yml` device IDs from
-  generator manifest. Snapshot metadata is required; there is no runtime fallback to `clab.yml`
-  for initial policy or readiness timeout derivation.
+- For c9s/netlab apply behavior, Skyforge does not evaluate runtime `initial_policy`/SSH-auth
+  gates; netlab runtime owns apply sequencing and per-device config semantics.
 - C9s/netlab persists canonical `device_key` and `forward_type` in
   `sf_netlab_node_status_current`; c9s Forward sync consumes those DB fields directly.
 - Non-c9s Forward sync resolves device identity from node `kind+image` using the same catalog

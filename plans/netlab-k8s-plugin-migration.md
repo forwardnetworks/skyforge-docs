@@ -5,8 +5,7 @@ Date: 2026-02-28
 ## Goal
 
 Move `c9s/netlab` from wrapper-heavy orchestration toward a strict netlab plugin
-contract while preserving native Skyforge ownership of lifecycle, policy, and
-auditing.
+contract while preserving native Skyforge ownership of lifecycle and auditing.
 
 ## Hard requirements
 
@@ -32,6 +31,8 @@ auditing.
   - generator validates manifest against schema before publish
   - taskengine validates incoming manifest JSON against schema before unmarshal
   - golden schema fixtures enforce fail-closed behavior in CI tests
+- Removed c9s/netlab Skyforge-side initial-policy and SSH/auth readiness gating;
+  apply sequencing now executes as a netlab runtime phase.
 
 ## Remaining cleanup before plugin-first rollout
 

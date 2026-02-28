@@ -36,6 +36,5 @@
   - catalog now reads `clab_kind` from native netlab locations (`clab.kind` and `clab.node.kind`),
   - no synthetic `netlab_ready` fallback is emitted in generated metadata,
   - no hardcoded readiness retry/delay defaults (parsed from upstream netlab SSH readiness task),
-  - runtime SSH readiness gating now follows netlab `ansible_connection` metadata for `netlab_ready: [ansible]`,
-  - readiness gating skips devices that omit `netlab_ready` metadata (netlab-native behavior),
-  - `initial_policy=always` fallback is still retained for devices without explicit policy/mode metadata.
+  - c9s/netlab apply orchestration no longer evaluates Skyforge runtime `initial_policy` or SSH/auth gates,
+  - netlab runtime now owns apply sequencing and per-device config behavior.

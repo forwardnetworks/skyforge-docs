@@ -39,12 +39,13 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - per-node ConfigMaps containing `node_files/<node>/...` text files
   - startup config ConfigMap(s) containing generated `config/*.cfg` files
 - Skyforge deploys the resulting containerlab definition via clabernetes, mounting the generated files via `filesFromConfigMap`.
+- Skyforge then runs the netlab runtime apply phase; netlab owns config/apply behavior (`netlab initial` and device-specific semantics).
 
 ### Configuration knobs
 
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.Netlab`
   - `Mode`: `"k8s"`
-  - `Image`: netlab runtime image (required for `c9s/netlab` generation and `netlab initial` apply)
+  - `Image`: netlab runtime image (required for `c9s/netlab` generation and apply phases)
   - `PullPolicy`: image pull policy for runtime jobs
 - Helm values (recommended):
   - `skyforge.netlab.image`
@@ -76,12 +77,11 @@ cd skyforge
      - pod states
      - controller events
 
-7) **Apply post-deploy config (`netlab initial`)**
+7) **Run netlab apply phase**
    - Skyforge runs a Kubernetes Job that:
      - reconstructs `node_files/` locally from per-node ConfigMaps
      - patches netlab inventory/snapshot to use k8s Service DNS names
-     - waits for an SSH banner on all NOS nodes (vrnetlab pods can be "Running" long before SSH is ready)
-     - runs `netlab initial` (Ansible playbooks)
+     - runs netlab runtime apply (`netlab initial` and netlab-native config modules)
 
 8) **Export to Forward (devices/IPs)**
    - Extract the device list + reachable management endpoints.
@@ -97,9 +97,8 @@ cd skyforge
   the corresponding Ansible network collections (Junos/NXOS/IOS/EOS/etc.) to be present
   in the runtime image.
 - Skyforge must remain cluster-native: no Docker socket mounts and no `docker exec` paths.
-- SSH readiness gating:
-  - Controlled by internal taskengine readiness windows derived from deployed device types.
-  - Uses an SSH banner check (reads `SSH-`), not just a TCP connect, to reduce false positives.
+- Skyforge does not implement per-device initial-policy or SSH-auth gating for c9s/netlab apply;
+  those checks are owned by netlab runtime behavior.
 
 ## Open questions
 
