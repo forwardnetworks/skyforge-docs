@@ -102,3 +102,6 @@ Disable only when needed:
 ```bash
 RUN_POST_DEPLOY_SMOKE=false ./scripts/deploy-skyforge-prod-safe.sh
 ```
+
+Smoke history (admin only) is queryable at:
+- `GET /api/admin/smoke-runs`

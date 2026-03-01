@@ -18,6 +18,13 @@ SKYFORGE_SMOKE_RUN_ACTION_CHECK=true \
 ./scripts/post-deploy-smoke.sh
 ```
 
+When credentials are provided, the script also records run results to:
+- `POST /api/admin/smoke-runs`
+
+You can disable/require reporting behavior with:
+- `SKYFORGE_SMOKE_REPORT_ENABLED=true|false`
+- `SKYFORGE_SMOKE_REPORT_REQUIRED=true|false`
+
 ## Cluster health
 ```bash
 kubectl -n skyforge get pods
