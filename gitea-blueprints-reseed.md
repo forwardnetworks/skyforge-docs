@@ -1,56 +1,31 @@
-# Reseed the public `skyforge/blueprints` repo (Gitea)
+# Reseed the shared template repo in Gitea
 
-Skyforge expects the public blueprints repo (`skyforge/blueprints`) to contain
-top-level template folders like:
+Skyforge consumes templates directly from a shared Gitea repo:
 
-- `netlab/…`
-- `eve-ng/…` (optional if you do not use EVE-NG)
-- `containerlab/…`
-- `terraform/…`
+- `skyforge/netlab-examples`
 
-If template pickers show “No templates” and the Skyforge server is healthy, the
-Gitea blueprints repo is usually missing content or out-of-sync.
+No per-user blueprint copy/sync is required.
 
-`components/blueprints` in this repo is the source-of-truth.
-
-## Canonical reseed command
-
-From the repo root:
+## Canonical reseed flow
 
 ```bash
-export SKYFORGE_HOST="skyforge.local.forwardnetworks.com"
-export GITEA_SKIP_TLS_VERIFY=true
-./scripts/push-blueprints-to-gitea.sh
+git clone https://github.com/ipspace/netlab-examples.git
+cd netlab-examples
+git remote add gitea https://<hostname>/git/skyforge/netlab-examples.git
+git push -u gitea main
 ```
 
-Defaults:
+## Required automation in the repo
 
-- Source mode: `BLUEPRINTS_SRC_MODE=local`
-- Source directory: `components/blueprints`
-- Target repo: `skyforge/blueprints`
-- Target branch: `main`
+Ensure these files are present in `skyforge/netlab-examples`:
 
-## Optional: reseed from an external git source
+- `.gitea/workflows/dns-normalize.yml`
+- `tools/normalize_dns_safe.py`
 
-```bash
-export SKYFORGE_HOST="skyforge.local.forwardnetworks.com"
-export BLUEPRINTS_SRC_MODE=git
-export BLUEPRINTS_GIT_URL="https://github.com/forwardnetworks/skyforge-blueprints.git"
-export BLUEPRINTS_GIT_REF="main"
-./scripts/push-blueprints-to-gitea.sh
-```
+The workflow auto-normalizes DNS-1035-invalid node names on push.
 
-## Optional overrides
+## Verification
 
-- `BLUEPRINTS_OWNER` (default: `skyforge`)
-- `BLUEPRINTS_REPO` (default: `blueprints`)
-- `BLUEPRINTS_TARGET_BRANCH` (default: `main`)
-- `GITEA_USERNAME` / `GITEA_PASSWORD`
-- `KUBECONFIG` (used only when reading password from k8s secret)
-
-## Notes
-
-- Reseed is a force-push by design: the published catalog should exactly match
-  the chosen source snapshot.
-- Keep top-level layout as `netlab/...`, `containerlab/...`, `terraform/...`
-  (not `blueprints/netlab/...`) for `source=blueprints` API paths.
+1. Open Skyforge deployment UI and select template source `Blueprints`.
+2. Confirm templates under `netlab/` are listed.
+3. Confirm run preflight no longer fails with DNS-1035 template node-name errors.

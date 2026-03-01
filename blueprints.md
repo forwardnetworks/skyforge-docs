@@ -1,63 +1,52 @@
-# Blueprints repository
+# Template Repository (Git-native)
 
-Skyforge uses a **blueprints** Git repository as the canonical catalog for:
+Skyforge uses a shared Git repository as the template catalog:
 
-- Lab templates (EVE‑NG)
-- Containerlab / Netlab templates
-- Cloud Terraform starter modules (AWS/Azure/GCP)
-
-Deployments reference these templates by **repo + folder path**; Skyforge does not need to copy templates into each user scope.
+- Repo: `skyforge/netlab-examples`
+- Managed directly in Gitea with normal Git workflows
+- Referenced directly by deployments (no per-user blueprint copy/sync)
 
 ```mermaid
 flowchart LR
-  user([User]) --> ui[Skyforge Portal]
+  user([User/Admin]) --> git[Gitea repo<br/>skyforge/netlab-examples]
+  user --> ui[Skyforge Portal]
   ui --> api[Skyforge Server]
-
-  api -->|references| bp[Blueprints repo<br/>skyforge/blueprints]
-  api -->|creates| proj[User repos<br/>{user}]
-  api --> runner[Native task engine<br/>(Tofu / Netlab / EVE‑NG / Containerlab / Clabernetes)]
-
-  runner -->|clones| proj
-  runner -->|optionally clones| bp
-  runner --> s3[S3 artifacts + state]
-  runner --> labs[EVE‑NG / Netlab / Containerlab]
+  api -->|references templates by repo+path| git
+  api --> runner[Native task engine<br/>(Netlab/Containerlab/EVE/Tofu)]
 ```
 
-## Recommended folder scheme
+## Folder scheme
 
-Keep the catalog predictable so the UI can offer sensible defaults:
+Keep templates at repo root:
 
-- `cloud/terraform/aws/…`
-- `cloud/terraform/azure/…`
-- `cloud/terraform/gcp/…`
-- `eve-ng/<template-name>/…` (blueprints repo)
-- `blueprints/eve-ng/<template-name>/…` (user repo override)
-- `netlab/<template>.yml`
-- `containerlab/<template>.yml`
-- `containerlab/<template>.yml` (also used by Clabernetes)
+- `netlab/...`
+- `containerlab/...` (optional)
+- `terraform/...` (optional)
+- `eve-ng/...` (optional)
 
-Skyforge deployments store the selected **repo** and **templates folder** (repo-relative), then discover templates underneath.
+## DNS-safe automation
 
-Notes:
+The catalog repo includes a Gitea Action workflow:
 
-- EVE‑NG templates are directories (each subfolder is a template).
-- Netlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
-- Containerlab templates are YAML topology files (each `.yml` / `.yaml` file is a template).
-- Clabernetes templates are Containerlab YAML topology files, deployed to Kubernetes via the clabernetes controller.
-- User repos can keep templates under `blueprints/eve-ng/...`, `blueprints/netlab/...`, and `blueprints/containerlab/...` for user-scoped customization.
-- EVE‑NG templates should include the `.unl` lab file (or a `.zip` containing it).
-- The bundled `blueprints/netlab/netlab-examples` is synced from the upstream Netlab examples; refresh it when updating Netlab to avoid template/filter mismatches.
+- `.gitea/workflows/dns-normalize.yml`
 
-## Bootstrap options
+It runs:
 
-The simplest approach is to create the `blueprints` repo manually in your Git
-provider and push the catalog once:
+- `tools/normalize_dns_safe.py`
+
+On every push and auto-commits DNS-1035-safe node name fixes.
+
+## Bootstrap
 
 ```bash
-git remote add gitea https://<hostname>/git/skyforge/blueprints.git
-git push gitea HEAD:main
+git clone https://<host>/git/skyforge/netlab-examples.git
+cd netlab-examples
+# edit templates
+git add -A
+git commit -m "update templates"
+git push
 ```
 
-To make the blueprint catalog visible to everyone, set the repo visibility to public in Gitea:
+To keep it visible in Explore:
 
-- Gitea UI: `skyforge/blueprints` → Settings → "Make Repository Public"
+- Gitea UI: `skyforge/netlab-examples` -> Settings -> "Make Repository Public"

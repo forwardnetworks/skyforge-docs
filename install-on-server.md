@@ -43,19 +43,21 @@ export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
 sudo -E ./scripts/install-on-host.sh
 ```
 
-5) Upload templates (blueprints) to Gitea
+5) Seed template catalog in Gitea
 
-If the UI shows “failed to load templates”, reseed the bundled
-`components/blueprints/` catalog:
+Skyforge uses a shared repo (default: `skyforge/netlab-examples`) and reads it directly.
+If templates are missing in UI, seed or refresh that repo:
 
 ```bash
-export SKYFORGE_HOST="skyforge-qa.local.forwardnetworks.com"
-export GITEA_SKIP_TLS_VERIFY=true
-./scripts/push-blueprints-to-gitea.sh
+git clone https://github.com/ipspace/netlab-examples.git
+cd netlab-examples
+git remote add gitea https://skyforge-qa.local.forwardnetworks.com/git/skyforge/netlab-examples.git
+git push -u gitea main
 ```
 
-By default, `scripts/push-blueprints-to-gitea.sh` uses the local
-`components/blueprints` directory as source-of-truth.
+The repo should include DNS normalization automation:
+- `.gitea/workflows/dns-normalize.yml`
+- `tools/normalize_dns_safe.py`
 
 ## What the installer does
 
