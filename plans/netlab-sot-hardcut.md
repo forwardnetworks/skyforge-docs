@@ -32,6 +32,22 @@
 - Removed snapshot/device fallback and forward-type re-lookup from row persistence; `buildNetlabNodeStatusCurrentRows` now requires canonical graph metadata (`device_key`, `forward_type`) prepared upstream.
 - Added DB/runtime contract checks for `sf_netlab_node_status_current` canonical fields (`device_key`, `forward_type`, `kind`, `image`) to prevent silent fallback rows.
 - Moved canonical graph enrichment (`device_key`, `forward_type`) into c9s topology artifact capture so persisted deployment topology artifacts match DB contract shape.
+- Migrated legacy netlab API run contract state off task JSON metadata:
+  - `netlabJobId` now persists in `sf_task_runtime_contracts.netlab_contract`.
+  - uploaded `netlab.snapshot.yml` / `clab.yml` keys now persist in
+    `sf_netlab_artifact_index` instead of `metadata.netlabSnapshotKey/netlabClabKey`.
+- Removed remaining taskengine task-metadata mutation helpers tied to runtime state:
+  - retired metadata helper files (`task_metadata.go`, `warnings.go`),
+  - retired duplicate skyforge metadata warning helpers (`task_cancel_helpers.go`),
+  - netlab cancel-applied markers now persist in `sf_task_runtime_contracts.netlab_contract`.
+- Migrated netlab run artifact lookup off log parsing:
+  - `GET /api/netlab/runs` now reads task artifact pointers from
+    `sf_netlab_artifact_index` instead of scanning `SKYFORGE_ARTIFACT` markers
+    from task log text.
+- Removed remaining runtime reads of task JSON metadata for cancellation/status paths:
+  - `taskCanceled` now checks task status directly (no metadata payload read),
+  - deployment task notifications now derive action from typed task fields instead
+    of `metadata.spec`/metadata helper parsing.
 - Generator/runtime hard-cut updates:
   - catalog now reads `clab_kind` from native netlab locations (`clab.kind` and `clab.node.kind`),
   - no synthetic `netlab_ready` fallback is emitted in generated metadata,

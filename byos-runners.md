@@ -59,15 +59,14 @@ Credential storage should match existing patterns (like EVE credentials): encryp
 
 ## Template delivery
 
-Preferred: **git clone/pull on the BYOS host**, driven by the native APIs/commands:
+Hard-cut behavior:
 
 - Skyforge passes repo/ref/path; the BYOS tool is responsible for obtaining the files.
 - Skyforge should support both:
   - internal/private repo URLs (Gitea)
   - public URLs (e.g., exposed via a Cloudflare tunnel when needed)
-
-Fallback (only if required by the provider API):
-- Send a tarball/blob of the template contents over the API request.
+- For containerlab BYOS, Skyforge now passes only `topologySourceUrl` to the API server.
+- Topology-content/blob fallback has been removed from the BYOS containerlab run path.
 
 ## Execution semantics (API)
 

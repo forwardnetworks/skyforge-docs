@@ -24,6 +24,15 @@ Stable identifiers:
   - Examples: `netlab-c9s-run`, `containerlab-run`, `netlab-run`, `eve-ng-run`, `terraform-*`
 - Do not rename task types without a DB migration / translation layer.
 
+### Terraform runner binary resolution
+
+- Terraform tasks resolve the executable in this order:
+  1. `Terraform.BinaryPath` from typed Encore config.
+  2. `terraform` found on `PATH` in the runtime container.
+- Skyforge no longer downloads Terraform binaries at runtime.
+- Operational requirement: worker/runtime images must include Terraform when
+  Terraform tasks are enabled.
+
 ## SSE streaming contracts
 
 ### Run output

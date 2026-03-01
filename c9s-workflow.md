@@ -81,6 +81,8 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - keyed by `(task_id, artifact_path)` with user/deployment/task foreign keys
   - historical `metadata.netlabArtifacts` is migrated and no longer the primary index
   - read API: `GET /api/users/:id/deployments/:deploymentID/netlab/artifacts`
+  - `GET /api/netlab/runs` now resolves run artifact pointers from this typed index
+    (legacy log-marker parsing `SKYFORGE_ARTIFACT` is removed).
 - Clabernetes apply step persists handoff checksum/provenance:
   - metadata key: `clabernetesApplySummary`
   - task event: `clabernetes.apply.summary`
@@ -93,7 +95,8 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
 - Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
-  passed as typed task metadata (not environment overrides).
+  written to typed runtime-contract rows in `sf_task_runtime_contracts`
+  (not environment overrides).
 - Preflight now runs at API-time before runs are queued:
   - API/CRD compatibility preflight (default enabled in `deployPolicy.compatibilityPreflight`)
   - capacity preflight (default hard-fail in `deployPolicy.failOnInsufficientResources`)
