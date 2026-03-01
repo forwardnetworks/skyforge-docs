@@ -97,6 +97,12 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 - Clabernetes apply step persists handoff checksum/provenance:
   - metadata key: `clabernetesApplySummary`
   - task event: `clabernetes.apply.summary`
+- Pure-k8s runtime contract is fail-closed at reconcile time:
+  - `env-files` in resolved node definitions are rejected for k8s runtime.
+  - Node `binds` are allowed only when bind sources are artifact-backed via
+    `spec.deployment.filesFromConfigMap` mounts for that node.
+  - This validation runs before deployment create/update so unsupported runtime
+    semantics do not partially apply.
 - Netlab generator handoff uses a versioned manifest contract:
   - contract version: `skyforge.netlab-c9s.manifest/v1`
   - schema file: `components/server/internal/taskengine/netlab_c9s_manifest.schema.json`
