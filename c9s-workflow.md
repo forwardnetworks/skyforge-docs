@@ -29,6 +29,17 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
 5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
 
+### 2.1) Alternate runtime migration: pure-k8s launcher mode
+
+- Skyforge default runtime is now `pure-k8s` (no Docker-in-Docker).
+- Runtime toggle:
+  - set `SKYFORGE_C9S_RUNTIME_MODE=docker` only for explicit fallback/testing.
+- In this alternate mode:
+  - netlab runtime emits launcher `extraEnv` with `LAUNCHER_RUNTIME_MODE=pure-k8s`.
+  - clabernetes deployment rendering omits Docker-specific mounts/config (`/var/lib/docker`, docker config secrets).
+  - launcher skips Docker bootstrap/image import path and invokes containerlab with `--runtime containerd`.
+- This remains additive in clabernetes so upstream default behavior is unchanged while Skyforge hardens pure-k8s orchestration.
+
 ### Deploy policy + phased task events
 
 - For `netlab-c9s-run` deploy actions, Skyforge resolves deploy policy once per task
