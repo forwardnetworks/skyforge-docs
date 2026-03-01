@@ -2,6 +2,22 @@
 
 These tests validate a minimal deployment without running full end‑to‑end jobs.
 
+## Automated post-deploy smoke
+```bash
+SKYFORGE_BASE_URL="https://<hostname>" \
+SKYFORGE_SMOKE_INSECURE_TLS=true \
+./scripts/post-deploy-smoke.sh
+```
+
+Optional authenticated deployment action smoke (includes `/preflight` + `/action` path checks):
+```bash
+SKYFORGE_BASE_URL="https://<hostname>" \
+SKYFORGE_SMOKE_USERNAME="admin" \
+SKYFORGE_SMOKE_PASSWORD="<password>" \
+SKYFORGE_SMOKE_RUN_ACTION_CHECK=true \
+./scripts/post-deploy-smoke.sh
+```
+
 ## Cluster health
 ```bash
 kubectl -n skyforge get pods

@@ -63,6 +63,18 @@ Notes:
 - The script enforces standalone mirror builds and dedicated daemon isolation.
 - This is the supported local build path for deterministic results.
 
+## Go 1.26 internal compiler error during Encore tests
+Symptom:
+- `encore test` or `make test` fails with an internal compiler error such as:
+  - `internal compiler error: bad declaration of .autotmp_*`
+
+Cause:
+- Local Go 1.26 toolchain edge case in this repository/runtime combo.
+
+Fix:
+- Use the pinned repo toolchain (`go1.25.4`) via `GOTOOLCHAIN`.
+- The repo now defaults `GOTOOLCHAIN=go1.25.4` in `Makefile`, CI, and key test scripts.
+
 ## Prevent stale UI/image deploy drift
 Symptom:
 - A deploy "succeeds" but the UI still reflects older routes/pages.
@@ -83,4 +95,10 @@ Recommended production flow:
 SKYFORGE_SERVER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag> \
 SKYFORGE_SERVER_WORKER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag>-worker \
 ./scripts/deploy-skyforge-prod-safe.sh
+```
+
+The deploy script now runs `scripts/post-deploy-smoke.sh` by default.
+Disable only when needed:
+```bash
+RUN_POST_DEPLOY_SMOKE=false ./scripts/deploy-skyforge-prod-safe.sh
 ```
