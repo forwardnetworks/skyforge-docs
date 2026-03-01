@@ -33,7 +33,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 
 - For `netlab-c9s-run` deploy actions, Skyforge resolves deploy policy once per task
   (connectivity, expose mode, scheduling mode, resource flags, deploy timeout) and stores it
-  in task metadata as `clabernetesDeployPolicy`.
+  in typed runtime contract storage (`sf_task_runtime_contracts.clabernetes_deploy_policy`).
 - Retries/resume of the same task re-use this persisted policy to prevent mid-run behavior drift
   when environment inputs change.
 - Deploy tasks emit phased events under `clabernetes.deploy.phase`:
@@ -69,12 +69,13 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 - Forward device credential creation for netlab/clabernetes sync is sourced from this same
   generated netlab catalog (no separate hardcoded credential table).
 - Unknown or alias-only devices fail preflight (fail-closed).
-- C9s/netlab tasks persist catalog provenance in task metadata/event:
-  - metadata key: `netlabCatalogProvenance`
-  - task event: `netlab.catalog.provenance`
-- C9s/netlab tasks also persist node resolution summary:
-  - metadata key: `netlabNodeResolutionSummary`
-  - task event: `netlab.node_resolution.summary`
+- C9s/netlab tasks persist contract summaries in typed DB rows:
+  - table: `sf_task_runtime_contracts`
+  - fields include `netlab_catalog_provenance`, `netlab_contract`,
+    `netlab_k8s_contract`, `netlab_node_resolution_summary`,
+    `clabernetes_deploy_policy`, `clabernetes_compatibility_preflight`,
+    `clabernetes_capacity_preflight`, `clabernetes_apply_summary`
+  - task events remain emitted for run/audit timelines.
 - C9s/netlab artifact index is persisted in typed DB rows:
   - table: `sf_netlab_artifact_index`
   - keyed by `(task_id, artifact_path)` with user/deployment/task foreign keys
@@ -86,7 +87,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 - Netlab generator handoff uses a versioned manifest contract:
   - contract version: `skyforge.netlab-c9s.manifest/v1`
   - schema file: `components/server/internal/taskengine/netlab_c9s_manifest.schema.json`
-  - required top-level fields: `contractVersion`, `bundleSha256`, `clabYAML`, `nodes`, `netlabOutput`
+  - required top-level fields: `contractVersion`, `bundleSha256`, `clabYAML`, `nodes`, `k8s`
   - optional strict field: `nodeLicenses` (per-node ConfigMap/key + mount path contract)
   - generator validates schema before publishing `manifest.json`
   - taskengine validates schema at ingress before unmarshal/use
@@ -104,8 +105,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 - Deployment action/preflight requests now use a short-lived advisory operation lock keyed by
   deployment operation key, which prevents duplicate clicks from running concurrent
   preflight+queue paths for the same deploy/destroy operation.
-- The run detail UI (`/dashboard/runs/:runId`) consumes these metadata keys and
-  lifecycle events from:
+- The run detail UI (`/dashboard/runs/:runId`) consumes lifecycle/provenance events from:
   - `/api/runs/:id/events` (stdout/stderr stream)
   - `/api/runs/:id/lifecycle` (structured phase/provenance events)
 

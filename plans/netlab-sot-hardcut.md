@@ -31,7 +31,7 @@
 - Hardened c9s credential resolution to `device_key`-only catalog lookup (no image-prefix credential fallback in c9s runtime paths).
 - Removed snapshot/device fallback and forward-type re-lookup from row persistence; `buildNetlabNodeStatusCurrentRows` now requires canonical graph metadata (`device_key`, `forward_type`) prepared upstream.
 - Added DB/runtime contract checks for `sf_netlab_node_status_current` canonical fields (`device_key`, `forward_type`, `kind`, `image`) to prevent silent fallback rows.
-- Moved canonical graph enrichment (`device_key`, `forward_type`) into c9s topology artifact capture so persisted `topologyKey` JSON matches DB contract shape.
+- Moved canonical graph enrichment (`device_key`, `forward_type`) into c9s topology artifact capture so persisted deployment topology artifacts match DB contract shape.
 - Generator/runtime hard-cut updates:
   - catalog now reads `clab_kind` from native netlab locations (`clab.kind` and `clab.node.kind`),
   - no synthetic `netlab_ready` fallback is emitted in generated metadata,
