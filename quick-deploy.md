@@ -5,8 +5,10 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 ## Scope
 
 - Deployment family/engine: `c9s` / `netlab` only.
-- Template source: curated Netlab blueprints under `netlab/_curated`.
-- Forward: always uses in-app Forward (`http://fwd-appserver.forward.svc.cluster.local:8080`)
+- Template source: curated Netlab blueprints managed by an admin catalog.
+  - Default catalog focuses on EOS technology demos (EVPN, SR/MPLS, IPv6, VRF).
+  - Default template files live under `netlab/{evpn,bgp,sr,mpls,vrf}/quick-eos-*.yml`.
+- Forward: always uses in-app Forward (`https://fwd-appserver.forward.svc.cluster.local`)
   with managed credentials from platform secrets.
   - `skyforge-quick-deploy-forward-username.skyforge-quick-deploy-forward-username`
   - `skyforge-quick-deploy-forward-password.skyforge-quick-deploy-forward-password`
@@ -49,4 +51,6 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 - `GET /api/deployment-lifetime/policy`
 - `GET /api/quick-deploy/catalog`
 - `POST /api/quick-deploy/deploy`
+- `GET /api/admin/quick-deploy/catalog`
+- `PUT /api/admin/quick-deploy/catalog`
 - `POST /internal/cron/deployments/leases` (private cron endpoint)
