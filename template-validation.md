@@ -15,7 +15,7 @@ For C9s-backed runs, node names in `topology.yml` must be valid DNS-1035 labels:
 - end with an alphanumeric character (`a-z0-9`)
 - allowed characters are `a-z`, `0-9`, and `-`
 
-Skyforge now rejects create/start for templates that violate this rule before queuing tasks.
+This rule is enforced by the netlab `k8s` plugin in the runtime validation path (`netlab create`).
 
 ### UI
 

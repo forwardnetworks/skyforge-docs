@@ -48,6 +48,15 @@ contract while preserving native Skyforge ownership of lifecycle and auditing.
 - Extended manifest node contract with canonical `forwardType` emitted by runtime
   generator and consumed directly by taskengine graph/status persistence (no
   forward-type derivation at graph-apply time).
+- Added strict runtime manifest contract validation in taskengine:
+  - JSON decode now fails on unknown fields
+  - required contract fields are validated before topology graph/status persistence
+  - c9s runtime manifest must include netlab k8s plugin metadata (`k8s.contract`, `k8s.provider`)
+- Added contract conformance tests (fixtures + Go tests):
+  - valid minimal contract case
+  - fail-closed checks for missing required fields and unknown fields
+- Netlab runtime now reads `k8s` metadata from netlab snapshot output and emits it
+  into `manifest.json` for explicit plugin provenance.
 
 ## Remaining cleanup before plugin-first rollout
 
