@@ -5,6 +5,18 @@ offline (no cluster required) and expose a Netlab “Validate” action in the U
 
 ## Netlab
 
+### Node naming requirement (C9s)
+
+For C9s-backed runs, node names in `topology.yml` must be valid DNS-1035 labels:
+
+- lowercase only
+- 1-63 characters
+- start with a letter (`a-z`)
+- end with an alphanumeric character (`a-z0-9`)
+- allowed characters are `a-z`, `0-9`, and `-`
+
+Skyforge now rejects create/start for templates that violate this rule before queuing tasks.
+
 ### UI
 
 On `Dashboard → Deployments → Create`, select a Netlab template and click **Validate**.
@@ -49,6 +61,9 @@ refactor the templates:
 ## Containerlab
 
 We validate containerlab templates against the official containerlab JSON schema (no deploy).
+
+For C9s-backed containerlab runs, Skyforge applies the same DNS-1035 node-name validation during
+template build/preflight.
 
 ```bash
 (cd server && go run ./cmd/validatecontainerlab --root ../blueprints/containerlab) > /tmp/containerlab-validate-report.md

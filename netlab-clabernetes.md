@@ -21,9 +21,10 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
    - Run `netlab create` (and/or `netlab up --dry-run` if needed) to generate:
      - `clab.yml` (Containerlab topology)
      - `hosts.yml`, `node_files/`, `config/`, `group_vars/`, etc.
-   - Skyforge runs `netlab create` in-cluster (using the netlab runtime image defaults at `/etc/netlab/defaults.yml`) and persists:
-     - `clab.yml` + `node_files/` + `config/` (for clabernetes deploy)
-     - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
+- Skyforge runs `netlab create` in-cluster (using the netlab runtime image defaults at `/etc/netlab/defaults.yml`) and persists:
+  - `clab.yml` + `node_files/` + `config/` (for clabernetes deploy)
+  - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
+  - canonical node metadata (`deviceKey`, `forwardType`) in the manifest contract
 
 ## Runtime modes
 
@@ -33,19 +34,24 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 
 ### In-cluster runtime (required)
 
-- Skyforge runs a Kubernetes Job (in the user namespace) that executes Netlab to generate artifacts.
-- The runtime job writes:
-  - a manifest ConfigMap (`c9s-<topology>-manifest`) containing `manifest.json`
-  - per-node ConfigMaps containing `node_files/<node>/...` text files
-  - startup config ConfigMap(s) containing generated `config/*.cfg` files
-- Skyforge deploys the resulting containerlab definition via clabernetes, mounting the generated files via `filesFromConfigMap`.
-- Skyforge then runs the netlab runtime apply phase; netlab owns config/apply behavior (`netlab initial` and device-specific semantics).
+- Skyforge runs one Kubernetes runtime job for bring-up (`netlab.py up`) in the user namespace.
+- `netlab.py up` owns the full runtime path:
+  - `netlab create` from the provided topology bundle
+  - manifest generation and manifest schema validation
+  - writing manifest + node/shared/startup/license/output ConfigMaps
+  - creating/updating the clabernetes `Topology` CR
+  - waiting for topology readiness
+  - running netlab apply (`netlab initial` and device-specific semantics)
+- Skyforge runs one Kubernetes runtime job for teardown (`netlab.py down`):
+  - deletes the clabernetes `Topology` CR
+  - deletes c9s runtime ConfigMaps labeled for that topology
+  - then taskengine performs post-destroy DB/orphan cleanup
 
 ### Configuration knobs
 
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.Netlab`
   - `Mode`: `"k8s"`
-  - `Image`: netlab runtime image (required for `c9s/netlab` generation and apply phases)
+  - `Image`: netlab runtime image (required for `c9s/netlab` generation and deploy/apply phases)
   - `PullPolicy`: image pull policy for runtime jobs
 - Helm values (recommended):
   - `skyforge.netlab.image`
@@ -63,13 +69,13 @@ cd skyforge
 ```
 
 4) **Deploy via c9s**
-   - Skyforge creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
-   - Skyforge mounts runtime-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
+   - Netlab runtime `up` creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
+   - Netlab runtime `up` mounts runtime-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
    - Uses a per-user namespace (`ws-<userScopeSlug>`) to isolate resources.
-   - Applies the `Topology` CR; waits for `status.topologyReady=true`.
+   - Netlab runtime `up` applies the `Topology` CR and waits for `status.topologyReady=true`.
 
 6) **Status + logs**
    - Provide a deployment “info” panel backed by Kubernetes queries:
@@ -78,9 +84,8 @@ cd skyforge
      - controller events
 
 7) **Run netlab apply phase**
-   - Skyforge runs a Kubernetes Job that:
+   - Netlab runtime `up`:
      - reconstructs `node_files/` locally from per-node ConfigMaps
-     - patches netlab inventory/snapshot to use k8s Service DNS names
      - runs netlab runtime apply (`netlab initial` and netlab-native config modules)
 
 8) **Export to Forward (devices/IPs)**
@@ -144,8 +149,9 @@ cd skyforge
 
 ## Netlab plugin migration direction
 
-The current `c9s/netlab` path remains a Skyforge wrapper around native netlab
-artifacts (`netlab create` + `netlab initial`) and clabernetes CR apply.
+The current `c9s/netlab` path keeps Skyforge as orchestrator while netlab
+runtime owns native netlab artifacts (`netlab create` + `netlab initial`) and
+clabernetes CR apply sequencing.
 
 The target architecture is to move more deployment semantics into a netlab
 plugin contract over time, while keeping these invariants:

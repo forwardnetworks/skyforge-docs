@@ -29,13 +29,25 @@ contract while preserving native Skyforge ownership of lifecycle and auditing.
 - Added contract v1 schema lock:
   - canonical schema file `internal/taskengine/netlab_c9s_manifest.schema.json`
   - generator validates manifest against schema before publish
-  - taskengine validates incoming manifest JSON against schema before unmarshal
+  - runtime `up` path validates manifest JSON before deploy/apply
   - golden schema fixtures enforce fail-closed behavior in CI tests
 - Removed c9s/netlab Skyforge-side initial-policy and SSH/auth readiness gating;
   apply sequencing now executes as a netlab runtime phase.
 - Removed c9s Go-side cEOS bootstrap synthesis and bind rewrites from deploy preparation.
 - Removed topology pre-validation patching in taskengine; c9s/netlab now validates against
   netlab-generated manifest/device metadata post-`netlab create`.
+- Moved native c9s Topology CR apply sequencing into netlab runtime bring-up phase
+  (`netlab.py up`), so Skyforge taskengine orchestrates jobs and persists state
+  while runtime performs CR submit/readiness/apply sequencing.
+- Removed Go-side `filesFromConfigMap` synthesis from generator/taskengine path;
+  netlab runtime deploy now derives mount layout directly from manifest contract.
+- Switched netlab-c9s destroy from direct clabernetes task invocation to netlab
+  runtime mode (`netlab.py down`) and runtime-owned topology/configmap teardown.
+- Removed remaining internal `clabTarball` plumbing from netlab-c9s taskengine
+  dispatch/deploy metadata path.
+- Extended manifest node contract with canonical `forwardType` emitted by runtime
+  generator and consumed directly by taskengine graph/status persistence (no
+  forward-type derivation at graph-apply time).
 
 ## Remaining cleanup before plugin-first rollout
 

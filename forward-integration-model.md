@@ -1,6 +1,6 @@
 # Skyforge ↔ Forward Integration Model (Proposed)
 
-This document outlines a model for connecting Skyforge deployments (family/engine pairs such as `c9s/netlab`, `c9s/containerlab`, `byos/eve_ng`, and `byos/netlab`) to Forward (network creation + classic device onboarding) without tying the configuration to a single deployment.
+This document outlines a model for connecting Skyforge deployments (family/engine pairs such as `c9s/netlab`, `byos/eve_ng`, and `byos/netlab`) to Forward (network creation + classic device onboarding) without tying the configuration to a single deployment.
 
 ## Goals
 
@@ -25,7 +25,7 @@ Why per-user:
 
 ### 2) In-cluster Forward Collector (preferred data-plane)
 
-For deployments that live in the Kubernetes cluster (`c9s/netlab` or `c9s/containerlab`), the simplest and most reliable approach is to run a Forward collector **inside the cluster**:
+For deployments that live in the Kubernetes cluster (`c9s/netlab`), the simplest and most reliable approach is to run a Forward collector **inside the cluster**:
 
 - One collector per user (recommended), or one collector per user scope (simpler isolation).
 - The collector establishes outbound connectivity to Forward, and uses in-cluster networking to reach the device management IPs (pod IPs / services).

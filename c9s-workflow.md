@@ -6,50 +6,32 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 ## How it works
 
-### 1) Containerlab → C9s (deployment family/engine: `c9s` / `containerlab`)
+### 1) C9s engine hard gate
 
-- User selects a **Containerlab topology** template (YAML) from either:
-  - public blueprints (`blueprints/containerlab`), or
-  - the user repo.
-- Skyforge creates a `Topology` custom resource:
-  - `apiVersion: clabernetes.containerlab.dev/v1alpha1`
-  - `kind: Topology`
-  - `spec.definition.containerlab: "<containerlab yaml>"`
-- clabernetes reconciles the Topology and launches the node pods.
-
-Notes:
-- There is no separate “conversion” step required: clabernetes accepts the Containerlab YAML directly via `spec.definition.containerlab`.
-- Skyforge places each user scope into its own Kubernetes namespace by default:
-  `ws-<userScopeSlug>` (sanitized).
+- C9s is now **netlab-only** (`family=c9s`, `engine=netlab`).
+- Direct C9s `containerlab` engine/task paths are retired.
+- Any remaining C9s records with non-netlab engine values fail closed at API preflight/action time.
 
 ### 2) Netlab → C9s (deployment family/engine: `c9s` / `netlab`)
 
-Netlab-on-C9s uses Netlab only as a generator of Containerlab artifacts, then deploys those artifacts to Kubernetes via clabernetes:
+Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and persists state:
 
-1. Skyforge syncs the Netlab template folder and runs Netlab generation in-cluster
-   via Kubernetes Job (`c9s/netlab` native mode). BYOS Netlab server mode is not
-   used for this path.
-   - Runtime entrypoint is unified: `python3 /app/netlab.py generate` for generate
-     and `python3 /app/netlab.py apply` for apply.
-2. Runs `netlab create` to generate:
+1. Skyforge syncs the Netlab template folder and runs netlab in-cluster (`c9s/netlab` native mode).
+   BYOS Netlab server mode is not used for this path.
+2. Runtime entrypoint is unified:
+   - `python3 /app/netlab.py up` for deploy/create
+   - `python3 /app/netlab.py down` for destroy/stop
+3. `netlab up` generates:
    - `clab.yml`
    - `node_files/…`
    - `config/*.cfg` startup configs (netlab-native output)
    - Skyforge does not post-process generated `node_files`; device bootstrap content comes from netlab output.
-3. Exports the generated artifacts as a `containerlab-<deployment>.tar.gz` tarball.
-4. Skyforge parses the tarball:
-   - extracts `clab.yml`
-   - extracts per-node `node_files/<node>/*`
-   - extracts generated startup configs from `config/*.cfg`
-5. Skyforge creates one ConfigMap per node containing that node’s `node_files`, labeled with:
-   - `skyforge-c9s-topology=<topologyName>`
-6. Skyforge creates a clabernetes `Topology` that mounts both `node_files` and startup-config ConfigMaps using `spec.deployment.filesFromConfigMap`.
-
-This gives an end-to-end “Netlab template → k8s lab” path without needing an external Containerlab host.
+4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
+5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
 
 ### Deploy policy + phased task events
 
-- For `clabernetes-run` deploy actions, Skyforge resolves deploy policy once per task
+- For `netlab-c9s-run` deploy actions, Skyforge resolves deploy policy once per task
   (connectivity, expose mode, scheduling mode, resource flags, deploy timeout) and stores it
   in task metadata as `clabernetesDeployPolicy`.
 - Retries/resume of the same task re-use this persisted policy to prevent mid-run behavior drift
@@ -93,6 +75,11 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
 - C9s/netlab tasks also persist node resolution summary:
   - metadata key: `netlabNodeResolutionSummary`
   - task event: `netlab.node_resolution.summary`
+- C9s/netlab artifact index is persisted in typed DB rows:
+  - table: `sf_netlab_artifact_index`
+  - keyed by `(task_id, artifact_path)` with user/deployment/task foreign keys
+  - historical `metadata.netlabArtifacts` is migrated and no longer the primary index
+  - read API: `GET /api/users/:id/deployments/:deploymentID/netlab/artifacts`
 - Clabernetes apply step persists handoff checksum/provenance:
   - metadata key: `clabernetesApplySummary`
   - task event: `clabernetes.apply.summary`
@@ -112,7 +99,7 @@ This gives an end-to-end “Netlab template → k8s lab” path without needing 
   - capacity preflight compares requested topology resources vs current allocatable-minus-requested node headroom
 - Skyforge also exposes an explicit preflight endpoint (no queue side-effects):
   - `POST /api/users/:id/deployments/:deploymentID/preflight`
-  - supported for deployment family/engine pairs `c9s/containerlab` and `c9s/netlab`
+  - supported for deployment family/engine pair `c9s/netlab`
   - returns no-op/idempotent reasons when deployment state already matches requested action
 - Deployment action/preflight requests now use a short-lived advisory operation lock keyed by
   deployment operation key, which prevents duplicate clicks from running concurrent
