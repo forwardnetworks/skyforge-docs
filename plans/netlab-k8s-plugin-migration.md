@@ -57,6 +57,16 @@ contract while preserving native Skyforge ownership of lifecycle and auditing.
   - fail-closed checks for missing required fields and unknown fields
 - Netlab runtime now reads `k8s` metadata from netlab snapshot output and emits it
   into `manifest.json` for explicit plugin provenance.
+- Hardened runtime backend contract to `k8s` only across Skyforge/netlab:
+  - manifest schema/validator now reject `docker` backend metadata
+  - runtime payload builder no longer emits docker image-pull config
+  - c9s deploy contract is fail-closed on non-`k8s` runtime backend values
+- Removed Docker package dependency from clabernetes launcher image and pinned
+  launcher backend resolution to `k8s` in runtime code paths.
+- Removed chart/runtime fallback toggles for c9s runtime mode:
+  - `SKYFORGE_C9S_RUNTIME_MODE` env wiring removed from worker chart
+  - chart value knob `skyforge.netlab.c9sRuntimeMode` removed
+  - docs now reflect k8s-only runtime contract (no docker fallback toggle)
 
 ## Remaining cleanup before plugin-first rollout
 
