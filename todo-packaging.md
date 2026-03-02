@@ -65,7 +65,7 @@ We should be able to enable/disable features cleanly at chart install time.
   - verifies correct `KUBECONFIG`/context
   - verifies required secrets exist
   - runs `helm upgrade --install` with `--atomic --wait`
-  - runs smoke checks (`server/cmd/smokecheck`) after the rollout
+  - runs smoke checks (`skyforge-cli smoke suite --scope deploy-forward`) after the rollout
 - [ ] Add `scripts/preflight.sh` (optional) to validate prerequisites without deploying.
 
 ### 6) CI Gates (Catch breakage before cluster)

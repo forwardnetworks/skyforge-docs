@@ -9,12 +9,13 @@ SKYFORGE_SMOKE_INSECURE_TLS=true \
 ./scripts/post-deploy-smoke.sh
 ```
 
-Optional authenticated deployment action smoke (includes `/preflight` + `/action` path checks):
+Optional authenticated deploy+forward smoke (includes `/preflight` + `/action` path checks):
 ```bash
 SKYFORGE_BASE_URL="https://<hostname>" \
 SKYFORGE_SMOKE_USERNAME="admin" \
 SKYFORGE_SMOKE_PASSWORD="<password>" \
 SKYFORGE_SMOKE_RUN_ACTION_CHECK=true \
+SKYFORGE_SMOKE_FWD_PROFILE="<fwd-cli-profile>" \
 ./scripts/post-deploy-smoke.sh
 ```
 
@@ -51,23 +52,51 @@ kubectl -n skyforge run skyforge-smoke --rm -i --restart=Never \
 - Create a deployment.
 - Delete the deployment and confirm it disappears.
 
-## Deployment action idempotency smoke (API-level)
+## Deployment and Forward smoke (API-level)
 ```bash
-cd components/server
+cd ../skyforge-cli
 SKYFORGE_BASE_URL="https://<hostname>" \
-SKYFORGE_SECRETS_FILE="../../deploy/skyforge-secrets.yaml" \
-SKYFORGE_SMOKE_ACTION_CHECK=true \
-go run ./cmd/smokecheck
+SKYFORGE_CLI_USERNAME="admin" \
+SKYFORGE_CLI_PASSWORD="<password>" \
+go run ./cmd/skyforge-cli --profile smoke --insecure \
+  auth login --password "$SKYFORGE_CLI_PASSWORD"
+go run ./cmd/skyforge-cli --profile smoke --insecure \
+  smoke suite --scope deploy-forward --timeout 60s --fwd-profile "<fwd-cli-profile>"
 ```
 
 This exercises both:
 - `/api/users/:id/deployments/:deploymentID/preflight`
 - `/api/users/:id/deployments/:deploymentID/action`
+- `/api/users/:id/deployments/:deploymentID/forward/sync`
 
-for `destroy/create/start` and validates idempotency metadata consistency:
-- `reason` is one of `queued`, `already_present`, `already_absent`, `in_flight_duplicate`, `cooldown_suppressed`
-- `queued` responses must not be `noOp`
-- idempotent reasons must return `noOp=true`
+plus run diagnostics (`/api/runs/:id/output`, `/events`, `/lifecycle`), deployment artifacts,
+and optional `fwd-cli` checks for latest snapshot + device inventory.
+
+Pin EVPN template + strict checks:
+
+```bash
+go run ./cmd/skyforge-cli --profile smoke --insecure \
+  smoke suite \
+  --scope deploy-forward \
+  --template EVPN/ebgp/topology.yml \
+  --fwd-profile "<fwd-cli-profile>" \
+  --strict-forward \
+  --assert-config \
+  --assert-stanzas auto \
+  --debug-artifacts
+```
+
+Stress reliability run:
+
+```bash
+go run ./cmd/skyforge-cli --profile smoke --insecure \
+  smoke stress \
+  --scope deploy-forward \
+  --template EVPN/ebgp/topology.yml \
+  --fwd-profile "<fwd-cli-profile>" \
+  --cycles 10 \
+  --stop-on-failure
+```
 
 ## Optional integration checks
 - Git UI: `https://<hostname>/api/gitea/public`
