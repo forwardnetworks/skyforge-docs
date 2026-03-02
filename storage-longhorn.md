@@ -48,9 +48,20 @@ The Skyforge chart sets:
 - `platform-data` PVC: `ReadWriteMany`
 - `skyforge-server-data` PVC: `ReadWriteMany`
 
+Forward in-cluster storage currently includes `forward-scratch` as `ReadWriteOnce`.
+That means:
+
+- strict required co-location can create hard scheduling deadlocks under pressure
+- but removing co-location entirely can increase volume attach churn
+
+Operational policy for Forward workloads is:
+
+- allow scheduling on any `forward` node
+- use **preferred** (not required) scratch-group co-location
+- avoid hard hostname pinning
+
 ## PVC sizing
 
 The chart requests `5Gi` for most PVCs. This is intentional: `local-path` does
 not enforce capacity, so historical data can exceed the old `100Mi` requests and
 will break Longhorn migrations if not resized.
-

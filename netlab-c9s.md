@@ -14,7 +14,13 @@ deploys the resulting Containerlab topology via Clabernetes.
    - Netlab runtime owns post-deploy config behavior (`netlab initial`, cfglets/modules, and
      device-specific apply semantics).
 
-Linux node extras are handled by the C9s runtime path and are not user-configurable overrides.
+Runtime defaults are sourced from `components/server/netlab/runtime/defaults.yml`.
+Current native mode defaults explicitly force shell config mode for:
+
+- `eos` (`netlab_config_mode: sh`)
+- `linux` (`netlab_config_mode: sh`, with `initial/routing: sh`)
+
+Skyforge does not override these per deployment.
 
 ## Phase 2 networking model (service DNS)
 
