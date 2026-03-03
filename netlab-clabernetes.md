@@ -175,3 +175,6 @@ Planned migration phases:
 - Capacity preflight is taint-aware and fit-aware:
   - excludes nodes with `NoSchedule`/`NoExecute` taints from candidate capacity
   - fails early when per-node placement cannot fit requested CPU/memory (even when aggregate free capacity looks sufficient)
+  - applies policy headroom reserves before fit checks:
+    - `capacityReserveCpuPercent` (default `10`)
+    - `capacityReserveMemoryPercent` (default `10`)

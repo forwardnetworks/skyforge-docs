@@ -6,8 +6,9 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 
 - Deployment family/engine: `c9s` / `netlab` only.
 - Template source: curated Netlab blueprints managed by an admin catalog.
-  - Default catalog focuses on EOS technology demos (EVPN, SR/MPLS, IPv6, VRF).
-  - Default template files live under `netlab/{evpn,bgp,sr,mpls,vrf}/quick-eos-*.yml`.
+  - Default catalog focuses on EOS technology demos (EVPN, MPLS, BGP, VRF).
+  - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.
+  - Admin catalog saves are validated against live blueprint template index entries to prevent drift.
 - Forward: always uses in-app Forward (`https://fwd-appserver.forward.svc.cluster.local`)
   with managed credentials from platform secrets.
   - `skyforge-quick-deploy-forward-username.skyforge-quick-deploy-forward-username`
@@ -23,7 +24,8 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
    `forwardEnabled=true`.
 4. Skyforge writes deployment lease metadata via
    `PUT /api/users/:id/deployments/:deploymentID/lease`.
-5. Skyforge preflights and queues deployment create action.
+5. Skyforge queues deployment create action directly (with short retry on
+   transient duplicate/cooldown no-op responses).
 
 ## Lease enforcement
 
@@ -53,4 +55,5 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 - `POST /api/quick-deploy/deploy`
 - `GET /api/admin/quick-deploy/catalog`
 - `PUT /api/admin/quick-deploy/catalog`
+- `GET /api/admin/quick-deploy/template-options`
 - `POST /internal/cron/deployments/leases` (private cron endpoint)

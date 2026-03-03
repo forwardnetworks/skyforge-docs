@@ -9,7 +9,8 @@ SKYFORGE_SMOKE_INSECURE_TLS=true \
 ./scripts/post-deploy-smoke.sh
 ```
 
-Optional authenticated deploy+forward smoke (includes `/preflight` + `/action` path checks):
+Optional authenticated deploy+forward smoke (action-path checks; preflight
+coverage is optional):
 ```bash
 SKYFORGE_BASE_URL="https://<hostname>" \
 SKYFORGE_SMOKE_USERNAME="admin" \
@@ -64,8 +65,7 @@ go run ./cmd/skyforge-cli --profile smoke --insecure \
   smoke suite --scope deploy-forward --timeout 60s --fwd-profile "<fwd-cli-profile>"
 ```
 
-This exercises both:
-- `/api/users/:id/deployments/:deploymentID/preflight`
+This exercises:
 - `/api/users/:id/deployments/:deploymentID/action`
 - `/api/users/:id/deployments/:deploymentID/forward/sync`
 

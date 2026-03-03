@@ -112,8 +112,28 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   (not environment overrides).
 - Preflight now runs at API-time before runs are queued:
   - API/CRD compatibility preflight (default enabled in `deployPolicy.compatibilityPreflight`)
-  - capacity preflight (default hard-fail in `deployPolicy.failOnInsufficientResources`)
+  - capacity preflight (default enforced in `deployPolicy.failOnInsufficientResources`)
   - capacity preflight compares requested topology resources vs current allocatable-minus-requested node headroom
+  - headroom reserves are configurable per deployment policy:
+    - `deployPolicy.capacityReserveCpuPercent` (default `10`)
+    - `deployPolicy.capacityReserveMemoryPercent` (default `10`)
+- when capacity is insufficient at execution time, tasks are re-queued with bounded exponential backoff instead of immediately failing:
+    - metadata keys: `capacityRetryCount`, `capacityRetryAt`
+    - events: `task.requeued`, `task.requeued.capacity`
+- queued task fairness + TTL behavior is enforced by the worker:
+  - per-user topology-run cap (default `1`) re-queues overflow tasks with
+    linear fairness delay (`task.requeued.fairness`)
+  - queue TTL (default `1800s`) fails stale queued tasks with
+    `task.expired.ttl` and a terminal task error
+  - defaults are configured in `skyforge.config.Worker`:
+    - `PerUserTopologyRunCap`
+    - `FairnessRequeueDelaySeconds`
+    - `QueueTTLSeconds`
+- deployment action responses now include queue state when an operation is queued:
+  - `queue.queueDepth`
+  - `queue.position`
+  - `queue.nextRetryAt`
+  - `queue.expiresAt`
 - Skyforge also exposes an explicit preflight endpoint (no queue side-effects):
   - `POST /api/users/:id/deployments/:deploymentID/preflight`
   - supported for deployment family/engine pair `c9s/netlab`
@@ -124,6 +144,13 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 - The run detail UI (`/dashboard/runs/:runId`) consumes lifecycle/provenance events from:
   - `/api/runs/:id/events` (stdout/stderr stream)
   - `/api/runs/:id/lifecycle` (structured phase/provenance events)
+
+## Deployment delete semantics
+
+- Deployment delete is force-delete for the Skyforge deployment definition.
+- UI/API delete remains available regardless of current deployment lifecycle state.
+- Force-delete removes the `sf_deployments` row immediately and is intended as a deterministic recovery path for stuck or partial state transitions.
+- Optional Forward network deletion (`forwardDelete=true`) still requires valid Forward credentials and will fail if Forward-side deletion fails.
 
 ## What’s still “phase 2” / future work
 
