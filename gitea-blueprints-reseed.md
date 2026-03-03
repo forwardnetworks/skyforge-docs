@@ -5,6 +5,8 @@ Skyforge consumes templates directly from a shared Gitea repo:
 - `skyforge/netlab-examples`
 
 No per-user blueprint copy/sync is required.
+CI reseed/sync is disabled; update templates by pushing Git commits to the
+catalog repo.
 
 ## Canonical reseed flow
 

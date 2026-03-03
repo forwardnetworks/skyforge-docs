@@ -83,8 +83,15 @@ Guardrails:
 - `scripts/deploy-skyforge-prod-safe.sh` now requires explicit image refs by default:
   - `SKYFORGE_SERVER_IMAGE=<repo>:<tag>`
   - `SKYFORGE_SERVER_WORKER_IMAGE=<repo>:<tag>-worker`
+- The server build now writes a build stamp:
+  - `artifacts/build-stamps/server-<tag>.json`
+  - `artifacts/build-stamps/latest-server-build.json`
 - The deploy script hard-fails if:
   - worker tag is not `<server-tag>-worker`,
+  - the build stamp for `<tag>` is missing,
+  - requested image refs do not match the build stamp refs,
+  - current config inputs differ from the stamp hash (for example `config.cue` changed after the image was built),
+  - embedded `Netlab.Image` in `components/server/skyforge/config.cue` or `components/server/worker/config.cue` differs from the stamp,
   - the deployed image refs do not match requested refs,
   - the live `/assets/skyforge/*` entrypoint hash does not match local built `components/server/skyforge/frontend_dist`.
 
