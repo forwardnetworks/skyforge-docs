@@ -24,7 +24,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 3. `netlab up` generates:
    - `clab.yml`
    - `node_files/…`
-   - `config/*.cfg` startup configs (netlab-native output)
+   - recursive `config/**` startup configs (netlab-native output)
    - Skyforge does not post-process generated `node_files`; device bootstrap content comes from netlab output.
 4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
 5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
@@ -107,6 +107,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - generator validates schema before publishing `manifest.json`
   - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
+  - if `clab.yml` references startup configs, runtime fails closed unless those files are present in manifest `startupConfigs`
 - Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
   written to typed runtime-contract rows in `sf_task_runtime_contracts`
   (not environment overrides).

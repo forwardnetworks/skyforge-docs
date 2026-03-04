@@ -82,6 +82,14 @@ Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
 
 These cron jobs are scheduled via Encore Cron and run in the Skyforge backend.
 
+Manual admin repair endpoints:
+
+- `POST /api/admin/tasks/reconcile`
+- `POST /api/admin/tasks/reconcile-running`
+- `POST /api/admin/tasks/workspace-pods/cleanup`
+  - dry-run and execute mode for force-cleaning stale clabernetes topology pods/resources in `ws-*` namespaces.
+  - supports targeted cleanup by `userScopeId` or explicit namespace override.
+
 ## Helm infra config
 
 Encore PubSub requires the Helm-shipped infra configs (`infra.config.json` and

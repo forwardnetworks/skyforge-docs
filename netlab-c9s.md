@@ -22,6 +22,18 @@ Current native mode defaults explicitly force shell config mode for:
 
 Skyforge does not override these per deployment.
 
+## Deployment environment overrides
+
+- The Deployments UI environment-variable editor includes a preset key:
+  - `NETLAB_DEVICE`
+- `NETLAB_DEVICE` values are shown as a dropdown sourced from the generated netlab
+  device catalog (`supported_in_skyforge`, excluding alias-only entries).
+- On deploy/validate, Skyforge passes `NETLAB_DEVICE` into the netlab runtime job.
+- The netlab runtime applies this as `defaults.device` in `topology.yml` before
+  `netlab create`.
+- Invalid values fail closed before deployment starts (with the supported device
+  list in the error).
+
 ## Phase 2 networking model (service DNS)
 
 To avoid coupling configuration to Pod IP churn, Skyforge targets nodes via
@@ -31,6 +43,12 @@ stable per-node Service DNS names:
 
 Skyforge does not implement device-specific post-up config logic for Netlab C9s;
 that behavior is delegated to netlab runtime.
+
+## XRd note
+
+For `iosxr`/`cisco_xrd`, container bootstrap environment wiring is handled by
+Clabernetes deployment rendering. Skyforge does not launch or configure XRd
+directly; it orchestrates the netlab runtime job and Clabernetes topology CR.
 
 ## Images
 
