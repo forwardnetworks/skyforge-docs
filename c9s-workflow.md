@@ -97,6 +97,8 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - `env-files` in resolved node definitions are rejected for k8s runtime.
   - Node `binds` are allowed only when bind sources are artifact-backed via
     `spec.deployment.filesFromConfigMap` mounts for that node.
+  - IOL/IOLL2 runtime paths are supported in native mode using dedicated
+    k8s-native image tags and image-owned runtime wiring.
   - This validation runs before deployment create/update so unsupported runtime
     semantics do not partially apply.
 - Netlab generator handoff uses a versioned manifest contract:
@@ -107,7 +109,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - generator validates schema before publishing `manifest.json`
   - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
-  - if `clab.yml` references startup configs, runtime fails closed unless those files are present in manifest `startupConfigs`
+  - if `clab.yml` references startup configs, runtime requires those paths to be artifact-backed in per-node `node_files` mounts (upstream netlab/containerlab pattern)
 - Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
   written to typed runtime-contract rows in `sf_task_runtime_contracts`
   (not environment overrides).

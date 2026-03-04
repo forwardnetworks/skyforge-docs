@@ -22,6 +22,9 @@ Current native mode defaults explicitly force shell config mode for:
 
 Skyforge does not override these per deployment.
 
+IOL/IOLL2 are supported in this workflow via native-k8s runtime images and
+netlab startup-config mode.
+
 ## Deployment environment overrides
 
 - The Deployments UI environment-variable editor includes a preset key:
