@@ -31,6 +31,19 @@ If a Helm upgrade fails trying to patch a `Job`, it’s usually because the `spe
 
 This chart runs Jobs as Helm hooks to avoid that (they are deleted/recreated automatically).
 
+### Yaade SSO rejects login with "Password does not match"
+Cause:
+- The upstream Yaade image only honors `YAADE_ADMIN_USERNAME` at bootstrap.
+- Its initial admin password remains the image default `password` until changed through the Yaade API.
+
+Skyforge now runs a `yaade-admin-sync` reconciler that logs in with the image default and rotates the password to the configured `yaade-admin-password` secret.
+
+Checks:
+```bash
+kubectl -n skyforge logs deploy/yaade-admin-sync --tail=100
+kubectl -n skyforge get deploy yaade yaade-admin-sync
+```
+
 ### Yaade data missing
 Cause: the `yaade-data` PVC is missing or was reset.
 
