@@ -99,6 +99,25 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
     `spec.deployment.filesFromConfigMap` mounts for that node.
   - IOL/IOLL2 runtime paths are supported in native mode using dedicated
     k8s-native image tags and image-owned runtime wiring.
+  - VM-class NOS nodes (for example `cisco_n9kv`) are reconciled as
+    KubeVirt `VirtualMachine` resources; launcher Deployments remain for
+    fabric connectivity only, while expose services target VM runtime pods.
+  - VM disk images should be published as KubeVirt-compatible `containerDisk`
+    images (disk at `/disk/disk.qcow2`) instead of vrnetlab runtime images.
+    - helper: `scripts/build-kubevirt-containerdisk-from-vrnetlab.sh`
+    - example conversion:
+      - source: `ghcr.io/forwardnetworks/vrnetlab/vr-n9kv:9.3.8`
+      - destination: `ghcr.io/forwardnetworks/kubevirt/vr-n9kv:9.3.8`
+  - VM runtime classification is kind-driven with image-based kubevirt hints.
+    If a VM node resolves to a `vrnetlab/*` image path, reconcile fails fast
+    and requires a `kubevirt/*` containerDisk image instead.
+  - VM nodes now honor containerlab/netlab `startup-config` when it is
+    artifact-backed in `spec.deployment.filesFromConfigMap` for that node:
+    clabernetes resolves the mounted startup-config source and injects it as a
+    KubeVirt ConfigMap-backed boot disk. Missing startup-config artifact
+    mappings fail fast.
+  - Cluster prerequisite for VM-class NOS in native mode: KubeVirt CRDs/API
+    (`kubevirt.io/v1`) must be installed; VM runs fail fast when unavailable.
   - This validation runs before deployment create/update so unsupported runtime
     semantics do not partially apply.
 - Netlab generator handoff uses a versioned manifest contract:
