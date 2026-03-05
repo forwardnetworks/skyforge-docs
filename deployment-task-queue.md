@@ -54,8 +54,8 @@ is `sf_tasks`.
 
 Skyforge streams task output via Server-Sent Events (SSE) directly from the backend:
 
-- Run output tail: `GET /api/skyforge/api/runs/:id/events`
-- Dashboard snapshot stream: `GET /api/skyforge/api/dashboard/events`
+- Dashboard snapshot stream: `GET /api/dashboard/events`
+- Run output tail: `GET /api/runs/:id/events`
 
 The portal consumes these endpoints to avoid polling.
 

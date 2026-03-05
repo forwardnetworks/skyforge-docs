@@ -39,16 +39,18 @@ Set:
 - `skyforge.objectStorage.useSsl`
 - object storage access key/secret secrets
 
-### Auth (`skyforge.dex.enabled=false`)
-Provide external OIDC config/secrets.
+### Auth
+Skyforge browser auth is selected by `skyforge.auth.mode`:
+- `password`: direct Skyforge login via `/api/login` (dev / OSS baseline)
+- `oidc`: Skyforge browser login via `/api/oidc/login` (prod baseline)
 
-When `skyforge.dex.enabled=true`, the default OSS baseline is Helm-managed Dex config with local-password auth:
-- `skyforge.dex.manageConfig=true`
-- `skyforge.dex.authMode=local`
-- password sourced from `skyforge-admin-shared.password`
+When `skyforge.auth.mode=oidc`, keep `skyforge.dex.enabled=true`. The supported browser-OIDC topology is:
+- `Skyforge -> Dex -> upstream IdP`
 
-Supported managed Dex auth modes:
-- `local` (default)
+Dex remains configurable via `skyforge.dex.*`, but that controls Dex's connector mode rather than the Skyforge browser-auth selector.
+
+Common Dex connector modes:
+- `local` (tool SSO / standalone Dex testing)
 - `google` (Google OAuth)
 - `oidc` (generic OIDC; use for Okta)
 - `ldap`

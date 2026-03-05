@@ -3,8 +3,11 @@
 # Notes:
 # - This disables most optional in-cluster tools.
 # - You must provide external replacements for Git and S3.
-# - Disabling Dex requires external OIDC configuration (typed Encore config + secrets).
+# - This example is a password-mode baseline; Skyforge browser login still works via /api/login.
+# - If you want prod OIDC, keep Dex enabled and switch skyforge.auth.mode=oidc.
 skyforge:
+  auth:
+    mode: "password"
   gitea:
     enabled: false
     apiUrl: "https://git.example/api/v1"

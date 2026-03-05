@@ -70,13 +70,17 @@ Payload:
 
 ## Auth contract
 
-OIDC login entry point:
-- `GET /api/oidc/login?next=<path>`
+Skyforge exposes two browser login entry points, selected by runtime config:
+- Password mode (`skyforge.auth.mode=password`): `POST /api/login`
+- OIDC mode (`skyforge.auth.mode=oidc`): `GET /api/oidc/login?next=<path>`
+
+Unauthenticated browser/tool redirects must use the same runtime-selected contract;
+they must not hardcode OIDC-only behavior.
 
 ## URL prefix contract (UI + API)
 
 Browser API base:
-- `/api/skyforge/api/*` (Gateway API route to Encore service)
+- `/api/*` (Gateway API route to Encore service)
 
 Static assets:
 - `/assets/skyforge/*`

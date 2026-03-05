@@ -34,11 +34,15 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 - External S3: set `skyforge.s3gw.enabled=false` and point `skyforge.objectStorage.endpoint` to external host:port.
 
 ## Auth modes
-- In-cluster Dex (default): `skyforge.dex.enabled=true`, `skyforge.dex.manageConfig=true`, `skyforge.dex.authMode=local`
-- Local Dex user password source: `skyforge-admin-shared.password`
-- Google OAuth: `skyforge.dex.authMode=google` with `skyforge.dex.google.clientID` + `dex-google-client-secret`
-- Generic OIDC (for Okta): `skyforge.dex.authMode=oidc` with `skyforge.dex.oidc.*` + `dex-oidc-client-secret`
-- External OIDC: `skyforge.dex.enabled=false` and provide OIDC config/secrets
+- Skyforge browser auth is selected with `skyforge.auth.mode`.
+- Dev / OSS baseline: `skyforge.auth.mode=password`
+  - Browser login uses `POST /api/login`
+  - Shared bootstrap password source: `skyforge-admin-shared.password`
+- Prod baseline: `skyforge.auth.mode=oidc`
+  - Browser login uses `GET /api/oidc/login`
+  - Supported OIDC topology is `Skyforge -> Dex -> IdP`
+  - For Okta, keep `skyforge.dex.enabled=true`, `skyforge.dex.manageConfig=true`, `skyforge.dex.authMode=oidc`, and populate `skyforge.dex.oidc.*` + `dex-oidc-client-secret`
+- Dex connector settings (`skyforge.dex.*`) control Dex's upstream identity provider. They do not replace `skyforge.auth.mode`.
 
 ## Service URLs
 - `GITEA_ROOT_URL`: generated from `skyforge.hostname`

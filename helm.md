@@ -89,7 +89,8 @@ Populate the following before installing:
 - `skyforge.hostname` (public hostname for the ingress routes)
 - `skyforge.domain` (email suffix for default users)
 - `skyforge.gateway.addresses` (recommended for Cilium Gateway API node-IP ingress; example `[{type: IPAddress, value: "10.128.16.60"}]`)
-- `skyforge.dex.authMode` and provider values (for Google mode: `skyforge.dex.google.clientID` + pre-created `dex-google-client-secret`)
+- `skyforge.auth.mode` (`password` for dev/OSS, `oidc` for prod)
+- If `skyforge.auth.mode=oidc`: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and provider values under `skyforge.dex.oidc.*`
 - If `secrets.create=false` (recommended): pre-create required Kubernetes
   Secrets (for example `proxy-tls`, `skyforge-session-secret`,
   `skyforge-admin-shared`, database/object-storage/Dex secrets).

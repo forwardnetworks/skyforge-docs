@@ -2,14 +2,14 @@
 
 ## API base path confusion
 Skyforge’s external API is served behind Cilium Gateway API routes under:
-- `https://<hostname>/api/skyforge/*`
+- `https://<hostname>/api/*`
 
 If you try `https://<hostname>/auth/login` it will 404; the correct path is:
-- `https://<hostname>/api/skyforge/auth/login`
+- `https://<hostname>/api/login`
 
 ## Swagger “Try it out” hits localhost or wrong base URL
 The deployed OpenAPI schema must include a `servers` entry with:
-- `url: /api/skyforge`
+- `url: /api`
 
 Check:
 ```bash
@@ -101,6 +101,7 @@ Recommended production flow:
 
 SKYFORGE_SERVER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag> \
 SKYFORGE_SERVER_WORKER_IMAGE=ghcr.io/forwardnetworks/skyforge-server:<tag>-worker \
+SKYFORGE_ALLOW_PROD_DEPLOY=true \
 ./scripts/deploy-skyforge-prod-safe.sh
 ```
 

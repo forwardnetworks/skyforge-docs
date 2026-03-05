@@ -15,10 +15,10 @@ Note:
 
 ## Contracts to lock down (don’t break)
 - **Portal assets:** served under `/assets/skyforge/*` (avoid edge route collisions with Coder/tool paths).
-- **Encore API base (browser):** `/api/skyforge/api/*` (Gateway API routes to the Encore service).
+- **Encore API base (browser):** `/api/*` (Gateway API routes to the Encore service).
 - **Platform status:** `/status/summary` (plus SSE at `/status/summary/events`).
 - (Legacy) **Platform health JSON:** `/data/platform-health.json` (served from live checks; no filesystem dependency).
-- **OIDC login entry:** `GET /api/oidc/login?next=<path>`.
+- **Login entry contract:** `POST /api/login` for password mode, `GET /api/oidc/login?next=<path>` for oidc mode.
 
 ## Client architecture (TanStack)
 ### Query model
@@ -32,13 +32,13 @@ Note:
   - `queryClient.invalidateQueries(...)`
 - Components should only read from queries.
 - Prefer a small number of “streams”:
-  - `dashboard snapshot` stream: `/api/skyforge/api/dashboard/events`
-  - `run output` stream: `/api/skyforge/api/runs/:id/events`
+  - `dashboard snapshot` stream: `/api/dashboard/events`
+  - `run output` stream: `/api/runs/:id/events`
 
 ### Auth model
-- Use one `useSession()` query that calls `GET /api/skyforge/api/session`.
+- Use one `useSession()` query that calls `GET /api/session`.
 - On `401/403` from authenticated endpoints:
-  - redirect to `.../oidc/login?next=<current location>`
+  - use the runtime-selected login path rather than hardcoding OIDC
 - Only guard **protected routes** (e.g. `/dashboard/*`, `/admin/*`).
 
 ### Error model

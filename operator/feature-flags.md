@@ -10,7 +10,7 @@ These are set by the Helm chart in `components/charts/skyforge/templates/encore-
 |---|---|---|
 | `skyforge.gitea.enabled` | `features.giteaEnabled` | Enables Git (Gitea) integrations and template listing from Gitea. |
 | `skyforge.s3gw.enabled` | `features.objectStorageEnabled` | Enables in-cluster S3-compatible object storage pathing. |
-| `skyforge.dex.enabled` | `features.dexEnabled` | Enables OIDC login (Dex). |
+| `skyforge.dex.enabled` | `features.dexEnabled` | Enables Dex as the OIDC broker / tool SSO component. |
 | `skyforge.coder.enabled` | `features.coderEnabled` | Enables Coder SSO links. |
 | `skyforge.yaade.enabled` | `features.yaadeEnabled` | Enables API testing (Yaade) SSO link. |
 | `skyforge.redoc.enabled` | `features.apiDocsEnabled` | Enables ReDoc link. |
