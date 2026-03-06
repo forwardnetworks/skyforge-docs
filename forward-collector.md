@@ -15,18 +15,18 @@ Skyforge creates the collector in Forward (SaaS or on-prem) and stores the retur
 ## Configure In-Cluster Collector (Skyforge)
 
 - Helm values:
-  - Set `skyforge.forwardCollector.image` (example Harbor tag below).
+  - Set `skyforge.forwardCollector.image` (example GHCR tag below).
   - Optional: set `skyforge.forwardCollector.heapSizeGB` to control memory (maps to `COLLECTOR_HEAP_SIZE`).
   - Optional: set `skyforge.forwardCollector.imagePullSecretName` if your registry requires auth.
 
-Example (Harbor):
+Example (GHCR):
 
 ```bash
 skyforge:
   forwardCollector:
-    image: harbor.local.forwardnetworks.com/forward/fwd_collector:26.1.0-05
+    image: ghcr.io/forwardnetworks/forward/fwd_collector:26.2.2-01
     pullPolicy: Always
-    imagePullSecretName: harbor-pull
+    imagePullSecretName: ghcr-pull
     imagePullSecretNamespace: skyforge
     heapSizeGB: 16
 ```
