@@ -10,16 +10,18 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.
   - Admin catalog saves are validated against live blueprint template index entries to prevent drift.
 - Forward: always uses in-app Forward (`https://fwd-appserver.forward.svc.cluster.local`)
-  with managed credentials from platform secrets.
-  - `skyforge-quick-deploy-forward-username.skyforge-quick-deploy-forward-username`
-  - `skyforge-quick-deploy-forward-password.skyforge-quick-deploy-forward-password`
+  with per-user tenant credentials + API token.
+  - Skyforge ensures the user has a Forward tenant user/password.
+  - Skyforge ensures API token `skyforge` exists for that user.
+  - Token `accessKey` + `secret` are stored as the managed in-cluster collector
+    credential for that user.
 - Lease presets: `4h`, `8h`, `24h`, `72h` (default `24h`).
 
 ## Flow
 
 1. User selects a curated template card.
-2. Skyforge upserts a managed Forward credential profile (`quick-deploy-in-cluster`)
-   for the current user.
+2. Skyforge upserts a managed Forward credential profile (`in-cluster forward`)
+   for the current user from token `skyforge`.
 3. Skyforge creates a deployment with family/engine `c9s` / `netlab` and
    `forwardEnabled=true`.
 4. Skyforge writes deployment lease metadata via
