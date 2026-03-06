@@ -76,6 +76,13 @@ Current local parity target:
 - `Forward` is no longer disabled in local values, but the local cluster still
   needs an actual `forward` stack bootstrapped if you want the Forward route and
   collector flow to be live end-to-end
+- Forward ingress (`skyforge-fwd.local.forwardnetworks.com`) is now attached as
+  an `HTTPRoute` in the `forward` namespace (parented to the shared `skyforge`
+  Gateway), which avoids cross-namespace backend-ref resolution failures seen in
+  Cilium when routing from a `skyforge`-namespace route to `forward/fwd-appserver`
+- local deploy now skips rendering Forward DB credential secrets when operator-
+  managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
+  Helm upgrade conflicts during normal local upgrades
 - local parity validation should be done through the shared Envoy/Gateway routes
   (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`) rather
   than any separate frontdoor or localhost-only proxy layer
@@ -86,6 +93,9 @@ Bootstrap and upgrade are now separated:
   set `SKYFORGE_BOOTSTRAP_DATABASES=true`
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
+- if KubeVirt CRDs are not present, local deploy auto-disables Infoblox nav/integration
+  (`skyforge.infoblox.enabled=false`) to avoid broken `/infoblox/` links; override with
+  `SKYFORGE_FORCE_INFOBLOX=true`
 
 The same local profile now supports the KubeVirt-backed Infoblox appliance via
 the shared Envoy ingress path:
@@ -185,11 +195,16 @@ SKYFORGE_FORWARD_SKIP_IMAGE_PREFLIGHT=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_APPLY_SUPPORT_DEFAULTS=false ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_ENABLE_SUPPORT_USER=true ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_COLLECTOR_PASSWORD=admin ./scripts/bootstrap-forward-local.sh
 ```
 
 By default, a failed local Forward bootstrap now preserves the Helm release and
 workloads for debugging. Set `SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true` only if
 you explicitly want the wrapper to uninstall a failed `pending-*` release.
+
+`bootstrap-forward-local.sh` now also ensures `forward/collector.credentials`
+exists (key: `password`) before applying Helm, so `fwd-collector` can start on
+clean cluster rebuilds.
 
 ## Required local context
 
@@ -219,9 +234,9 @@ SKYFORGE_ALLOW_PROD_DEPLOY=true ./scripts/deploy-skyforge-prod-safe.sh
 Use this only when you are validating VM-backed integrations or KubeVirt-backed
 NOS paths. It installs:
 - Multus plus the standard secondary CNI plugins on the local `k3d` nodes,
-- KubeVirt on KVM by default for local `k3d` hosts that expose `/dev/kvm`,
+- KubeVirt with software emulation enabled by default for local `k3d`,
 - CDI for disk import workflows,
-- an immediate-binding storage class `local-path-immediate` for CDI uploads,
+- a CDI upload storage class (default `local-path`),
 - `virtctl` into `~/.local/bin`,
 - a small smoke VM to prove VM scheduling, networking, and serial console.
 
@@ -235,7 +250,7 @@ Local defaults:
 - CDI version: `v1.64.0`
 - Multus version: `v4.1.3`
 - CNI plugins version: `v1.6.2`
-- KubeVirt emulation: disabled (`SKYFORGE_KUBEVIRT_USE_EMULATION=false`)
+- KubeVirt emulation: enabled (`SKYFORGE_KUBEVIRT_USE_EMULATION=true`)
 - smoke VM: `default/kubevirt-smoke`
 
 The script is guarded the same way as other local workflows:
