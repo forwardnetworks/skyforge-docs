@@ -93,6 +93,12 @@ Current local parity target:
 - local deploy now skips rendering Forward DB credential secrets when operator-
   managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
   Helm upgrade conflicts during normal local upgrades
+- local deploy no longer force-deletes Forward Postgres credential secrets by
+  default (`SKYFORGE_RECREATE_FORWARD_DB_SECRETS=false`)
+- local deploy now runs a Forward DB-auth reconcile step by default
+  (`SKYFORGE_FORWARD_RECONCILE_DB_AUTH=true`) to align `postgres` DB password
+  with `postgres.fwd-pg-app.credentials` and restart Forward services so workers
+  do not get stuck on `password authentication failed for user "postgres"`
 - local parity validation should be done through the shared Envoy/Gateway routes
   (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/rapid7`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
@@ -234,6 +240,10 @@ Important:
 - the support user `forward` is enabled by default when org defaults are
   applied; set `SKYFORGE_FORWARD_ENABLE_SUPPORT_USER=false` if you need it
   disabled for a specific run
+- support credential bootstrap is deterministic: local bootstrap first tries the
+  saved `forward/forward-support-credentials` secret, falls back to
+  `forward/forward`, then rotates away from the default password and persists
+  the new random password back into `forward/forward-support-credentials`
 - valid GHCR credentials for the mirrored Forward runtime images must already
   exist in `~/.docker/config.json`; the script does a manifest preflight and
   fails fast if `ghcr.io/forwardnetworks/forward` is not accessible
@@ -260,6 +270,7 @@ SKYFORGE_FORWARD_SKIP_IMAGE_PREFLIGHT=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_APPLY_SUPPORT_DEFAULTS=false ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_ENABLE_SUPPORT_USER=true ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_ROTATE_SUPPORT_PASSWORD=auto ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_COLLECTOR_PASSWORD=admin ./scripts/bootstrap-forward-local.sh
 ```
 
