@@ -3,11 +3,11 @@
 # Notes:
 # - This disables most optional in-cluster tools.
 # - You must provide external replacements for Git and S3.
-# - This example is a password-mode baseline; Skyforge browser login still works via /api/login.
+# - This example is a local-auth baseline; Skyforge browser login works via /login/local and /api/login.
 # - If you want prod OIDC, keep Dex enabled and switch skyforge.auth.mode=oidc.
 skyforge:
   auth:
-    mode: "password"
+    mode: "local"
   gitea:
     enabled: false
     apiUrl: "https://git.example/api/v1"

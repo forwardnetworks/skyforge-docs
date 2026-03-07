@@ -41,7 +41,7 @@ Set:
 
 ### Auth
 Skyforge browser auth is selected by `skyforge.auth.mode`:
-- `password`: direct Skyforge login via `/api/login` (dev / OSS baseline)
+- `local`: direct Skyforge local login via `/login/local` (`POST /api/login`) (dev / OSS baseline)
 - `oidc`: Skyforge browser login via `/api/oidc/login` (prod baseline)
 
 When `skyforge.auth.mode=oidc`, keep `skyforge.dex.enabled=true`. The supported browser-OIDC topology is:

@@ -65,11 +65,29 @@ The local overlay may override only the following fields:
 - `skyforge.oidc.issuerUrl`
 - `skyforge.oidc.redirectUrl`
 - `skyforge.infoblox.enabled`
+- `skyforge.infoblox.managed`
+- `skyforge.infoblox.image`
+- `skyforge.infoblox.pullPolicy`
 - `skyforge.infoblox.internalUrl`
-- `skyforge.infoblox.upstreamHost`
-- `skyforge.infoblox.upstreamPort`
-- `skyforge.infoblox.lanNetworkName`
-- `skyforge.infoblox.nodeSelector.kubernetes.io/hostname`
+- `skyforge.infoblox.serviceName`
+- `skyforge.infoblox.servicePort`
+- `skyforge.infoblox.rewritePrefixToRoot`
+- `skyforge.infoblox.serviceAlias.enabled`
+- `skyforge.infoblox.vm.cpuCores`
+- `skyforge.infoblox.vm.memory`
+- `skyforge.infoblox.vm.interfaceModel`
+- `skyforge.infoblox.vm.podNetworkBinding`
+- `skyforge.infoblox.vm.multus.enabled`
+- `skyforge.infoblox.vm.multus.createNADs`
+- `skyforge.infoblox.lifecycle.enabled`
+- `skyforge.infoblox.lifecycle.autoStop.enabled`
+- `skyforge.infoblox.lifecycle.autoStop.schedule`
+- `skyforge.infoblox.lifecycle.autoStop.maxRunMinutes`
+- `skyforge.infoblox.lifecycle.reseed.enabled`
+- `skyforge.infoblox.lifecycle.reseed.schedule`
+- `skyforge.infoblox.lifecycle.reseed.resetAfterDays`
+- `skyforge.infoblox.lifecycle.reseed.haltWaitSeconds`
+- `skyforge.jira.enabled`
 - `skyforge.infobloxUrl`
 - `images.skyforgeServer`
 - `images.skyforgeServerWorker`
@@ -79,7 +97,7 @@ The local overlay may override only the following fields:
 
 ### Auth
 
-Local and OSS use `password` mode.
+Local and OSS use `local` mode.
 Prod uses OIDC.
 
 This is a config difference, not a separate code path.
@@ -96,8 +114,22 @@ Prod does not need that by default.
 
 ### Infoblox
 
-Infoblox is staged locally and depends on KubeVirt plus Multus.
-It is not part of the promoted prod base yet, so the local overlay is allowed to turn it on and provide its local wiring.
+Infoblox is staged locally and runs as a managed KubeVirt VM with an in-cluster
+Service backend. Local routes `/infoblox` directly via Gateway API (no extra
+proxy tier).
+It is not part of the promoted prod base yet, so the local overlay is allowed to
+turn it on and provide its local wiring.
+Local-only lifecycle defaults are also allowed:
+- VM auto-stop cadence for resource savings
+- 60-day reseed cadence (halt/start from stock containerDisk for temp-license renewal workflows)
+
+### Jira
+
+Jira is staged locally by turning on `skyforge.jira.enabled` in the local overlay
+and remains disabled in the prod promotion base. Local `/jira` is expected to be
+an in-cluster Gateway route that targets a Jira Service directly (no redirect
+fallback, no extra proxy tier). Local may set `skyforge.jira.managed=true` to
+run Jira in-cluster for path validation.
 
 ### Image tags
 

@@ -17,6 +17,8 @@ What it does:
 - by default runs:
   - `./scripts/deploy-skyforge-local.sh`
   - `./scripts/bootstrap-forward-local.sh`
+- ensures `local-path` storage is usable by installing Rancher
+  `local-path-provisioner` when needed (or reusing an existing valid one)
 
 Opt out when needed:
 
@@ -57,14 +59,14 @@ Add a hosts entry on the local workstation:
 ```
 
 Authentication uses the same browser auth contract as other environments:
-- `skyforge.auth.mode=password` makes the portal use direct `POST /api/login`
+- `skyforge.auth.mode=local` makes the portal use direct local login via `/login/local` (`POST /api/login`)
 - `skyforge.auth.mode=oidc` makes the portal use `/api/oidc/login`
 
-For local k3d, keep `skyforge.auth.mode=password` unless you are explicitly testing OIDC.
+For local k3d, keep `skyforge.auth.mode=local` unless you are explicitly testing OIDC.
 
 The local profile is now built as:
 - prod-parity platform base values,
-- a thin local overlay for password auth, loopback ingress, and staged additions.
+- a thin local overlay for local auth, loopback ingress, and staged additions.
 
 This layering is enforced by:
 - `scripts/check-k3d-parity.py`
@@ -84,29 +86,52 @@ Current local parity target:
   managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
   Helm upgrade conflicts during normal local upgrades
 - local parity validation should be done through the shared Envoy/Gateway routes
-  (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`) rather
+  (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
 
 Bootstrap and upgrade are now separated:
 - normal `./scripts/deploy-skyforge-local.sh` runs a Helm upgrade/install only
+- if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
+  `skyforge.infoblox.managed=true`), local deploy auto-installs KubeVirt/CDI
+  prerequisites when the CRDs are missing
 - `db-provision` is run only when local secrets are regenerated or you explicitly
   set `SKYFORGE_BOOTSTRAP_DATABASES=true`
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
-- if KubeVirt CRDs are not present, local deploy auto-disables Infoblox nav/integration
-  (`skyforge.infoblox.enabled=false`) to avoid broken `/infoblox/` links; override with
-  `SKYFORGE_FORCE_INFOBLOX=true`
+
+- Jira visibility in the side-nav can be enabled with
+  `skyforge.jira.enabled=true` in the local overlay to expose
+  `/jira` via a direct in-cluster service route (`skyforge.jira.serviceName`).
+  For local all-in-cluster bring-up, set `skyforge.jira.managed=true`.
 
 The same local profile now supports the KubeVirt-backed Infoblox appliance via
-the shared Envoy ingress path:
+the shared Gateway path:
 - browser path: `https://skyforge.local.forwardnetworks.com/infoblox`
-- in-cluster raw service: `http://infoblox-proxy:8080`
+- in-cluster service target: `https://infoblox:443`
 
-The current local implementation assumes:
-- the Infoblox VM is already running under KubeVirt,
-- `LAN1` is reachable at `192.168.1.2`,
-- the raw `infoblox-proxy` pod is attached to the `infoblox-lan1` Multus
-  network and pinned to the same node as the VM.
+The preferred local implementation is managed KubeVirt:
+- set `skyforge.infoblox.managed=true`
+- set `skyforge.infoblox.image` to a KubeVirt containerDisk image
+- use a single management NIC on pod network by default:
+  - `skyforge.infoblox.vm.podNetworkBinding=bridge` (or `masquerade`)
+  - keep `skyforge.infoblox.vm.multus.enabled=false`
+- only enable Multus NICs if you explicitly need LAN/HA/LAN2 attachment:
+  - `skyforge.infoblox.vm.multus.enabled=true`
+  - `skyforge.infoblox.vm.multus.createNADs=true`
+- enable VM lifecycle policy for resource savings and periodic reseed:
+  - `skyforge.infoblox.lifecycle.enabled=true`
+  - `skyforge.infoblox.lifecycle.autoStop.enabled=true`
+  - `skyforge.infoblox.lifecycle.autoStop.maxRunMinutes=<minutes>`
+  - `skyforge.infoblox.lifecycle.reseed.enabled=true`
+  - `skyforge.infoblox.lifecycle.reseed.resetAfterDays=60`
+- keep route target on `skyforge.infoblox.serviceName` (default `infoblox`) and
+  `skyforge.infoblox.servicePort` (default `443`)
+- build/push a containerDisk from a local qcow2 with:
+  `scripts/build-kubevirt-containerdisk-from-qcow2.sh --src-qcow2 <path> --dst <ghcr-image> --push`
+
+Legacy fallback is still available for external appliances:
+- enable `skyforge.infoblox.serviceAlias.enabled=true` and set
+  `skyforge.infoblox.upstreamHost`/`upstreamPort`.
 
 If `~/.docker/config.json` exists, the script also creates `ghcr-pull` in the `skyforge` namespace.
 
@@ -142,6 +167,9 @@ Defaults:
 - Forward repo: `~/src/fwd`
 - chart: `ops/kubernetes/fwd-helm`
 - namespace: `forward`
+- local bootstrap pins `fwd-cbr-agent` to 1 replica and disables `fwd-autopilot`
+  by default (`SKYFORGE_FORWARD_ENABLE_AUTOPILOT=false`) to avoid unschedulable
+  local-path PVC fanout in small k3d clusters.
 - release: `forward-local`
 - registry: `ghcr.io/forwardnetworks/forward`
 - image tag: `26.2.2-01`

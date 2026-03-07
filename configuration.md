@@ -35,8 +35,8 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 
 ## Auth modes
 - Skyforge browser auth is selected with `skyforge.auth.mode`.
-- Dev / OSS baseline: `skyforge.auth.mode=password`
-  - Browser login uses `POST /api/login`
+- Dev / OSS baseline: `skyforge.auth.mode=local`
+  - Browser login uses `/login/local` + `POST /api/login`
   - Shared bootstrap password source: `skyforge-admin-shared.password`
 - Prod baseline: `skyforge.auth.mode=oidc`
   - Browser login uses `GET /api/oidc/login`

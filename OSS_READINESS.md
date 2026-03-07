@@ -51,7 +51,7 @@ Status keys:
 
 ⬜ **Provide a minimal “no-OIDC” mode**
 - For OSS users without Dex/OIDC:
-  - Option A: local password auth (only for dev).
+  - Option A: local auth (via Dex local users).
   - Option B: “OIDC required” but provide a one-command Dex example.
 
 ⬜ **Provide example configs**

@@ -27,7 +27,7 @@ Minimum values to update:
 - `skyforge.gateway.addresses` (recommended for node-IP ingress, example `type: IPAddress`, `value: 10.128.16.60`)
 - `skyforge.gitea.url`
 - `skyforge.gitea.apiUrl`
-- `skyforge.auth.mode=password` for local/dev/OSS, or `skyforge.auth.mode=oidc` for prod
+- `skyforge.auth.mode=local` for local/dev/OSS, or `skyforge.auth.mode=oidc` for prod
 - If using prod OIDC with Okta: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and `skyforge.dex.oidc.*`
 
 Minimum secrets to populate:

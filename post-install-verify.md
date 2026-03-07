@@ -40,7 +40,7 @@ Run the sidebar link probe from the repo root:
 
 Expected:
 - `/fwd` returns `302` to the configured browser-login entry:
-  - password mode: `/status?signin=1&next=%2Ffwd%2F`
+  - local mode: `/status?signin=1&next=%2Ffwd%2F` (login UI links to `/login/local`)
   - oidc mode: `/api/oidc/login?next=%2Ffwd%2F`
 - Tool links either return a login redirect (`302`) or an app response (`200`) depending on auth state.
 

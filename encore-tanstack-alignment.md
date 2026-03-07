@@ -18,7 +18,7 @@ Note:
 - **Encore API base (browser):** `/api/*` (Gateway API routes to the Encore service).
 - **Platform status:** `/status/summary` (plus SSE at `/status/summary/events`).
 - (Legacy) **Platform health JSON:** `/data/platform-health.json` (served from live checks; no filesystem dependency).
-- **Login entry contract:** `POST /api/login` for password mode, `GET /api/oidc/login?next=<path>` for oidc mode.
+- **Login entry contract:** `POST /api/login` for local mode (`/login/local` UI), `GET /api/oidc/login?next=<path>` for oidc mode.
 
 ## Client architecture (TanStack)
 ### Query model
