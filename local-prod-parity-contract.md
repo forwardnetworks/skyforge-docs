@@ -131,6 +131,14 @@ an in-cluster Gateway route that targets a Jira Service directly (no redirect
 fallback, no extra proxy tier). Local may set `skyforge.jira.managed=true` to
 run Jira in-cluster for path validation.
 
+### Rapid7
+
+Rapid7 is staged locally by turning on `skyforge.rapid7.enabled` in the local
+overlay and remains disabled in the prod promotion base. Local `/rapid7` is
+expected to be an in-cluster Gateway route that targets a Rapid7 Service
+directly (no redirect fallback, no extra proxy tier). Local may set
+`skyforge.rapid7.managed=true` to run Rapid7 in-cluster for path validation.
+
 ### Image tags
 
 Local may point at candidate Skyforge server/worker images under test.

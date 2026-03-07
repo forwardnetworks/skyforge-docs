@@ -17,6 +17,9 @@ These are set by the Helm chart in `components/charts/skyforge/templates/encore-
 | `skyforge.forward.enabled` | `features.forwardEnabled` | Enables Forward collector + sync UI. |
 | `skyforge.netbox.enabled` | `features.netboxEnabled` | Enables NetBox link/SSO plumbing (when deployed). |
 | `skyforge.nautobot.enabled` | `features.nautobotEnabled` | Enables Nautobot link/SSO plumbing (when deployed). |
+| `skyforge.infoblox.enabled` | `features.infobloxEnabled` | Enables Infoblox UI + console integration routes. |
+| `skyforge.jira.enabled` | `features.jiraEnabled` | Enables Jira integration route. |
+| `skyforge.rapid7.enabled` | `features.rapid7Enabled` | Enables Rapid7 integration route. |
 | `skyforge.dns.enabled` | `features.dnsEnabled` | Enables DNS (Technitium) SSO link (when deployed). |
 
 ## Recommended minimal install

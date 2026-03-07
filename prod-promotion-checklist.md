@@ -36,6 +36,7 @@ Before enabling staged integrations in prod values:
 For current staged integrations:
 - `Infoblox`: keep disabled until KubeVirt/Multus runtime and ingress path are validated in pre-prod.
 - `Jira`: keep disabled until auth/routing/runtime checks pass in pre-prod.
+- `Rapid7`: keep disabled until in-cluster runtime and ingress path checks pass in pre-prod.
 
 ## 3. Forward DB/org automation rules
 

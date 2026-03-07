@@ -86,7 +86,7 @@ Current local parity target:
   managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
   Helm upgrade conflicts during normal local upgrades
 - local parity validation should be done through the shared Envoy/Gateway routes
-  (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/dashboard/integrations`) rather
+  (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/rapid7`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
 
 Bootstrap and upgrade are now separated:
@@ -104,10 +104,16 @@ Bootstrap and upgrade are now separated:
   `/jira` via a direct in-cluster service route (`skyforge.jira.serviceName`).
   For local all-in-cluster bring-up, set `skyforge.jira.managed=true`.
 
+- Rapid7 visibility in the side-nav can be enabled with
+  `skyforge.rapid7.enabled=true` in the local overlay to expose
+  `/rapid7` via a direct in-cluster service route (`skyforge.rapid7.serviceName`).
+  For local all-in-cluster bring-up, set `skyforge.rapid7.managed=true`.
+
 The same local profile now supports the KubeVirt-backed Infoblox appliance via
 the shared Gateway path:
 - browser path: `https://skyforge.local.forwardnetworks.com/infoblox`
 - in-cluster service target: `https://infoblox:443`
+- operator bootstrap helper: `scripts/infoblox-bootstrap-console.sh`
 
 The preferred local implementation is managed KubeVirt:
 - set `skyforge.infoblox.managed=true`
@@ -128,6 +134,29 @@ The preferred local implementation is managed KubeVirt:
   `skyforge.infoblox.servicePort` (default `443`)
 - build/push a containerDisk from a local qcow2 with:
   `scripts/build-kubevirt-containerdisk-from-qcow2.sh --src-qcow2 <path> --dst <ghcr-image> --push`
+
+### Infoblox first-boot bootstrap (network + temp license)
+
+After first boot (or after a lifecycle reseed), the appliance may require
+interactive console initialization before HTTPS is reachable.
+
+Run:
+
+```bash
+cd /home/captainpacket/src/skyforge
+./scripts/infoblox-bootstrap-console.sh
+```
+
+Inside console:
+- run `set network` to confirm/adjust management IP/gateway for your cluster path
+- run `set temp_license` and enable required eval services (Grid/DNS/DHCP as needed)
+
+Then verify service from inside cluster:
+
+```bash
+kubectl -n skyforge run netdiag-ibx --image=curlimages/curl:8.10.1 --restart=Never --rm -i --quiet -- \
+  sh -lc 'curl -k -sS -m 10 -o /dev/null -w "%{http_code}\n" https://infoblox'
+```
 
 Legacy fallback is still available for external appliances:
 - enable `skyforge.infoblox.serviceAlias.enabled=true` and set
