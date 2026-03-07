@@ -19,11 +19,19 @@ What it does:
   - `./scripts/bootstrap-forward-local.sh`
 - ensures `local-path` storage is usable by installing Rancher
   `local-path-provisioner` when needed (or reusing an existing valid one)
+- prints periodic progress heartbeats during long-running phases (cluster create,
+  Helm apply, rollout waits) so stalled waits are visible in CI/terminal logs
 
 Opt out when needed:
 
 ```bash
 SKYFORGE_AUTO_DEPLOY_LOCAL=false SKYFORGE_AUTO_BOOTSTRAP_FORWARD=false ./scripts/k3d-recreate-skyforge.sh
+```
+
+Tune progress heartbeat cadence:
+
+```bash
+SKYFORGE_PROGRESS_INTERVAL_SECONDS=5 ./scripts/k3d-recreate-skyforge.sh
 ```
 
 ## Deploy Skyforge locally
