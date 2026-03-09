@@ -76,17 +76,31 @@ Notes:
 - The script enforces standalone mirror builds and dedicated daemon isolation.
 - This is the supported local build path for deterministic results.
 
-## Go 1.26 internal compiler error during Encore tests
+## Encore Go toolchain drift
 Symptom:
-- `encore test` or `make test` fails with an internal compiler error such as:
-  - `internal compiler error: bad declaration of .autotmp_*`
+- `encore test` or `make test` fails after bumping `components/server/go.mod` to Go 1.26.
 
 Cause:
-- Local Go 1.26 toolchain edge case in this repository/runtime combo.
+- Encore CLI may ship an older embedded `encore-go` runtime than repo requirements.
+- `encore test` uses the local Encore runtime (`~/.encore/encore-go` unless overridden), so version drift can break tests.
 
 Fix:
-- Use the pinned repo toolchain (`go1.25.4`) via `GOTOOLCHAIN`.
-- The repo now defaults `GOTOOLCHAIN=go1.25.4` in `Makefile`, CI, and key test scripts.
+- Install the patched 1.26 runtime and keep toolchain pins aligned:
+  - `make install-encore-go-runtime`
+  - `GOTOOLCHAIN=go1.26.1`
+
+Pinned surfaces:
+- `Makefile`
+- `.github/workflows/ci.yml`
+- `scripts/go-toolchain-env.sh`
+- `components/server/go.mod`
+
+Quick checks:
+```bash
+encore version
+~/.encore/encore-go/bin/go version
+echo "${GOTOOLCHAIN:-unset}"
+```
 
 ## Prevent stale UI/image deploy drift
 Symptom:
@@ -106,7 +120,7 @@ Guardrails:
   - current config inputs differ from the stamp hash (for example `config.cue` changed after the image was built),
   - embedded `Netlab.Image` in `components/server/skyforge/config.cue` or `components/server/worker/config.cue` differs from the stamp,
   - the deployed image refs do not match requested refs,
-  - the live `/assets/skyforge/*` entrypoint hash does not match local built `components/server/skyforge/frontend_dist`.
+  - the live `/assets/skyforge/*` entrypoint hash does not match local built `components/server/frontend/frontend_dist`.
 
 Recommended production flow:
 ```bash

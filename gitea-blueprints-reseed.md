@@ -2,7 +2,7 @@
 
 Skyforge consumes templates directly from a shared Gitea repo:
 
-- `skyforge/netlab-examples`
+- `skyforge/blueprints`
 
 No per-user blueprint copy/sync is required.
 CI reseed/sync is disabled; update templates by pushing Git commits to the
@@ -13,13 +13,13 @@ catalog repo.
 ```bash
 git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
-git remote add gitea https://<hostname>/git/skyforge/netlab-examples.git
+git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
 ```
 
 ## Required automation in the repo
 
-Ensure these files are present in `skyforge/netlab-examples`:
+Ensure these files are present in `skyforge/blueprints`:
 
 - `.gitea/workflows/dns-normalize.yml`
 - `tools/normalize_dns_safe.py`

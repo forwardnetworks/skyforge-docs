@@ -2,7 +2,7 @@
 
 This document captures the “don’t break lightly” contracts between:
 - the Skyforge backend (Encore services),
-- the browser UI (TanStack app served from `server/skyforge/frontend_dist`),
+- the browser UI (TanStack app served from `server/frontend/frontend_dist`),
 - and any external tooling that calls the API directly.
 
 If you must break any of the below, bump `X-Skyforge-API-Version` and update the UI in the same change.

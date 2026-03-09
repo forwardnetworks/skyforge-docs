@@ -10,7 +10,7 @@ This guide assumes:
 ## 1) Create (or verify) the template repo in Gitea
 
 In the Gitea UI:
-- Create a repo named `netlab-examples` under the desired owner/org (commonly `skyforge`).
+- Create a repo named `blueprints` under the desired owner/org (commonly `skyforge`).
 - Make it **public** if you want unauthenticated BYOS servers to fetch templates by URL.
 - Ensure the default branch is `main`.
 
@@ -19,7 +19,7 @@ In the Gitea UI:
 ```bash
 git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
-git remote add gitea https://<hostname>/git/skyforge/netlab-examples.git
+git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
 ```
 
@@ -37,5 +37,5 @@ In Skyforge UI:
 - Ensure templates load for Netlab/Containerlab/Terraform (depending on what you seeded)
 
 If templates still do not load:
-- Confirm user scope references the shared catalog (`skyforge/netlab-examples`).
+- Confirm user scope references the shared catalog (`skyforge/blueprints`).
 - Confirm the repo branch exists (`main`) and the repo is readable by the Skyforge server.

@@ -67,6 +67,24 @@ Some runs include a `metadata.dedupeKey` value. When present, Skyforge will
 return the existing queued/running task for the same `dedupeKey` instead of
 creating a duplicate task (useful for double-clicks and refreshes).
 
+## Background bootstrap tasks
+
+Skyforge also uses the same queue/worker path for non-topology bootstrap work
+that used to run as request-scoped goroutines:
+
+- `user-bootstrap` now includes best-effort Forward tenant bootstrap for the
+  user (`forward.ensure_tenant` task step in the worker).
+- `forward-collector-deploy` is a dedicated background task used to reconcile
+  managed in-cluster Forward collector deployment state.
+
+These tasks use the same `sf_tasks` durability model and are replayable by the
+existing queue reconciliation jobs.
+
+Forward bootstrap observability metrics:
+
+- `skyforge_forward_provision_queue_total{operation,outcome}`
+- `skyforge_forward_worker_provision_total{operation,outcome}`
+
 ## Preflight checks
 
 Some run endpoints validate basic filesystem prerequisites up front (for example,

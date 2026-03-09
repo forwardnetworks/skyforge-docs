@@ -112,7 +112,8 @@ Status keys:
 ## 6) CI / quality gates
 
 ⬜ **CI pipeline**
-- `encore test ./...`
+- `encore test ./forwardregistry ./skyforge ./worker ./internal/...`
+- `go test ./cmd/...` for command binaries such as `smokecheck`
 - `go test` for non-encore libs where possible
 - Helm lint/template rendering
 - Container image build verification

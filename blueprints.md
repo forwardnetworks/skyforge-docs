@@ -2,14 +2,14 @@
 
 Skyforge uses a shared Git repository as the template catalog:
 
-- Repo: `skyforge/netlab-examples`
+- Repo: `skyforge/blueprints`
 - Managed directly in Gitea with normal Git workflows
 - Referenced directly by deployments (no per-user blueprint copy/sync)
 - No CI reseed/sync step; template changes must arrive as normal Git commits
 
 ```mermaid
 flowchart LR
-  user([User/Admin]) --> git[Gitea repo<br/>skyforge/netlab-examples]
+  user([User/Admin]) --> git[Gitea repo<br/>skyforge/blueprints]
   user --> ui[Skyforge Portal]
   ui --> api[Skyforge Server]
   api -->|references templates by repo+path| git
@@ -37,11 +37,6 @@ It runs:
 
 On every push and auto-commits DNS-1035-safe node name fixes.
 
-## Legacy sync endpoint behavior
-
-`POST /api/users/:id/blueprint/sync` remains for backward compatibility, but in
-git-native mode it only invalidates template caches; it does not copy content.
-
 ## Actions runner prerequisite
 
 Skyforge now deploys a persistent in-cluster Gitea Actions runner (`gitea-actions-runner`).
@@ -63,8 +58,8 @@ kubectl -n skyforge exec deploy/gitea -- \
 ## Bootstrap
 
 ```bash
-git clone https://<host>/git/skyforge/netlab-examples.git
-cd netlab-examples
+git clone https://<host>/git/skyforge/blueprints.git
+cd blueprints
 # edit templates
 git add -A
 git commit -m "update templates"
@@ -73,4 +68,4 @@ git push
 
 To keep it visible in Explore:
 
-- Gitea UI: `skyforge/netlab-examples` -> Settings -> "Make Repository Public"
+- Gitea UI: `skyforge/blueprints` -> Settings -> "Make Repository Public"

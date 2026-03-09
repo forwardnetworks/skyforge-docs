@@ -45,13 +45,13 @@ sudo -E ./scripts/install-on-host.sh
 
 5) Seed template catalog in Gitea
 
-Skyforge uses a shared repo (default: `skyforge/netlab-examples`) and reads it directly.
+Skyforge uses a shared repo (default: `skyforge/blueprints`) and reads it directly.
 If templates are missing in UI, seed or refresh that repo:
 
 ```bash
 git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
-git remote add gitea https://skyforge-qa.local.forwardnetworks.com/git/skyforge/netlab-examples.git
+git remote add gitea https://skyforge-qa.local.forwardnetworks.com/git/skyforge/blueprints.git
 git push -u gitea main
 ```
 
