@@ -15,8 +15,9 @@ What it does:
 - writes kubeconfig to `.kubeconfig-skyforge`,
 - sets context to `k3d-skyforge`,
 - by default runs:
-  - `./scripts/deploy-skyforge-local.sh`
-  - `./scripts/bootstrap-forward-local.sh`
+  - phase 1: `./scripts/deploy-skyforge-local.sh --no-verify`
+  - phase 2: `./scripts/bootstrap-forward-local.sh`
+  - phase 3: `./scripts/verify-k3d-local-stack.sh` (aggregate report + final pass/fail)
 - ensures `local-path` storage is usable by installing Rancher
   `local-path-provisioner` when needed (or reusing an existing valid one)
 - prints periodic progress heartbeats during long-running phases (cluster create,
@@ -26,6 +27,12 @@ Opt out when needed:
 
 ```bash
 SKYFORGE_AUTO_DEPLOY_LOCAL=false SKYFORGE_AUTO_BOOTSTRAP_FORWARD=false ./scripts/k3d-recreate-skyforge.sh
+```
+
+Skip phase-3 verification explicitly:
+
+```bash
+./scripts/k3d-recreate-skyforge.sh --no-verify
 ```
 
 Tune progress heartbeat cadence:
@@ -56,9 +63,9 @@ Defaults:
   so the `k3d` host bindings remain deterministic
 - local deploy recreates the ephemeral `gitea-actions-runner-token` secret after
   Gitea is healthy so the local Actions runner stays aligned with the live Gitea instance
-- if runner-token reconciliation fails because the embedded Gitea DB credentials
-  drifted, the deploy now warns and continues; this no longer marks an otherwise
-  healthy local rollout as failed
+- deployment verification now uses an aggregate-fail contract via
+  `scripts/verify-k3d-local-stack.sh` and writes a JSON report (default:
+  `out/k3d-deploy-report-<timestamp>.json`)
 
 Add a hosts entry on the local workstation:
 
@@ -104,7 +111,8 @@ Current local parity target:
   than any separate frontdoor or localhost-only proxy layer
 
 Bootstrap and upgrade are now separated:
-- normal `./scripts/deploy-skyforge-local.sh` runs a Helm upgrade/install only
+- normal `./scripts/deploy-skyforge-local.sh` runs Helm upgrade/install, then
+  runs aggregate verification (disable with `--no-verify`)
 - if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
   `skyforge.infoblox.managed=true`), local deploy auto-installs KubeVirt/CDI
   prerequisites when the CRDs are missing
@@ -112,6 +120,8 @@ Bootstrap and upgrade are now separated:
   set `SKYFORGE_BOOTSTRAP_DATABASES=true`
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
+- opt-in repair actions are disabled by default; enable only when explicitly
+  needed with `./scripts/deploy-skyforge-local.sh --repair`
 
 - Jira visibility in the side-nav can be enabled with
   `skyforge.jira.enabled=true` in the local overlay to expose
