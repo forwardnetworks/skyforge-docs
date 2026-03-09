@@ -16,14 +16,14 @@ Check:
 curl -sk https://<hostname>/openapi.json | head
 ```
 
-## LDAP (StartTLS) issues
+## OIDC / SSO issues
 Symptoms:
-- LDAP login intermittently fails.
-- NetBox/Nautobot login loops or rejects credentials.
+- OIDC login intermittently fails.
+- Browser login loops or returns to `/login`.
 
 Notes:
-- StartTLS with python-ldap can require setting global TLS options (not only per-connection options).
-- If you use `skipTlsVerify`, ensure both NetBox and Nautobot LDAP configs set the global options consistently.
+- Verify Dex is reachable and configured with valid upstream OIDC settings.
+- If TLS is custom, ensure trust bundles are mounted consistently across Skyforge and Dex.
 
 ## Hoppscotch failures
 ### Helm upgrade failures due to immutable Jobs

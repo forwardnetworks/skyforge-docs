@@ -13,8 +13,8 @@ Status keys:
 ## 0) Decide the OSS “product shape”
 
 ⬜ **Core vs. integrations split**
-- Define a “core” distribution that works without Forward, LabPP, LDAP, NetBox/Nautobot, and Gitea provisioning.
-- Define optional “integration modules” (Forward sync, collector, NetBox/Nautobot SSO, LabPP).
+- Define a “core” distribution that works without Forward, EVE-NG integration, NetBox/Nautobot, and Gitea provisioning.
+- Define optional “integration modules” (Forward sync, collector, NetBox/Nautobot SSO, EVE-NG).
 
 ⬜ **Deployment target**
 - Pick a default: `kind`/`k3d` (local), or “any Kubernetes 1.x”.
@@ -31,8 +31,8 @@ Status keys:
   - Forward API sync, collector provisioning, and credential management.
 - Ensure the core system runs cleanly with Forward disabled (no required config/secrets).
 
-⬜ **LabPP / client-plus**
-- If the LabPP runner requires proprietary artifacts (e.g. Forward client-plus):
+⬜ **EVE-NG integration**
+- If the EVE-NG runner requires proprietary artifacts:
   - Remove from OSS core or replace with a public implementation.
   - Make it a separate private add-on repo/image if needed.
 

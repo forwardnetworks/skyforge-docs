@@ -63,9 +63,9 @@ Suggested checklist:
 - Default NodePorts (`30053`, `30380`) can be changed via Helm values (recommended) or by editing `k8s/infra/technitium-dns/service.yaml` (legacy).
 
 ## DNS SSO (per-user zone)
-Skyforge can optionally provision Technitium per-user access without storing your LDAP password:
+Skyforge can optionally provision Technitium per-user access without storing your directory password:
 
-- On first visit to DNS via Skyforge, you’ll be prompted for a Technitium password (you can choose to match LDAP).
+- On first visit to DNS via Skyforge, you’ll be prompted for a Technitium password.
 - Skyforge uses that password once to create/update a Technitium user, create a per-user zone, and mint a long-lived API token.
 - The token is stored encrypted in the Skyforge database and injected into the browser via the `/api/dns/sso` bridge.
 

@@ -11,7 +11,7 @@ This page is written to be pasted into Confluence as Markdown.
 Skyforge provides:
 
 - A **portal UI** for browsing blueprints and managing deployments/runs.
-- A **backend** that executes provider-specific automation (Netlab, LabPP, Terraform, etc.).
+- A **backend** that executes provider-specific automation (Netlab, EVE-NG, Terraform, etc.).
 - A **toolchain** (Git, NetBox, Nautobot, DNS, Coder/code-server, webhook inbox, etc.) behind SSO to support lab workflows.
 
 Skyforge is optimized for:
@@ -70,10 +70,10 @@ If you want to create or customize Netlab blueprints:
 - Refer to the Netlab documentation: https://netlab.tools
 - If you need help adapting a topology to Skyforge conventions (images, credentials, startup behavior), contact Craig Johnson (`craigjohnson@forwardnetworks.com`) via Slack `#ask-skyforge`.
 
-### LabPP (EVE-NG lab workflows)
+### EVE-NG lab workflows
 Best for EVE-NG-backed labs where the topology is running on an EVE server.
 
-In Skyforge, LabPP is primarily used to:
+In Skyforge, EVE-NG integration is primarily used to:
 
 - Configure devices inside the EVE lab (when applicable).
 - Generate a device inventory output (for example, name/IP CSV) for downstream ingestion.
@@ -81,7 +81,7 @@ In Skyforge, LabPP is primarily used to:
 Notes:
 
 - Skyforge can SSH-tunnel to the EVE host for secure access.
-- LabPP is not intended to create/modify Forward networks directly unless explicitly enabled by admins.
+- EVE-NG integration is not intended to create/modify Forward networks directly unless explicitly enabled by admins.
 
 ### Terraform
 Terraform deployments manage cloud/on-prem infrastructure where IaC is appropriate:
@@ -100,13 +100,13 @@ Skyforge includes an experimental path for Kubernetes-based containerlab orchest
 ## Typical workflow (most users)
 
 1. **Log in**
-   - Use SSO/LDAP credentials.
+   - Use SSO credentials.
 2. **Pick a user scope**
    - Create a user scope (or select an existing one you own).
 3. **Choose a blueprint**
    - Pick from public catalog or your user repo.
 4. **Create a deployment**
-   - Choose provider (Netlab/LabPP/Terraform/etc.), target server, and template.
+   - Choose provider (Netlab/EVE-NG/Terraform/etc.), target server, and template.
 5. **Run actions**
    - Create → Start → Stop/Destroy as needed.
 6. **Check logs & artifacts**
@@ -168,7 +168,7 @@ What to do:
 
 - Use a blueprint that references images available on the host, or ask the platform owner to preload the image on the Netlab server.
 
-### LabPP errors about EVE credentials
+### EVE-NG credential errors
 This usually indicates expired/cleared cached credentials or missing credential handoff to the run.
 
 What to do:
@@ -197,14 +197,14 @@ When reporting issues, include:
 
 - Project name
 - Deployment name
-- Run ID and provider (Netlab/LabPP/Terraform/etc.)
+- Run ID and provider (Netlab/EVE-NG/Terraform/etc.)
 - Copy/paste of the relevant error section from logs
 
 ---
 
 ## FAQ
 
-### Can I add my own Netlab or EVE/LabPP server?
+### Can I add my own Netlab or EVE-NG server?
 This may be enabled per user scope. If allowed, you can add your own server endpoint and use it as the deployment target. If it’s not visible in the UI, ask an admin to enable it.
 
 ### Why do some tools redirect or require SSO again?

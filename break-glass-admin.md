@@ -1,6 +1,6 @@
 # Break-glass local admin
 
-Use the local admin path when LDAP is unavailable or you need to recover access.
+Use the local admin path when external OIDC login is unavailable or you need to recover access.
 
 ## What it is
 - Skyforge supports a local admin user list (Helm value `skyforge.adminUsers`, typed config `AdminUsers`) plus a shared password (`SKYFORGE_ADMIN_PASSWORD`).

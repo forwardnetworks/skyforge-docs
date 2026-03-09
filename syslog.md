@@ -23,7 +23,7 @@ Then upgrade the release.
 Routes map sender CIDRs to an owner username:
 
 - CIDR: e.g. `10.128.18.0/24` or `10.128.18.5/32`
-- Owner: LDAP username (e.g. `craigjohnson`)
+- Owner: Skyforge username (e.g. `craigjohnson`)
 
 The admin UI can list and update routes.
 

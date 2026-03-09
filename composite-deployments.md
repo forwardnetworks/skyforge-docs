@@ -1,6 +1,6 @@
 # Composite Deployments (Design)
 
-Skyforge today models a deployment as a single provider run (Terraform, Netlab/Containerlab, LabPP, etc). For multi-provider demos and real workflows, we want a **composite deployment** that can orchestrate multiple providers as one “deployment” with shared state, ordering, and consistent UX.
+Skyforge today models a deployment as a single provider run (Terraform, Netlab/Containerlab, EVE-NG, etc). For multi-provider demos and real workflows, we want a **composite deployment** that can orchestrate multiple providers as one “deployment” with shared state, ordering, and consistent UX.
 
 This doc describes the intended model for a composite that combines:
 - **On‑prem containerlab/netlab** (running on a host like `netlab.local.forwardnetworks.com`)
@@ -86,7 +86,7 @@ Skyforge should treat tunnel setup as a provider stage with a clear responsibili
 
 We already have:
 - A task/run model with step logs
-- Provider-specific runners (Terraform/Netlab/LabPP)
+- Provider-specific runners (Terraform/Netlab/EVE-NG)
 - A consistent way to record logs and metadata
 
 To implement composites without rewriting everything:

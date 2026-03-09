@@ -137,5 +137,5 @@ sudo -E ./scripts/verify-install.sh
 
 ## Notes for OSS readiness
 
-- Keep LabPP out of the default install path (it depends on private assets).
+- Keep EVE-NG integration out of the default install path when it depends on private assets.
 - Prefer to keep “core” images either public or documented with a GHCR pull secret flow.

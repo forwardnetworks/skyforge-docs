@@ -35,7 +35,7 @@ On each k3s node:
 Some Skyforge services intentionally share PVCs across multiple pods:
 
 - `platform-data`: used by `healthwatch`, `skyforge-server`, `skyforge-server-worker`
-- `skyforge-server-data`: used by `skyforge-server`, `skyforge-server-worker` (and LabPP jobs)
+- `skyforge-server-data`: used by `skyforge-server`, `skyforge-server-worker` (and EVE-NG jobs, when enabled)
 
 With k3s `local-path` (host directories), multiple pods could mount the same
 volume on the same node.

@@ -1,13 +1,13 @@
 # Runner preflight (EVE hosts)
 
-These checks validate the external EVE-NG hosts are ready for Netlab/LabPP runs.
+These checks validate the external EVE-NG hosts are ready for Netlab/EVE-NG runs.
 
 ## What should be consistent across hosts
 - `netlab` installed (same version)
 - `containerlab` installed (same version)
 - `apache2` (or equivalent) running to front internal APIs on 443
 - `netlab-api.service` and `containerlab-api.service` running (if used)
-- LDAP shell auth configured (if Skyforge expects user-scoped paths like `/home/{user}/...`)
+- User shell auth configured (if Skyforge expects user-scoped paths like `/home/{user}/...`)
 
 ## Quick commands (run on each EVE host)
 ```bash

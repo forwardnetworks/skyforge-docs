@@ -68,7 +68,7 @@ Goal:
 4. Move one config “domain” at a time:
    - tasks/worker knobs
    - gitea/netbox/nautobot URLs
-   - LDAP/OIDC
+   - OIDC
 - netlab/eve-ng runner settings
 
 ### Current progress

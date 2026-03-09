@@ -28,7 +28,6 @@ CI runs **gitleaks** (`.github/workflows/security-ci.yml`). If secrets are commi
 Examples:
 - Forward credentials
 - OIDC client secrets
-- LDAP bind passwords
 - Object storage access/secret keys
 - Any private keys/certificates (TLS/SSH CA keys, etc.)
 

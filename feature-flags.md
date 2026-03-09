@@ -53,7 +53,6 @@ Common Dex connector modes:
 - `local` (tool SSO / standalone Dex testing)
 - `google` (Google OAuth)
 - `oidc` (generic OIDC; use for Okta)
-- `ldap`
 
 ## Minimal install example
 ```yaml
