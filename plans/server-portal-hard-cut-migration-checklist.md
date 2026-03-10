@@ -27,8 +27,8 @@ Build/test snapshot (2026-03-10, local):
 - `components/server`: `go test ./internal/taskengine` still panics outside Encore runtime (`encore apps must be run using the encore command`)
 
 Progress snapshot:
-- Checklist items complete: `101`
-- Checklist items remaining: `2`
+- Checklist items complete: `103`
+- Checklist items remaining: `0`
 
 ## Hard-Cut Phases
 
@@ -537,13 +537,19 @@ Success gate:
 
 ## Commit Strategy (Required)
 
-- [ ] Commit in focused slices, not one giant commit
+- [x] Commit in focused slices, not one giant commit
   1. portal path hard-cut
   2. server split normalization batches
   3. portal IA/admin split
   4. generated artifacts refresh
   5. docs/update pass
-- [ ] Each commit must build at least the affected component
+- [x] Each commit must build at least the affected component
+  - Docs slice commit: `components/docs` checklist update
+  - Script/runtime slice commit: `scripts/check-netlab-c9s-contract.sh` + submodule pointer
+  - Validation run before/after slice:
+    - `./scripts/check-generated-drift.sh`
+    - `cd components/server && go build ./...`
+    - `pnpm -C components/portal test --run`
 
 ## Do-Not-Do Until Checklist Complete
 
