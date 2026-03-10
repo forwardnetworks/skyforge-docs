@@ -12,6 +12,7 @@ cd /home/captainpacket/src/skyforge
 What it does:
 - deletes existing `k3d` clusters named `skyforge` (and legacy `skyforge-qa` by default),
 - creates `k3d-skyforge` with prod-like k3s/Cilium settings,
+- uses k3s image `rancher/k3s:v1.35.2-k3s1` by default (`SKYFORGE_K3S_IMAGE` override),
 - writes kubeconfig to `.kubeconfig-skyforge`,
 - sets context to `k3d-skyforge`,
 - by default runs:
@@ -22,6 +23,8 @@ What it does:
   `local-path-provisioner` when needed (or reusing an existing valid one)
 - prints periodic progress heartbeats during long-running phases (cluster create,
   Helm apply, rollout waits) so stalled waits are visible in CI/terminal logs
+- if phase-1 local deploy fails, retries once automatically (default retry uses
+  the same clean deploy args), so first-boot transient sequencing issues can recover
 
 Opt out when needed:
 
@@ -58,14 +61,25 @@ Defaults:
 - host exposure: loopback only (`127.0.0.1:80` / `127.0.0.1:443`)
 - local ingress uses the same Cilium Gateway / Envoy path as other environments;
   there is no separate local NGINX frontdoor
-- `./scripts/deploy-skyforge-local.sh` pins the generated
-  `cilium-gateway-skyforge` Service to stable NodePorts `30080` and `30443`
-  so the `k3d` host bindings remain deterministic
-- local deploy recreates the ephemeral `gitea-actions-runner-token` secret after
-  Gitea is healthy so the local Actions runner stays aligned with the live Gitea instance
+- Gateway nodePort pinning is now chart-owned and declarative:
+  `skyforge.gateway.localNodePorts.enabled=true` in local overlay runs a Helm
+  hook Job that reconciles `cilium-gateway-skyforge` to stable
+  `30080`/`30443` values so `k3d` host bindings stay deterministic
+- `./scripts/deploy-skyforge-local.sh` now runs an automatic node-network
+  resilience gate before and after Helm apply (`scripts/k8s-network-resilience.sh`);
+  it probes service DNS/TCP from each Ready node and, on failure, restarts only
+  that node's `cilium`/`cilium-envoy` pods before proceeding
+- local deploy now explicitly waits for integration rollouts when present
+  (`yaade`, `jira`, `rapid7`, `kibana`) and enforces `HTTPRoute`
+  readiness for `skyforge-tools-extra` when that route exists
+- local deploy now runs a dedicated ELK health gate after rollout
+  (`kibana` service reachability probe with retries) before final verification
+- Gitea Actions runner token reconciliation is chart-owned via a post-install/
+  post-upgrade hook job (the deploy script no longer mutates that secret)
 - deployment verification now uses an aggregate-fail contract via
   `scripts/verify-k3d-local-stack.sh` and writes a JSON report (default:
   `out/k3d-deploy-report-<timestamp>.json`)
+  - verification now prints per-check progress/pass/fail lines so long probes are visible
 
 Add a hosts entry on the local workstation:
 
@@ -100,12 +114,12 @@ Current local parity target:
 - local deploy now skips rendering Forward DB credential secrets when operator-
   managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
   Helm upgrade conflicts during normal local upgrades
-- local deploy no longer force-deletes Forward Postgres credential secrets by
-  default (`SKYFORGE_RECREATE_FORWARD_DB_SECRETS=false`)
-- local deploy now runs a Forward DB-auth reconcile step by default
-  (`SKYFORGE_FORWARD_RECONCILE_DB_AUTH=true`) to align `postgres` DB password
-  with `postgres.fwd-pg-app.credentials` and restart Forward services so workers
-  do not get stuck on `password authentication failed for user "postgres"`
+- mutable recovery actions (Forward DB secret recreation, Forward DB-auth reconcile,
+  Rapid7 home reset) are no longer part of normal deploy flow; use
+  `scripts/deploy/local/integration-repair.sh` explicitly when needed
+- Forward observability UI routes (`/grafana`, `/prometheus`) are disabled in
+  local overlay by default because the current Forward local chart profile does
+  not render `fwd-grafana-service`/`fwd-prometheus` backends
 - local parity validation should be done through the shared Envoy/Gateway routes
   (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/rapid7`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
@@ -113,15 +127,48 @@ Current local parity target:
 Bootstrap and upgrade are now separated:
 - normal `./scripts/deploy-skyforge-local.sh` runs Helm upgrade/install, then
   runs aggregate verification (disable with `--no-verify`)
+- deploy now gates Helm apply with a machine-readable preflight contract:
+  `scripts/deploy/local/preflight.sh`
 - if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
   `skyforge.infoblox.managed=true`), local deploy auto-installs KubeVirt/CDI
   prerequisites when the CRDs are missing
-- `db-provision` is run only when local secrets are regenerated or you explicitly
-  set `SKYFORGE_BOOTSTRAP_DATABASES=true`
+- `db-provision` is chart-owned and runs as a Helm hook on install/upgrade
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
-- opt-in repair actions are disabled by default; enable only when explicitly
-  needed with `./scripts/deploy-skyforge-local.sh --repair`
+- blueprint reseed now runs in-cluster (no local `kubectl port-forward`):
+  - deploy wrapper delegates reseed to `scripts/reseed-blueprints-incluster.sh`
+  - default mode is `SKYFORGE_RESEED_BLUEPRINTS_MODE=local` (copies `components/blueprints` into an in-cluster reseed pod)
+  - optional git source mode:
+    - `SKYFORGE_RESEED_BLUEPRINTS_MODE=git`
+    - `SKYFORGE_RESEED_BLUEPRINTS_GIT_URL=https://github.com/ipspace/netlab-examples.git`
+    - `SKYFORGE_RESEED_BLUEPRINTS_GIT_REF=main`
+- Forward support-user/org-default enforcement is delegated to
+  `scripts/forward-enforce-support-defaults.sh`
+- node-network resilience gate tuning (optional):
+  - `SKYFORGE_NETWORK_RESILIENCE_ENABLE=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_STRICT=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_PRE_HELM_STRICT=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_POST_HELM_STRICT=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_PROBE_ATTEMPTS=<n>`
+  - `SKYFORGE_NETWORK_RESILIENCE_PROBE_TIMEOUT_SECONDS=<n>`
+  - `SKYFORGE_NETWORK_RESILIENCE_CILIUM_WAIT_TIMEOUT_SECONDS=<n>`
+  - `SKYFORGE_NETWORK_RESILIENCE_NODE_NAME_REGEX=<regex>`
+- integration health gate tuning (optional):
+  - `SKYFORGE_STRICT_INTEGRATION_HEALTH=true|false`
+  - `SKYFORGE_ELK_HEALTH_ATTEMPTS=<n>`
+  - `SKYFORGE_ELK_HEALTH_SLEEP_SECONDS=<n>`
+- aggregate verification ELK probe tuning (optional):
+  - `SKYFORGE_VERIFY_ELK_PROBE_ATTEMPTS=<n>`
+  - `SKYFORGE_VERIFY_ELK_PROBE_SLEEP_SECONDS=<n>`
+- k3d phase-1 deploy retry tuning (optional):
+  - `SKYFORGE_DEPLOY_RETRY_ON_FAILURE=true|false`
+- explicit repair entrypoint (not part of normal deploy):
+  - `./scripts/deploy/local/integration-repair.sh pre-helm`
+  - `./scripts/deploy/local/integration-repair.sh post-helm`
+  - toggle specific actions with env flags:
+    - `SKYFORGE_RECREATE_FORWARD_DB_SECRETS=true`
+    - `SKYFORGE_FORWARD_RECONCILE_DB_AUTH=true`
+    - `SKYFORGE_RAPID7_AUTO_RESET_BROKEN_HOME=true`
 
 - Jira visibility in the side-nav can be enabled with
   `skyforge.jira.enabled=true` in the local overlay to expose
@@ -132,6 +179,10 @@ Bootstrap and upgrade are now separated:
   `skyforge.rapid7.enabled=true` in the local overlay to expose
   `/rapid7` via a direct in-cluster service route (`skyforge.rapid7.serviceName`).
   For local all-in-cluster bring-up, set `skyforge.rapid7.managed=true`.
+
+- ELK visibility in the side-nav can be enabled with
+  `skyforge.elk.enabled=true` and `skyforge.elk.managed=true` in the local
+  overlay to expose `/elk` via an in-cluster Kibana service (`kibana:5601`).
 
 The same local profile now supports the KubeVirt-backed Infoblox appliance via
 the shared Gateway path:
@@ -162,16 +213,25 @@ The preferred local implementation is managed KubeVirt:
 ### Infoblox first-boot bootstrap (network + temp license)
 
 After first boot (or after a lifecycle reseed), the appliance may require
-interactive console initialization before HTTPS is reachable.
+bootstrap initialization before HTTPS is reachable.
+
+Automated (best-effort) bootstrap:
 
 Run:
 
 ```bash
 cd /home/captainpacket/src/skyforge
-./scripts/infoblox-bootstrap-console.sh
+./scripts/infoblox-bootstrap-console.sh --auto
 ```
 
-Inside console:
+If auto mode cannot complete licensing prompts reliably, use interactive mode:
+
+```bash
+cd /home/captainpacket/src/skyforge
+./scripts/infoblox-bootstrap-console.sh --interactive
+```
+
+Inside interactive console:
 - run `set network` to confirm/adjust management IP/gateway for your cluster path
 - run `set temp_license` and enable required eval services (Grid/DNS/DHCP as needed)
 
@@ -180,6 +240,12 @@ Then verify service from inside cluster:
 ```bash
 kubectl -n skyforge run netdiag-ibx --image=curlimages/curl:8.10.1 --restart=Never --rm -i --quiet -- \
   sh -lc 'curl -k -sS -m 10 -o /dev/null -w "%{http_code}\n" https://infoblox'
+```
+
+Infoblox bootstrap automation is opt-in when HTTPS remains unreachable after VM restart:
+
+```bash
+SKYFORGE_INFOBLOX_AUTO_BOOTSTRAP=true ./scripts/deploy-skyforge-local.sh
 ```
 
 Legacy fallback is still available for external appliances:
@@ -198,12 +264,6 @@ Force fresh local secrets generation when you want a full reset:
 
 ```bash
 SKYFORGE_REGENERATE_SECRETS=true ./scripts/deploy-skyforge-local.sh
-```
-
-Force database/bootstrap reconciliation without regenerating secrets:
-
-```bash
-SKYFORGE_BOOTSTRAP_DATABASES=true ./scripts/deploy-skyforge-local.sh
 ```
 
 ## Bootstrap Forward locally
@@ -300,6 +360,13 @@ Operational scripts now default to `.kubeconfig-skyforge` and require context `k
 - `scripts/prepull-images-k8s.sh`
 - `scripts/push-blueprints-to-gitea.sh`
 - `scripts/install-kubevirt-local.sh`
+- `scripts/reseed-blueprints-incluster.sh`
+- `scripts/forward-enforce-support-defaults.sh`
+- `scripts/deploy/local/preflight.sh`
+- `scripts/deploy/local/wait-rollout.sh`
+- `scripts/deploy/local/wait-httproute.sh`
+- `scripts/deploy/local/integration-health.sh`
+- `scripts/deploy/local/integration-repair.sh`
 
 If context is prod-like or non-local, scripts fail fast.
 
