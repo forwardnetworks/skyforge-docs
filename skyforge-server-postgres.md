@@ -20,10 +20,15 @@ Set DB credentials in `deploy/skyforge-secrets.yaml`:
 Chart will render/create `db-skyforge-server-password` secret from this value.
 
 ## Provision role + database
-Re-run provisioning job when needed:
+`db-provision` is chart-owned and runs as a Helm hook on install/upgrade.
+
+To re-run explicitly, run a Helm upgrade (same values you use for deploy):
 ```bash
-kubectl -n skyforge delete job/db-provision --ignore-not-found
-kubectl -n skyforge apply -f components/charts/skyforge/files/manifests/db-provision-job.yaml
+helm upgrade --install skyforge components/charts/skyforge \
+  -n skyforge \
+  -f components/charts/skyforge/values-prod-skyforge-local.yaml \
+  -f deploy/examples/values-k3d-dev.yaml \
+  -f .tmp/k3d-skyforge/skyforge-secrets.yaml
 ```
 
 ## Runtime env (server)

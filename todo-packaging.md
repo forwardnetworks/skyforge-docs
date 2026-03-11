@@ -98,6 +98,19 @@ scripts/preflight-packaging.sh
   - run smoke check
 - [ ] Record expected timings and failure modes.
 
+## Platform Resilience (Move Scripted Repair to Native Control Loop)
+
+- [ ] Replace deploy-time `scripts/k8s-network-resilience.sh` remediation with an in-cluster native control loop:
+  - controller/CronJob probes node-local service DNS/TCP reachability
+  - auto-restarts only affected node `cilium` / `cilium-envoy` pods
+  - publishes metrics/events for visibility and audit
+  - runs continuously (not only during deploy)
+- [ ] Keep deploy scripts as a final guardrail only; avoid making Helm rollout responsible for steady-state CNI healing.
+- [ ] Add smoke/CI coverage for reboot resilience:
+  - reboot one worker node
+  - verify control loop repairs datapath
+  - verify `skyforge-server` endpoints return to Ready without manual intervention
+
 ## Notes / Recent Lessons
 
 - DockerHub pulls can break installs (rate limits) → mirror images.

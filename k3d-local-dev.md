@@ -127,6 +127,15 @@ Current local parity target:
 Bootstrap and upgrade are now separated:
 - normal `./scripts/deploy-skyforge-local.sh` runs Helm upgrade/install, then
   runs aggregate verification (disable with `--no-verify`)
+  - aggregate verification now includes a required blueprints readiness gate:
+    authenticated `source=blueprints` netlab template listing must return at
+    least one template before deploy is considered healthy
+  - aggregate verification now includes a required ForwardAuth gateway check
+    (`/api/auth/forwardauth/envoy`) before NetBox/Nautobot/Jira route probes so
+    SSO/auth regressions fail early with a specific signal
+  - gateway health checks accept `Programmed=False (AddressNotAssigned)` when
+    `skyforge.gateway.addresses` is empty (k3d/nodeport mode), then rely on
+    route probes for final readiness
 - deploy now gates Helm apply with a machine-readable preflight contract:
   `scripts/deploy/local/preflight.sh`
 - if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
@@ -135,13 +144,22 @@ Bootstrap and upgrade are now separated:
 - `db-provision` is chart-owned and runs as a Helm hook on install/upgrade
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
-- blueprint reseed now runs in-cluster (no local `kubectl port-forward`):
-  - deploy wrapper delegates reseed to `scripts/reseed-blueprints-incluster.sh`
-  - default mode is `SKYFORGE_RESEED_BLUEPRINTS_MODE=local` (copies `components/blueprints` into an in-cluster reseed pod)
-  - optional git source mode:
-    - `SKYFORGE_RESEED_BLUEPRINTS_MODE=git`
+- blueprint reseed now defaults to the canonical push helper:
+  - deploy wrapper calls `scripts/push-blueprints-to-gitea.sh` by default
+  - helper tries route-first access (`/api/gitea/public`, `/git`, `/`) and then
+    uses local `kubectl port-forward` to `svc/gitea` if needed
+  - if route and port-forward are both unavailable, helper falls back to
+    `scripts/reseed-blueprints-incluster.sh`
+  - default mode is `SKYFORGE_RESEED_BLUEPRINTS_MODE=git`
+    (`ipspace/netlab-examples`, normalized under `netlab/`)
+  - optional local source mode:
+    - `SKYFORGE_RESEED_BLUEPRINTS_MODE=local`
+    - copies `components/blueprints` content as-is
+  - git source controls:
     - `SKYFORGE_RESEED_BLUEPRINTS_GIT_URL=https://github.com/ipspace/netlab-examples.git`
     - `SKYFORGE_RESEED_BLUEPRINTS_GIT_REF=main`
+  - set `SKYFORGE_RESEED_BLUEPRINTS_USE_PUSH_HELPER=false` to force the older
+    in-cluster reseed path
 - Forward support-user/org-default enforcement is delegated to
   `scripts/forward-enforce-support-defaults.sh`
 - node-network resilience gate tuning (optional):
@@ -155,6 +173,7 @@ Bootstrap and upgrade are now separated:
   - `SKYFORGE_NETWORK_RESILIENCE_NODE_NAME_REGEX=<regex>`
 - integration health gate tuning (optional):
   - `SKYFORGE_STRICT_INTEGRATION_HEALTH=true|false`
+  - `SKYFORGE_INFOBLOX_HEALTH_STRICT=true|false` (default `false`; when `true`, Infoblox HTTPS must be reachable or deploy fails)
   - `SKYFORGE_ELK_HEALTH_ATTEMPTS=<n>`
   - `SKYFORGE_ELK_HEALTH_SLEEP_SECONDS=<n>`
 - aggregate verification ELK probe tuning (optional):

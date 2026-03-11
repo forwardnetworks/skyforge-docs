@@ -15,8 +15,8 @@ This checklist is the execution reference for:
 ## Current Baseline
 
 Observed in working tree:
-- `components/server`: `modified=73`, `deleted=49`, `untracked=334`
-- `components/portal`: `modified=44`, `deleted=5`, `untracked=227`
+- `components/server`: `modified=78`, `deleted=46`, `untracked=346`
+- `components/portal`: `modified=45`, `deleted=5`, `untracked=247`
 
 Build/test snapshot (2026-03-10, local):
 - `components/server`: `go build ./...` passes
@@ -27,8 +27,8 @@ Build/test snapshot (2026-03-10, local):
 - `components/server`: `go test ./internal/taskengine` still panics outside Encore runtime (`encore apps must be run using the encore command`)
 
 Progress snapshot:
-- Checklist items complete: `103`
-- Checklist items remaining: `0`
+- Checklist items complete: `124`
+- Checklist items remaining: `13`
 
 ## Hard-Cut Phases
 
@@ -534,6 +534,313 @@ Success gate:
 - [x] `pnpm build` in `components/portal`
 - [x] `git status --short` reviewed for expected changes only
 - [x] no accidental build outputs outside canonical paths
+
+## Phase 6: Next Hard-Cut Tranche (Portal + Server)
+
+- [x] Split topology-viewer effects hook into focused effect modules
+  - source: `components/portal/src/hooks/use-topology-viewer-effects.tsx`
+  - target split:
+    - persisted/deep-link effects
+    - menu + dialog fetch effects
+    - live stats stream effects
+  - result:
+    - `components/portal/src/hooks/use-topology-viewer-effects.tsx` reduced to `10` lines
+    - `components/portal/src/hooks/use-topology-viewer-effects-types.ts` at `74` lines
+    - `components/portal/src/hooks/use-topology-viewer-effects-persist-deeplink.tsx` at `141` lines
+    - `components/portal/src/hooks/use-topology-viewer-effects-menus-fetch.tsx` at `71` lines
+    - `components/portal/src/hooks/use-topology-viewer-effects-stats-stream.tsx` at `109` lines
+- [x] Split user variable groups surface into page + dialog/list components
+  - source: `components/portal/src/components/user-variable-groups.tsx`
+  - target split:
+    - page coordinator + query/delete orchestration
+    - list table component
+    - create/edit dialog component
+  - result:
+    - `components/portal/src/components/user-variable-groups.tsx` reduced to `144` lines
+    - `components/portal/src/components/user-variable-groups-table.tsx` at `85` lines
+    - `components/portal/src/components/user-variable-group-dialog.tsx` at `169` lines
+- [x] Split netlab template materialization helpers by concern
+  - source: `components/server/internal/taskengine/netlab_templates.go`
+  - target split:
+    - repo/path normalization helpers
+    - gitea client/read helpers
+    - bundle materialization helpers
+  - result:
+    - `components/server/internal/taskengine/netlab_templates.go` reduced to `191` lines
+    - `components/server/internal/taskengine/netlab_templates_repo_paths.go` at `152` lines
+    - `components/server/internal/taskengine/netlab_templates_gitea_io.go` at `86` lines
+
+Success gates:
+- [x] `cd components/server && go build ./...` passes
+- [x] `make lint-portal` passes
+- [x] `pnpm -C components/portal type-check` passes
+- [x] `pnpm -C components/portal test --run` passes
+- [x] `pnpm -C components/portal build` passes
+
+## Phase 7: Monolith Reduction Continuation (Portal + Server)
+
+- [x] Split portal API client monolith into domain modules behind a stable barrel
+  - source: `components/portal/src/lib/api-client.ts`
+  - target split:
+    - `api-client-core` (fetch + shared types/utilities)
+    - domain modules (`api-client-deployments`, `api-client-forward`, `api-client-auth`, `api-client-integrations`, etc.)
+    - compatibility barrel at `api-client.ts` that re-exports existing names
+  - result:
+    - `components/portal/src/lib/api-client.ts` reduced to `5` lines (barrel)
+    - `components/portal/src/lib/api-client-user.ts` at `1154` lines
+    - `components/portal/src/lib/api-client-deployments.ts` at `1423` lines
+    - `components/portal/src/lib/api-client-forward.ts` at `531` lines
+    - `components/portal/src/lib/api-client-admin.ts` at `715` lines
+    - `components/portal/src/lib/api-client-policy-report.ts` at `1056` lines
+- [x] Split topology-viewer surface orchestrator by concern
+  - source: `components/portal/src/hooks/use-topology-viewer-surface.tsx`
+  - target split:
+    - layout/state primitives
+    - node/edge action wiring
+    - modal/dialog state coordination
+  - result:
+    - `components/portal/src/hooks/use-topology-viewer-surface.tsx` at `203` lines (coordinator)
+    - `components/portal/src/hooks/use-topology-viewer-surface-primitives.tsx` at `183` lines
+    - `components/portal/src/hooks/use-topology-viewer-surface-action-wiring.tsx` at `97` lines
+    - `components/portal/src/hooks/use-topology-viewer-surface-dialog-coordination.tsx` at `141` lines
+- [x] Split labs designer sidebar into focused sections
+  - source: `components/portal/src/components/lab-designer-sidebar.tsx`
+  - target split:
+    - lab metadata + controls section
+    - node detail editor section
+    - YAML/viewer section
+  - result:
+    - `components/portal/src/components/lab-designer-sidebar.tsx` reduced to `66` lines (coordinator)
+    - `components/portal/src/components/lab-designer-sidebar-metadata-section.tsx` at `225` lines
+    - `components/portal/src/components/lab-designer-sidebar-node-section.tsx` at `57` lines
+    - `components/portal/src/components/lab-designer-sidebar-yaml-section.tsx` at `77` lines
+- [x] Split admin auth orchestration into focused providers + shared helpers
+  - source: `components/portal/src/hooks/use-admin-settings-auth.tsx`
+  - target split:
+    - local auth + break-glass flows
+    - OIDC settings/validation flows
+    - quick-deploy catalog auth-adjacent flows
+  - result:
+    - `components/portal/src/hooks/use-admin-settings-auth.tsx` reduced to `105` lines (coordinator)
+    - `components/portal/src/hooks/use-admin-settings-auth-local.tsx` at `79` lines
+    - `components/portal/src/hooks/use-admin-settings-auth-oidc.tsx` at `139` lines
+    - `components/portal/src/hooks/use-admin-settings-auth-quick-deploy.tsx` at `167` lines
+
+- [x] Split clabernetes kubeutil monolith by concern
+  - source: `components/server/internal/kubeutil/clabernetes.go`
+  - target split:
+    - topology/resource helpers
+    - object apply/delete helpers
+    - status/wait/poll helpers
+  - result:
+    - `components/server/internal/kubeutil/clabernetes.go` reduced to `29` lines
+    - `components/server/internal/kubeutil/clabernetes_topology_resource_helpers.go` at `415` lines
+    - `components/server/internal/kubeutil/clabernetes_object_apply_delete_helpers.go` at `288` lines
+    - `components/server/internal/kubeutil/clabernetes_status_wait_poll_helpers.go` at `117` lines
+- [x] Split taskstore persistence layer by concern
+  - sources:
+    - `components/server/internal/taskstore/taskstore.go`
+    - `components/server/internal/taskstore/queries.go`
+  - target split:
+    - enqueue/dispatch persistence
+    - run history persistence
+    - query/read models
+  - result:
+    - `components/server/internal/taskstore/taskstore.go` reduced to `69` lines
+    - `components/server/internal/taskstore/enqueue_dispatch_persistence.go` at `349` lines
+    - `components/server/internal/taskstore/run_history_persistence.go` at `62` lines
+    - `components/server/internal/taskstore/queries.go` at `645` lines
+- [x] Split worker runtime service by concern
+  - source: `components/server/worker/service.go`
+  - target split:
+    - subscription/startup wiring
+    - task execution handlers
+    - health/maintenance/background loops
+  - result:
+    - `components/server/worker/service.go` reduced to `149` lines
+    - `components/server/worker/service_dispatch.go` at `128` lines
+    - `components/server/worker/service_logging.go` at `51` lines
+    - `components/server/worker/service_forward_sync.go` at `144` lines
+- [x] Split config load monolith into loader/default/validation slices
+  - source: `components/server/internal/skyforgeconfig/load_config.go`
+  - target split:
+    - environment/config loading
+    - defaulting/normalization
+    - validation and diagnostics
+  - result:
+    - `components/server/internal/skyforgeconfig/load_config.go` reduced to `353` lines
+    - `components/server/internal/skyforgeconfig/load_config_helpers.go` at `99` lines
+    - `components/server/internal/skyforgeconfig/load_config_worker.go` at `152` lines
+
+Success gates:
+- [x] `cd components/server && go build ./...` passes
+- [x] `cd components/server && ENCORE_DISABLE_UPDATE_CHECK=1 encore test ./internal/taskengine/...` passes
+- [x] `make lint-portal` passes
+- [x] `pnpm -C components/portal type-check` passes
+- [x] `pnpm -C components/portal test --run` passes
+
+## Phase 8: Remaining Refactor Backlog (Portal + Server)
+
+- [x] Split `api-client-user` into auth/session/user-scope/token modules
+  - source: `components/portal/src/lib/api-client-user.ts`
+  - result:
+    - `components/portal/src/lib/api-client-user.ts` reduced to compatibility barrel exports
+    - `components/portal/src/lib/api-client-user-auth.ts` added
+    - `components/portal/src/lib/api-client-user-session.ts` added
+    - `components/portal/src/lib/api-client-user-user-scope.ts` added
+    - `components/portal/src/lib/api-client-user-token.ts` added
+- [x] Split `api-client-deployments` into list/detail/actions/capacity modules
+  - source: `components/portal/src/lib/api-client-deployments.ts`
+  - result:
+    - `components/portal/src/lib/api-client-deployments.ts` reduced to compatibility barrel exports
+    - `components/portal/src/lib/api-client-deployments-list.ts` added
+    - `components/portal/src/lib/api-client-deployments-detail.ts` added
+    - `components/portal/src/lib/api-client-deployments-actions.ts` added
+    - `components/portal/src/lib/api-client-deployments-capacity.ts` added
+- [x] Split capacity growth tab implementations into shared chart/table helpers
+  - sources:
+    - `components/portal/src/components/capacity/deployment-capacity-growth-tab.tsx`
+    - `components/portal/src/components/capacity/forward-network-capacity-growth-tab.tsx`
+  - result:
+    - `components/portal/src/components/capacity/capacity-growth-tab-shared.tsx` added
+    - both growth tab files reduced to thin adapters
+- [x] Split S3 page into route/page plus object actions/table/dialog modules
+  - source: `components/portal/src/components/s3-page.tsx`
+  - result:
+    - `components/portal/src/components/s3-page.tsx` reduced to route/controller orchestration
+    - `components/portal/src/components/s3/s3-page.tsx` added
+    - `components/portal/src/components/s3/s3-object-actions.tsx` added
+    - `components/portal/src/components/s3/s3-object-table.tsx` added
+    - `components/portal/src/components/s3/s3-object-dialogs.ts` added
+    - `components/portal/src/components/s3/s3-types.ts` added
+- [x] Split taskstore query monolith by read concern families
+  - source: `components/server/internal/taskstore/queries.go`
+  - result:
+    - `components/server/internal/taskstore/queries.go` removed
+    - `components/server/internal/taskstore/queries_types.go` added
+    - `components/server/internal/taskstore/queries_dedupe_reads.go` added
+    - `components/server/internal/taskstore/queries_deployment_reads.go` added
+    - `components/server/internal/taskstore/queries_task_reads.go` added
+    - `components/server/internal/taskstore/queries_log_event_reads.go` added
+- [x] Split clabernetes topology helper module by data-shape vs transform logic
+  - source: `components/server/internal/kubeutil/clabernetes_topology_resource_helpers.go`
+  - result:
+    - `components/server/internal/kubeutil/clabernetes_topology_resource_data_helpers.go` added
+    - `components/server/internal/kubeutil/clabernetes_topology_resource_transform_helpers.go` added
+- [x] Split Gitea integration client by auth/repo/content concerns
+  - source: `components/server/integrations/gitea/gitea.go`
+  - result:
+    - `components/server/integrations/gitea/gitea.go` removed
+    - `components/server/integrations/gitea/client.go` added
+    - `components/server/integrations/gitea/auth.go` added
+    - `components/server/integrations/gitea/repo.go` added
+    - `components/server/integrations/gitea/content.go` added
+- [x] Split `load_config` primary path into explicit normalization and validation helpers
+  - source: `components/server/internal/skyforgeconfig/load_config.go`
+  - result:
+    - `components/server/internal/skyforgeconfig/load_config_normalize.go` added
+    - `components/server/internal/skyforgeconfig/load_config_validate.go` added
+    - `components/server/internal/skyforgeconfig/load_config.go` reduced to orchestration path
+
+Success gates:
+- [x] `cd components/server && go build ./...` passes
+- [x] `cd components/server && ENCORE_DISABLE_UPDATE_CHECK=1 encore test ./internal/taskengine/...` passes
+- [x] `make lint-portal` passes
+- [x] `pnpm -C components/portal type-check` passes
+- [x] `pnpm -C components/portal test --run` passes
+
+## Phase 9: Hard-Cut Finalization Gates (Release Blocking)
+
+- [ ] Commit train cleanup
+  - remove `WIP`, `fixup!`, `squash!`, and temporary checkpoint commits from the hard-cut branch history
+  - keep only intentional, reviewable slices (server, portal, generated artifacts, docs, CI gates)
+  - ensure the final docs/runbook commit references current validation and preflight commands
+  - non-interactive execution checklist (close this item after all checks pass):
+    - [ ] capture base/head and audit current train:
+      - `BASE_REF=origin/main`
+      - `BASE_SHA="$(git merge-base "$BASE_REF" HEAD)" && OLD_HEAD="$(git rev-parse HEAD)"`
+      - `git log --reverse --no-merges --format='%h %s' "$BASE_SHA..$OLD_HEAD"`
+    - [ ] create a clean replay branch from base:
+      - `git switch -c hard-cut-cleanup "$BASE_SHA"`
+    - [ ] replay into explicit commit slices (replace `<...>` with SHA ranges from the audited log):
+      - `git cherry-pick -n <server-first>^..<server-last> && git commit -m "server: hard-cut refactor normalization"`
+      - `git cherry-pick -n <portal-first>^..<portal-last> && git commit -m "portal: hard-cut route and hook splits"`
+      - `git cherry-pick -n <generated-first>^..<generated-last> && git commit -m "generated: refresh openapi and route artifacts"`
+      - `git cherry-pick -n <ci-first>^..<ci-last> && git commit -m "ci: enforce hard-cut validation gates"`
+      - `git cherry-pick -n <docs-first>^..<docs-last> && git commit -m "docs: update migration checklist and runbook gates"`
+    - [ ] verify cleanup gates before replacing branch tip:
+      - `if git log --oneline --no-merges "$BASE_SHA..HEAD" | rg -n 'WIP|fixup!|squash!|checkpoint'; then echo "cleanup incomplete"; exit 1; fi`
+      - `git range-diff "$BASE_SHA..$OLD_HEAD" "$BASE_SHA..HEAD"`
+      - `git push --force-with-lease origin HEAD:<hard-cut-branch>`
+- [x] Compatibility barrel removal
+  - remove temporary compatibility barrels after callsites are migrated:
+    - `components/portal/src/lib/api-client.ts`
+    - `components/portal/src/lib/api-client-user.ts`
+    - `components/portal/src/lib/api-client-deployments.ts`
+  - update imports to domain modules directly and delete stale re-export-only files
+  - progress:
+    - [x] removed `components/portal/src/lib/api-client-user.ts`
+    - [x] removed `components/portal/src/lib/api-client-deployments.ts`
+    - [x] migrated `components/portal/src/lib/api-client.ts` to leaf exports for user/deployment domains
+    - [x] final decision: retain `components/portal/src/lib/api-client.ts` as the intentional stable umbrella API surface; compatibility-only barrels removed
+- [ ] Regression test additions for hard-cut seams
+  - portal: add targeted regressions for split admin settings, deployments flows, and route-shell boundaries
+  - server: add targeted regressions for preflight/taskstore/config split boundaries and error handling
+  - require at least one regression test per high-risk migrated surface
+  - progress:
+    - [x] `components/server/internal/skyforgeconfig/load_config_validate_test.go` added for auth/oidc helper regressions
+    - [x] `components/server/internal/taskstore/queries_deployment_reads_test.go` added for queue-helper determinism regressions
+    - [x] `components/portal/tests/playwright/smoke-sidebar-embedded.spec.ts` adds tagged smoke coverage (`@smoke-sidebar`, `@smoke-integrations`)
+- [x] Playwright sidebar/integration smoke coverage
+  - add smoke coverage for final sidebar hierarchy across integrations/platform/admin boundaries
+  - verify integrations open in-frame via `tools.$tool` where intended, with explicit checks for external-link exceptions
+  - result:
+    - `components/portal/scripts/smoke-sidebar-embedded.mjs` added
+    - `components/portal/package.json` script `smoke:sidebar-embedded` added
+    - `.github/workflows/ci.yml` adds `Playwright Tagged Smoke Gate (OSS-Safe)` (2026-03-10), which runs tagged Playwright smoke tests when tagged specs are present in-tree
+- [ ] Deploy preflight hardening
+  - [x] script-level gateway/route fail-fast checks added:
+    - `scripts/check-sidebar-links.sh` (gateway Programmed + route health probes)
+    - `scripts/verify-k3d-local-stack.sh` (gateway readiness + route/prefix health fail-fast gates)
+  - enforce stable preflight error payloads consumed by portal UI
+  - add negative-path coverage for compatibility/capacity failures and missing dependency states
+  - verify deterministic preflight output for identical input payloads
+  - progress:
+    - [x] `components/server/internal/taskengine/clabernetes_preflight_api_test.go` added for deterministic and negative-path contract checks on preflight wiring
+- [x] Performance checks for quick deploy templates
+  - capture baseline and post-hard-cut timings for template catalog load, preview render, and deploy kickoff paths
+  - define and document fail thresholds for template-load and preview-render regressions
+  - thresholds:
+    - template catalog load: `<= 7000ms`
+    - preview render request: `<= 9000ms`
+    - deploy kickoff API: `<= 12000ms`
+  - progress:
+    - [x] `scripts/check-quick-deploy-performance.sh` added to measure login-authenticated timings for catalog load, preview render request, and deploy kickoff API
+    - [x] script emits per-metric diagnostics and fails when explicit thresholds are exceeded
+    - [x] script is OSS-safe in CI: exits cleanly with `SKIP` when required environment is not set
+- [ ] CI required checks lock-in
+  - enforce required status checks for server build/tests, portal lint/type-check/tests/build, generated drift, and Playwright smoke
+  - block merge when any required hard-cut check is failed or skipped
+  - progress:
+    - [x] CI now includes a tagged Playwright smoke gate step in `.github/workflows/ci.yml` using `--grep '@smoke-sidebar|@smoke-integrations'`
+    - [x] Gate is OSS-safe: when no tagged Playwright smoke tests are present, CI logs a skip and continues without failing
+    - [x] CI now includes `Quick Deploy Performance Gate (OSS-Safe)` using `./scripts/check-quick-deploy-performance.sh` with env-driven URL/credentials and threshold overrides via repo vars
+    - [ ] branch protection required-check enforcement still needs repo settings update
+
+Success gates:
+- [ ] `git log --oneline --no-merges <base>..HEAD` has no `WIP`, `fixup!`, `squash!`, or checkpoint commits
+- [x] `cd components/server && go build ./...` passes
+- [x] `cd components/server && ENCORE_DISABLE_UPDATE_CHECK=1 encore test ./internal/taskengine/...` passes
+- [x] `make lint-portal` passes
+- [x] `pnpm -C components/portal type-check` passes
+- [x] `pnpm -C components/portal test --run` passes
+- [x] `pnpm -C components/portal build` passes
+- [x] `pnpm -C components/portal exec playwright test --grep '@smoke-sidebar|@smoke-integrations'` gate is wired in CI (runs when tagged specs exist; OSS-safe skip path when no tagged specs are present)
+- [x] `./scripts/check-quick-deploy-performance.sh` gate is wired in CI (runs when quick-deploy env is set; OSS-safe skip path when env is missing)
+- [x] `./scripts/check-generated-drift.sh` passes
+- [x] quick deploy template performance checks meet documented thresholds with no regression vs baseline
+  - local validation (2026-03-10): `catalog_load=155ms`, `preview_render_request=28ms`, `deploy_kickoff_api=1673ms` via `./scripts/check-quick-deploy-performance.sh`
+- [ ] branch protection requires the hard-cut CI suite and blocks merge until all required checks are green
 
 ## Commit Strategy (Required)
 

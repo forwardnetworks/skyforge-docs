@@ -15,8 +15,14 @@ Skyforge supports minimal and full installs through Helm values.
 - `skyforge.yaade.enabled` (default `true`)
 - `skyforge.redoc.enabled` (default `true`)
 - `skyforge.forward.enabled` (default `true`)
+- `skyforge.forwardCluster.enabled` (default `false`)
+- `skyforge.forwardCluster.observabilityUI.enabled` (default `false`)
 - `skyforge.netbox.enabled` (default `false`)
 - `skyforge.nautobot.enabled` (default `false`)
+- `skyforge.infoblox.enabled` (default `false`)
+- `skyforge.jira.enabled` (default `false`)
+- `skyforge.rapid7.enabled` (default `false`)
+- `skyforge.elk.enabled` (default `false`)
 - `skyforge.dns.enabled` (default `false`)
 
 Related toggles:
@@ -24,7 +30,16 @@ Related toggles:
 - `skyforge.syslog.enabled` (default `false`)
 - `skyforge.snmpTraps.enabled` (default `false`)
 - `skyforge.nodeMetrics.enabled` (default `false`)
+- `skyforge.keda.enabled` (default `false`)
 - `nsq.enabled` (default `true`)
+
+Observability notes:
+- Forward Grafana/Prometheus UI entries are gated by `skyforge.forwardCluster.observabilityUI.enabled`.
+- Forward dashboard provisioning pack is gated by `skyforge.forwardCluster.observabilityUI.dashboards.enabled`.
+- `skyforge.nodeMetrics.enabled` uses Telegraf ingestion into Skyforge APIs/Postgres (not Prometheus scraping).
+- Syslog ingestion uses Vector when `skyforge.syslog.enabled=true`.
+- `skyforge.keda.enabled` only enables KEDA resources; trigger definitions remain explicit per integration block.
+- Infoblox VM lifecycle control is handled by `skyforge.infoblox.lifecycle.*` (KubeVirt), not KEDA.
 
 ## External replacements
 

@@ -25,6 +25,32 @@ Notes:
 - Verify Dex is reachable and configured with valid upstream OIDC settings.
 - If TLS is custom, ensure trust bundles are mounted consistently across Skyforge and Dex.
 
+## `no healthy upstream` after node reboot
+Symptom:
+- Gateway/Envoy returns `no healthy upstream` for Skyforge routes after host/node reboot.
+
+Typical cause:
+- Node-local Cilium datapath regression on one worker causes intermittent service DNS/TCP failures.
+- `skyforge-server` then CrashLoops on startup dependency lookups (`nsq`, `db`), leaving no ready service endpoints.
+
+Checks:
+```bash
+kubectl -n skyforge get pods -o wide | rg 'skyforge-server|skyforge-server-worker'
+kubectl -n skyforge get endpoints skyforge-server -o wide
+kubectl -n skyforge logs deploy/skyforge-server --tail=120
+```
+
+Fast remediation:
+```bash
+./scripts/k8s-network-resilience.sh --namespace skyforge
+kubectl -n skyforge rollout restart deploy/skyforge-server deploy/skyforge-server-worker
+kubectl -n skyforge rollout status deploy/skyforge-server --timeout=5m
+```
+
+Deployment guardrail:
+- `scripts/deploy-skyforge-local.sh` and `scripts/deploy-skyforge-prod-safe.sh` run this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
+- Node-local Cilium datapath restarts are opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true` or explicit `--repair` workflows).
+
 ## Hoppscotch failures
 ### Helm upgrade failures due to immutable Jobs
 If a Helm upgrade fails trying to patch a `Job`, it’s usually because the `spec.template` is immutable.

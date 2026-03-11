@@ -76,6 +76,16 @@ Run one pre-prod environment with prod auth and real ingress before prod cut:
    - collector config and runtime actions
    - sync path from deployment to Forward
 
+Cluster resiliency gate:
+- `scripts/deploy-skyforge-prod-safe.sh` now executes `scripts/k8s-network-resilience.sh`
+  before and after Helm apply in strict mode.
+- Auto-repair of node-local Cilium datapath is opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true`).
+- Tune only if needed:
+  - `SKYFORGE_NETWORK_RESILIENCE_ENABLE=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_STRICT=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_REPAIR=true|false`
+  - `SKYFORGE_NETWORK_RESILIENCE_MAX_REPAIRS_PER_NODE=<n>`
+
 ## 5. Promotion decision
 
 Promote only when all are true:
