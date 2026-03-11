@@ -47,7 +47,7 @@ Two options:
 
 ### Option B: Skyforge provides a jump/bastion endpoint
 
-- Skyforge deploys a per-user SSH bastion inside the cluster and exposes it (NodePort/LoadBalancer/cloudflared TCP).
+- Skyforge deploys a per-user SSH bastion inside the cluster and exposes it (NodePort/LoadBalancer).
 - The collector (outside) uses the bastion as a jump host to reach internal device addresses.
 
 Tradeoffs:

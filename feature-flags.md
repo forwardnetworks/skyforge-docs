@@ -26,7 +26,6 @@ Skyforge supports minimal and full installs through Helm values.
 - `skyforge.dns.enabled` (default `false`)
 
 Related toggles:
-- `skyforge.cloudflareTunnel.enabled` (default `false`)
 - `skyforge.syslog.enabled` (default `false`)
 - `skyforge.snmpTraps.enabled` (default `false`)
 - `skyforge.nodeMetrics.enabled` (default `false`)

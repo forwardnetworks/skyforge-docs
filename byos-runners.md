@@ -64,7 +64,7 @@ Hard-cut behavior:
 - Skyforge passes repo/ref/path; the BYOS tool is responsible for obtaining the files.
 - Skyforge should support both:
   - internal/private repo URLs (Gitea)
-  - public URLs (e.g., exposed via a Cloudflare tunnel when needed)
+  - public URLs when explicitly intended for external BYOS delivery
 - For containerlab BYOS, Skyforge now passes only `topologySourceUrl` to the API server.
 - Topology-content/blob fallback has been removed from the BYOS containerlab run path.
 

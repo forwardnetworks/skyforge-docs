@@ -21,7 +21,6 @@ This repository is user-scoped by default. Internal Skyforge architecture must u
 - Provider-native terms:
   - AWS account/accountId
   - GCP service account/project
-  - Cloudflare account
   - Forward account (vendor account wording)
 - Kubernetes-native terms:
   - `ServiceAccount`
