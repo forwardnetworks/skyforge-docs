@@ -141,6 +141,8 @@ Bootstrap and upgrade are now separated:
 - if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
   `skyforge.infoblox.managed=true`), local deploy auto-installs KubeVirt/CDI
   prerequisites when the CRDs are missing
+- if KEDA is enabled (`skyforge.keda.enabled=true`), local deploy auto-installs
+  KEDA cluster-wide before Helm apply when `ScaledObject` CRDs are missing
 - `db-provision` is chart-owned and runs as a Helm hook on install/upgrade
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
@@ -173,6 +175,7 @@ Bootstrap and upgrade are now separated:
   - `SKYFORGE_NETWORK_RESILIENCE_NODE_NAME_REGEX=<regex>`
 - integration health gate tuning (optional):
   - `SKYFORGE_STRICT_INTEGRATION_HEALTH=true|false`
+  - `SKYFORGE_AUTO_INSTALL_KEDA=true|false`
   - `SKYFORGE_INFOBLOX_HEALTH_STRICT=true|false` (default `false`; when `true`, Infoblox HTTPS must be reachable or deploy fails)
   - `SKYFORGE_ELK_HEALTH_ATTEMPTS=<n>`
   - `SKYFORGE_ELK_HEALTH_SLEEP_SECONDS=<n>`
@@ -221,9 +224,11 @@ The preferred local implementation is managed KubeVirt:
 - enable VM lifecycle policy for resource savings and periodic reseed:
   - `skyforge.infoblox.lifecycle.enabled=true`
   - `skyforge.infoblox.lifecycle.autoStop.enabled=true`
+  - `skyforge.infoblox.lifecycle.autoStop.maxIdleMinutes=<minutes>`
   - `skyforge.infoblox.lifecycle.autoStop.maxRunMinutes=<minutes>`
   - `skyforge.infoblox.lifecycle.reseed.enabled=true`
   - `skyforge.infoblox.lifecycle.reseed.resetAfterDays=60`
+  - `skyforge.infoblox.lifecycle.license.enabled=true`
 - keep route target on `skyforge.infoblox.serviceName` (default `infoblox`) and
   `skyforge.infoblox.servicePort` (default `443`)
 - build/push a containerDisk from a local qcow2 with:
@@ -232,7 +237,9 @@ The preferred local implementation is managed KubeVirt:
 ### Infoblox first-boot bootstrap (network + temp license)
 
 After first boot (or after a lifecycle reseed), the appliance may require
-bootstrap initialization before HTTPS is reachable.
+bootstrap initialization before HTTPS is reachable. Lifecycle now includes a
+best-effort in-cluster temp-license reconcile CronJob. If it still cannot clear
+the licensing prompts, use the operator helper below.
 
 Automated (best-effort) bootstrap:
 

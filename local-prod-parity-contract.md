@@ -82,11 +82,15 @@ The local overlay may override only the following fields:
 - `skyforge.infoblox.lifecycle.enabled`
 - `skyforge.infoblox.lifecycle.autoStop.enabled`
 - `skyforge.infoblox.lifecycle.autoStop.schedule`
+- `skyforge.infoblox.lifecycle.autoStop.maxIdleMinutes`
 - `skyforge.infoblox.lifecycle.autoStop.maxRunMinutes`
 - `skyforge.infoblox.lifecycle.reseed.enabled`
 - `skyforge.infoblox.lifecycle.reseed.schedule`
 - `skyforge.infoblox.lifecycle.reseed.resetAfterDays`
 - `skyforge.infoblox.lifecycle.reseed.haltWaitSeconds`
+- `skyforge.infoblox.lifecycle.license.enabled`
+- `skyforge.infoblox.lifecycle.license.schedule`
+- `skyforge.infoblox.lifecycle.license.maxAttempts`
 - `skyforge.jira.enabled`
 - `skyforge.infobloxUrl`
 - `images.skyforgeServer`

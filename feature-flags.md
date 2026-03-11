@@ -38,8 +38,9 @@ Observability notes:
 - Forward dashboard provisioning pack is gated by `skyforge.forwardCluster.observabilityUI.dashboards.enabled`.
 - `skyforge.nodeMetrics.enabled` uses Telegraf ingestion into Skyforge APIs/Postgres (not Prometheus scraping).
 - Syslog ingestion uses Vector when `skyforge.syslog.enabled=true`.
-- `skyforge.keda.enabled` only enables KEDA resources; trigger definitions remain explicit per integration block.
+- `skyforge.keda.enabled` enables KEDA resources for configured blocks (`worker`, `jira`, `netbox`, `nautobot`, `rapid7`, `elkProxy`), with per-block triggers/limits still controlled by values.
 - Infoblox VM lifecycle control is handled by `skyforge.infoblox.lifecycle.*` (KubeVirt), not KEDA.
+- Temp-license reconciliation for Infoblox is controlled by `skyforge.infoblox.lifecycle.license.*`.
 
 ## External replacements
 

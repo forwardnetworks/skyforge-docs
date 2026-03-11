@@ -1,7 +1,7 @@
 # ServiceNow: Forward Connectivity Ticket Demo
 
-Skyforge provides a near-zero-touch setup workflow for installing the ServiceNow
-“Connectivity Ticket” demo app.
+Skyforge provides a near-zero-touch workflow for a shared ServiceNow PDI with
+per-user tenant isolation.
 
 The demo app:
 - collects `srcIp/dstIp/protocol/port` from a Service Portal widget
@@ -9,24 +9,36 @@ The demo app:
 - normalizes the result into allowed/blocked + a hop trace
 - stores hop records on the ticket
 
+## Model
+
+- One global ServiceNow PDI is configured by Skyforge admins.
+- Each Skyforge user maps to a dedicated ServiceNow tenant user.
+- Each user binds their own Forward credential set.
+- Runtime operations are server-scoped to the authenticated Skyforge user.
+
 ## Prerequisites
 
 - A ServiceNow Personal Developer Instance (PDI)
-- Forward SaaS credentials (for `https://fwd.app`) via either:
-  - a Skyforge Forward collector (recommended), or
-  - manual username/password.
+- At least one saved Forward credential set in Skyforge.
 
 ## Setup
 
-1) Create a ServiceNow PDI.
-2) In Skyforge, open **ServiceNow**.
-3) Set:
+1) Admin: open **Settings → Admin** and configure:
    - ServiceNow instance URL
    - ServiceNow admin username/password
-   - Forward credential set (from **Forward → Credentials**)
-4) Click **Save settings**.
+   - optional bootstrap Forward credential set
+2) User: open **ServiceNow**.
+3) Select a Forward credential set (from **Forward → Credentials**).
+4) Click **Save tenant binding**.
 5) Click **Run setup**.
 6) If setup pauses at `needs_manual_step`, apply remediation shown in the UI and click **Resume setup**.
+
+## Tenant Operations
+
+- **Reset tenant password** rotates the mapped ServiceNow user password and
+  reprovisions the tenant user.
+- Forward ticketing integration is configured using tenant credentials, not the
+  global ServiceNow admin account.
 
 ## Reachability Gate
 
