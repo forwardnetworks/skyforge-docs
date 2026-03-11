@@ -1,22 +1,25 @@
-# Hetzner Deployment (kube-hetzner Profiles)
+# Hetzner Deployment (kube-hetzner, Prod Baseline)
 
 Skyforge supports a third deployment path on Hetzner Cloud using
 `terraform-hcloud-kube-hetzner`, alongside local `k3d` and Forward-hosted prod.
+Current policy is explicit:
+- local `k3d` is dev
+- Hetzner is prod
 
 ## What This Path Includes
 
 Phase 1 (enabled by default):
-- pinned k3s version (`v1.35.2+k3s1`) via profile vars
+- pinned k3s version (`v1.35.2+k3s1`) via prod tfvars
 - Cilium CNI
 - dedicated control-plane API load balancer
-- profile-based nodepool sizing (`dev`, `staging`, `prod`)
+- prod-sized nodepool baseline
 - delete protection
 
-Phase 2 (enabled/ready in profiles):
+Phase 2 (enabled/ready):
 - `cert-manager` enabled
-- etcd S3 backup inputs supported (set in profile or extra tfvars)
+- etcd S3 backup inputs supported (set in prod baseline or extra tfvars)
 - upgrade scheduling support via Terraform vars
-- cluster autoscaler nodepool support (profile-driven)
+- cluster autoscaler nodepool support
 - KEDA worker autoscaling support in Skyforge Helm values
 
 ## Files
@@ -24,13 +27,9 @@ Phase 2 (enabled/ready in profiles):
 - Terraform root:
   - `deploy/hetzner/main.tf`
   - `deploy/hetzner/variables.tf`
-- Named Terraform profiles:
-  - `deploy/hetzner/profiles/dev.tfvars`
-  - `deploy/hetzner/profiles/staging.tfvars`
+- Terraform baseline:
   - `deploy/hetzner/profiles/prod.tfvars`
-- Helm overlay profiles:
-  - `deploy/examples/values-hetzner-dev.yaml`
-  - `deploy/examples/values-hetzner-staging.yaml`
+- Helm overlay baseline:
   - `deploy/examples/values-hetzner-prod.yaml`
 - Scripts:
   - `scripts/deploy-skyforge-hetzner.sh`
@@ -50,8 +49,8 @@ Required variables:
 Optional:
 - `SKYFORGE_HETZNER_ENV_FILE` defaults to `secrets/hetzner.env`
 
-For staging/prod profiles, backups and external object storage are enforced by
-default. Set these in your env file:
+Backups and external object storage are enforced by default. Set these in your
+env file:
 
 - `SKYFORGE_HETZNER_S3_ENDPOINT`
 - `SKYFORGE_HETZNER_S3_BUCKET`
@@ -67,37 +66,35 @@ default. Set these in your env file:
 
 ```bash
 cd /home/captainpacket/src/skyforge
-./scripts/deploy-skyforge-hetzner.sh --profile dev
+./scripts/deploy-skyforge-hetzner.sh
 ```
 
 Outputs:
-- kubeconfig written to `.kubeconfig-skyforge-hetzner-<profile>`
-- Terraform workspace `skyforge-<profile>`
+- kubeconfig written to `.kubeconfig-skyforge-hetzner-prod`
+- Terraform workspace `skyforge-prod`
 
 ## Destroy
 
 ```bash
-./scripts/destroy-skyforge-hetzner.sh --profile dev
+./scripts/destroy-skyforge-hetzner.sh
 ```
 
 ## Recreate
 
 ```bash
-./scripts/hetzner-recreate-skyforge.sh --profile dev --force
+./scripts/hetzner-recreate-skyforge.sh --force
 ```
 
-## Profile Model
+## Model
 
-The scripts enforce named profiles. Use profile files for baseline cluster
-shape and an optional extra tfvars file for sensitive or environment-specific
-overrides.
+The scripts are prod-only for Hetzner.
 
 Terraform:
-- baseline: `deploy/hetzner/profiles/<profile>.tfvars`
+- baseline: `deploy/hetzner/profiles/prod.tfvars`
 - optional: `--extra-tfvars <path>`
 
 Helm:
-- baseline: `deploy/examples/values-hetzner-<profile>.yaml`
+- baseline: `deploy/examples/values-hetzner-prod.yaml`
 - optional: `--extra-values <path>`
 
 ## Notes
@@ -105,11 +102,11 @@ Helm:
 - Module source is pinned in `deploy/hetzner/main.tf` for deterministic runs.
 - Ingress controller is set to `none` at module level to avoid duplicate ingress
   stacks; Skyforge keeps its Gateway API path.
-- Staging/prod profiles hard-enable etcd S3 backups at deploy time; deploy will
+- Prod hard-enables etcd S3 backups at deploy time; deploy will
   fail fast when required S3 inputs are missing.
-- Staging/prod values disable in-cluster `s3gw`; deploy will fail fast when
+- Prod values disable in-cluster `s3gw`; deploy will fail fast when
   external object storage endpoint or credentials are missing.
-- Prod profile includes an autoscaler burst pool (`ccx53`, min 0, max 8),
+- Prod includes an autoscaler burst pool (`ccx53`, min 0, max 8),
   allowing capacity bursts up to roughly 256 vCPU / 1 TiB when demanded.
-- Profiles currently set `allow_scheduling_on_control_plane=true` so lightweight
+- Config currently sets `allow_scheduling_on_control_plane=true` so lightweight
   workloads can use control-plane headroom at baseline.

@@ -5,6 +5,10 @@ This is the minimal single-node k3s deployment path.
 For local development using k3d (default-safe workflow), use:
 - `components/docs/k3d-local-dev.md`
 
+Environment mapping (current policy):
+- local `k3d` = dev
+- VMware/Hetzner = prod
+
 If you want a repeatable install workflow, use `docs/install-on-server.md`.
 
 ## 1) Prereqs

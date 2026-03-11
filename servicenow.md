@@ -53,6 +53,7 @@ The demo app:
 - Skyforge attempts to create the required schema and assets via ServiceNow Table API.
 - If the ServiceNow instance blocks table creation, setup reports exact manual steps and supports resume.
 - The installer overwrites demo artifact contents by name (scripts, widget, REST message, properties).
+- Skyforge runs an Encore-native keepalive cron for the global PDI (`/internal/cron/servicenow/pdi/keepalive`) every 20 minutes to reduce demo interruptions from PDI sleep/hibernation.
 
 ## Demo Asset Source-Of-Truth
 
