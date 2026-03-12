@@ -19,6 +19,7 @@ the core platform remains runnable and useful to downstream users.
 - Provide a portable-first configuration profile.
 - Keep provider integrations pluggable and optional.
 - Document internal-only pieces so they can be removed or replaced.
+- Keep the active architectural standard in `components/docs/architecture-guidelines.md`.
 - Configuration inputs are documented in `docs/configuration.md` (UI branding, hostnames, admin email).
 
 ## Next Steps

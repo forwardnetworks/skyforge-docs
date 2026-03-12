@@ -7,7 +7,7 @@ Skyforge Server stores platform state in Postgres (`db`) for durability and easi
 - user scopes (per username) and membership mappings
 - AWS SSO token records
 - audit log
-- governance/resource inventory
+- policy/resource inventory
 
 ## Target database
 - database: `skyforge_server`

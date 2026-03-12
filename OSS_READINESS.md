@@ -20,7 +20,7 @@ Status keys:
 - Pick a default: `kind`/`k3d` (local), or “any Kubernetes 1.x”.
 - Decide whether to ship Helm as the primary path, or Helm + plain manifests.
 
-⬜ **Licensing + governance**
+⬜ **Licensing + policy**
 - Choose license (Apache-2.0/MIT/etc) and add contributor guidelines (CLA or DCO).
 - Define a public issue triage / security vulnerability process (private disclosure email).
 

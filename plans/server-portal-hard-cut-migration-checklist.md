@@ -1,6 +1,6 @@
 # Skyforge Server + Portal Hard-Cut Migration Checklist
 
-Last updated: 2026-03-10
+Last updated: 2026-03-11
 
 ## Goal
 
@@ -61,17 +61,27 @@ Success gate:
   - `user_scope_deployment_delete_cleanup_*`
 - [x] Stage and normalize run-family split
   - containerlab/netlab/terraform run files
-- [x] Stage and normalize policy reports/governance move
-  - keep only policy-reports governance API/store surface intended for current UI
+- [x] Stage and normalize Forward Analytics hard cut
+  - keep only the Forward Analytics API/store surface intended for the current UI
 - [x] Split `cloudcredentials` private API by provider family
   - shared request/response types and crypto helpers in `components/server/cloudcredentials/private_types.go`
   - provider families in `private_aws_static_api.go`, `private_aws_sso_api.go`, `private_azure_api.go`, `private_gcp_api.go`, `private_ibm_api.go`
+- [x] Split `cloudcredentials` public validation API by provider family
+  - `components/server/cloudcredentials/public_validation_types.go` now owns shared validation request/response types
+  - `components/server/cloudcredentials/public_validation_aws_api.go` now owns AWS SSO validation at `76` lines
+  - `components/server/cloudcredentials/public_validation_azure_api.go` now owns Azure validation and subscription discovery at `138` lines
+  - `components/server/cloudcredentials/public_validation_gcp_api.go` now owns GCP service-account validation at `140` lines
 - [x] Split `deploymentruntime` private API by domain
   - shared request/response types in `components/server/deploymentruntime/api_types.go`
   - shared JSON/time helpers in `components/server/deploymentruntime/helpers.go`
   - runtime topology/forward state in `private_topology_forward_api.go`
   - lease state in `private_lease_api.go`
   - deployment lookup/status in `private_deployments_api.go`
+- [x] Split `gitcredentials` private API by concern
+  - request/response types and shared models in `components/server/gitcredentials/api_types.go`
+  - SQL-access and deploy-key ensure helpers in `components/server/gitcredentials/api_store.go`
+  - crypto helpers and keypair generation in `components/server/gitcredentials/api_helpers.go`
+  - private API surface methods in `components/server/gitcredentials/api_private_api.go`
 - [x] Split `apitokens` private API by responsibility
   - shared request/response types in `components/server/apitokens/api_types.go`
   - token parsing/hash/header helpers in `components/server/apitokens/helpers.go`
@@ -90,10 +100,19 @@ Success gate:
   - transport/client core in `components/server/internal/forwardapi/client.go`
   - org and admin-user APIs in `components/server/internal/forwardapi/admin_org_user.go`
   - current-user password/token APIs in `components/server/internal/forwardapi/current_user_tokens.go`
-  - network, collector, endpoint, and credential APIs in `components/server/internal/forwardapi/network_collectors.go`
+  - network, collector, endpoint, and credential APIs in:
+    - `components/server/internal/forwardapi/network_apis.go`
+    - `components/server/internal/forwardapi/network_collectors.go`
+    - `components/server/internal/forwardapi/network_endpoints.go`
+    - `components/server/internal/forwardapi/network_credentials.go`
+    - `components/server/internal/forwardapi/network_devices.go`
 - [x] Split `internal/maintenancejobs` by job concern
   - `components/server/internal/maintenancejobs/run.go` now owns dispatch, advisory locking, and job constants at `59` lines
-  - `components/server/internal/maintenancejobs/user_sync.go` now owns user-scope/Gitea sync, audit, and notification helpers at `353` lines
+  - `components/server/internal/maintenancejobs/user_sync.go` now owns coordinator split marker comments for user-scope maintenance helpers
+  - `components/server/internal/maintenancejobs/user_sync_model.go` now owns user-scope persistence model slices and metadata at `20` lines
+  - `components/server/internal/maintenancejobs/user_sync_job.go` now owns the maintenance coordinator and maintenance field writes at `93` lines
+  - `components/server/internal/maintenancejobs/user_sync_gitea.go` now owns Gitea owner/collaborator synchronization logic at `125` lines
+  - `components/server/internal/maintenancejobs/user_sync_notifications.go` now owns collaborator notification/audit helper routines at `133` lines
   - `components/server/internal/maintenancejobs/cloud_checks.go` now owns cloud credential maintenance checks at `190` lines
   - `components/server/internal/maintenancejobs/loaders.go` now owns shared DB loaders and encrypted credential fetches at `212` lines
   - `components/server/internal/maintenancejobs/cloud_validation.go` now owns AWS/Azure/GCP validation and token helpers at `212` lines
@@ -102,19 +121,43 @@ Success gate:
   - `components/server/internal/taskengine/forward_client_collectors.go` now owns network and collector lifecycle helpers at `227` lines
   - `components/server/internal/taskengine/forward_client_devices.go` now owns credential, jump-server, classic-device, and collection helpers at `247` lines
   - `components/server/internal/taskengine/forward_client_endpoints.go` now owns endpoint and endpoint-profile helpers at `138` lines
+- [x] Split `internal/taskexec/queued_task.go` by concern
+  - `components/server/internal/taskexec/queued_task.go` remains the coordinator for task execution flow
+  - `components/server/internal/taskexec/queued_task_types.go` now owns taskexec interfaces and dependency structs
+  - `components/server/internal/taskexec/queued_task_retry.go` now owns retry/backoff helpers
+  - `components/server/internal/taskexec/queued_task_timing.go` now owns TTL and queue timing helpers
+  - `components/server/internal/taskexec/queued_task_fairness.go` now owns fairness-gate helpers
+- [x] Split `internal/awssso/runtime.go` by concern
+  - `components/server/internal/awssso/types.go` now owns config, token, device-auth, account, and role contracts
+  - `components/server/internal/awssso/runtime.go` reduced to the runtime entry surface
+  - `components/server/internal/awssso/client_ops.go` now owns anonymous config and OIDC client registration helpers
+  - `components/server/internal/awssso/device_auth.go` now owns device-authorization start/poll/logout flows
+  - `components/server/internal/awssso/token_ops.go` now owns access-token refresh and account/role credential operations
 - [x] Split `internal/taskengine/forward_netlab_sync` by concern
   - `components/server/internal/taskengine/forward_sync_consts.go` now owns Forward sync keys, defaults, and option structs at `43` lines
   - `components/server/internal/taskengine/forward_netlab_catalog.go` now owns embedded netlab catalog/default helpers and Forward catalog mapping at `212` lines
   - `components/server/internal/taskengine/forward_netlab_credentials.go` now owns user Forward credential loading and credential-name sanitization at `151` lines
-  - `components/server/internal/taskengine/forward_netlab_deployment_sync.go` now owns deployment network setup, collection start, and topology upload orchestration at `466` lines
+  - `components/server/internal/taskengine/forward_netlab_deployment_network.go` now owns deployment network/collector/jump setup at `157` lines
+  - `components/server/internal/taskengine/forward_netlab_deployment_collection.go` now owns collection-start orchestration at `55` lines
+  - `components/server/internal/taskengine/forward_netlab_deployment_devices.go` now owns orchestration for node sync and completion
+  - `components/server/internal/taskengine/forward_netlab_deployment_devices_state.go` now owns sync state + upload execution
+  - `components/server/internal/taskengine/forward_netlab_deployment_devices_node.go` now owns per-node classification/mapping and credential/device construction
 - [x] Split `internal/taskengine/clabernetes_task` by concern
   - `components/server/internal/taskengine/clabernetes_task_types.go` now owns clabernetes task spec/run types and policy metadata helpers at `71` lines
   - `components/server/internal/taskengine/clabernetes_task_dispatch.go` now owns task decode and dispatch wiring at `48` lines
-  - `components/server/internal/taskengine/clabernetes_task_run.go` now owns deploy/destroy execution flow at `463` lines
+  - `components/server/internal/taskengine/clabernetes_task_run.go` now owns the coordinator action switch at `33` lines
+  - `components/server/internal/taskengine/clabernetes_task_run_deploy.go` now owns deploy orchestration and event sequencing at `73` lines
+  - `components/server/internal/taskengine/clabernetes_task_run_deploy_policy.go` now owns deploy policy normalization, preflight execution, and event helpers at `109` lines
+  - `components/server/internal/taskengine/clabernetes_task_run_deploy_payload.go` now owns deploy CR payload construction and file/resource aggregation at `167` lines
+  - `components/server/internal/taskengine/clabernetes_task_run_deploy_execute.go` now owns topology creation, readiness polling, native-mode verification, and summary/artifact recording at `145` lines
+  - `components/server/internal/taskengine/clabernetes_task_run_destroy.go` now owns destroy execution flow at `53` lines
   - `components/server/internal/taskengine/clabernetes_topology_artifacts.go` now owns topology graph resolution, resource derivation, and artifact persistence at `138` lines
 - [x] Split `internal/taskengine/clabernetes_preflight` by concern
   - `components/server/internal/taskengine/clabernetes_preflight_api.go` now owns the public preflight request/result API and deploy-fragment builder at `67` lines
-  - `components/server/internal/taskengine/clabernetes_preflight_quantities.go` now owns quantity parsing, deployment request aggregation, and placement helpers at `313` lines
+  - `components/server/internal/taskengine/clabernetes_preflight_quantities_types.go` now owns preflight request/capacity aggregate types
+  - `components/server/internal/taskengine/clabernetes_preflight_quantities_parse.go` now owns quantity parsing (`cpu`, `memory`, `split`, `number` helpers)
+  - `components/server/internal/taskengine/clabernetes_preflight_quantities_requests.go` now owns deployment request extraction and request/aggregate rollup helpers
+  - `components/server/internal/taskengine/clabernetes_preflight_quantities_math.go` now owns capacity reservation math, placement checks, and hostname filtering helpers
   - `components/server/internal/taskengine/clabernetes_preflight_compatibility.go` now owns CRD/API compatibility checks at `137` lines
   - `components/server/internal/taskengine/clabernetes_preflight_capacity.go` now owns cluster capacity checks and Kubernetes node/pod accounting at `283` lines
 - [x] Split `internal/taskengine/capacity_rollup_task` by concern
@@ -124,20 +167,97 @@ Success gate:
   - `components/server/internal/taskengine/capacity_rollup_device.go` now owns device rollup fetch, enrichment, and history-stat application at `213` lines
   - `components/server/internal/taskengine/capacity_rollup_store.go` now owns upsert persistence and SQL null helpers at `91` lines
   - `components/server/internal/taskengine/capacity_rollup_stats.go` now owns the shared mean/quantile/max/slope helpers at `71` lines
+- [x] Split `internal/taskengine/deployment_runtime_state.go` by concern
+  - `components/server/internal/taskengine/deployment_forward_state.go` now owns deployment-forward state loading/upsert and Forward-state config overlay helpers at `279` lines
+  - `components/server/internal/taskengine/deployment_topology_state.go` now owns topology artifact-key persistence and cleanup paths at `96` lines
 - [x] Compile-confirm existing `servicenow` split and fix fallout
   - confirm `components/server/servicenow/api.go` replacement files build cleanly
 - [x] Split `internal/taskengine/netlab_c9s_task` by concern
   - `components/server/internal/taskengine/netlab_c9s_types.go` now owns the task payload/request models at `75` lines
   - `components/server/internal/taskengine/netlab_c9s_dispatch.go` now owns task decode/dispatch at `69` lines
-  - `components/server/internal/taskengine/netlab_c9s_run.go` now owns the primary task orchestration at `388` lines
+  - `components/server/internal/taskengine/netlab_c9s_run.go` now owns the primary task orchestration at `207` lines
+  - `components/server/internal/taskengine/netlab_c9s_run_policy.go` now owns deploy policy resolution and metadata persistence at `37` lines
+  - `components/server/internal/taskengine/netlab_c9s_destroy.go` now owns destroy orchestration at `30` lines
+  - `components/server/internal/taskengine/netlab_c9s_runtime_manifest.go` now owns runtime manifest loading and summary extraction at `80` lines
+  - `components/server/internal/taskengine/netlab_c9s_task_artifacts.go` now owns runtime artifact persistence flow at `66` lines
   - `components/server/internal/taskengine/netlab_c9s_manifest_resolution.go` now owns manifest resolution and runtime mapping at `132` lines
   - `components/server/internal/taskengine/netlab_c9s_topology_capture.go` now owns topology artifact capture helpers at `103` lines
+  - `components/server/internal/taskengine/netlab_c9s_apply_deploy.go` now owns deploy-job construction/execution at `211` lines
+  - `components/server/internal/taskengine/netlab_c9s_apply_destroy.go` now owns destroy-job construction/execution at `149` lines
+  - `components/server/internal/taskengine/netlab_c9s_apply_env.go` now owns runtime env filter/merge helpers at `20` lines
+- [x] Split `internal/taskengine/netlab_task.go` by concern
+  - `components/server/internal/taskengine/netlab_task_types.go` now owns netlab task payload/run contract types
+  - `components/server/internal/taskengine/netlab_task_dispatch.go` now owns task decode and dispatch wiring
+  - `components/server/internal/taskengine/netlab_task_run.go` now owns the netlab API run loop and status/error handling
+  - `components/server/internal/taskengine/netlab_task_artifacts.go` now owns artifact capture orchestration
+  - `components/server/internal/taskengine/netlab_task_utils.go` now owns cancellation checks, cancel request helper, and benign-failure logic
 - [x] Normalize `servicenow` installer split into focused files
   - `components/server/servicenow/installer_core.go` now owns installer entrypoint flow at `133` lines
   - `components/server/servicenow/installer_schema.go` now owns schema/table declarations at `249` lines
   - `components/server/servicenow/installer_forward.go` now owns Forward-specific ServiceNow records at `201` lines
   - `components/server/servicenow/installer_portal.go` now owns portal widgets/pages/navigation setup at `293` lines
   - `components/server/servicenow/installer_table_api.go` now owns table upsert/query helpers at `244` lines
+- [x] Split `servicenow/config_store.go` by concern
+  - `components/server/servicenow/config_store_mapping.go` now owns config/API mapping helpers
+  - `components/server/servicenow/config_store_reader.go` now owns persisted config readers
+  - `components/server/servicenow/config_store_utils.go` now owns normalization and utility helpers
+  - `components/server/servicenow/config_store_writer.go` now owns persisted config writers
+- [x] Split `internal/rbacstore/store.go` by concern
+  - `components/server/internal/rbacstore/types.go` now owns RBAC role and API-permission contracts
+  - `components/server/internal/rbacstore/helpers.go` now owns username/role/decision normalization helpers
+  - `components/server/internal/rbacstore/roles.go` now owns direct-role queries and mutations
+  - `components/server/internal/rbacstore/api_permissions.go` now owns per-user API permission queries and mutations
+- [x] Split `platform/store.go` reservation path by concern
+  - `components/server/platform/store_reservation_queries.go` now owns reservation list/get/count helpers
+  - `components/server/platform/store_reservation_admission.go` now owns reservation priority normalization and admission/preflight helpers
+  - `components/server/platform/store.go` now stays focused on reservation mutation paths
+- [x] Split `platform/cluster_inventory.go` by concern
+  - `components/server/platform/cluster_inventory.go` reduced to `271` lines as the inventory coordinator
+  - `components/server/platform/cluster_inventory_node_classification.go` now owns node/pool/provider classification at `142` lines
+  - `components/server/platform/cluster_inventory_pool_rollup.go` now owns pool rollup builders at `50` lines
+  - `components/server/platform/cluster_inventory_costs.go` now owns cost-label extraction and monthly cost helpers at `171` lines
+- [x] Split `platform/contracts.go` by concern
+  - `components/server/platform/policy_contracts.go` now owns profiles, capabilities, operating modes, and quotas at `113` lines
+  - `components/server/platform/reservations.go` now owns reservation records, lifecycle, and preflight contracts at `139` lines
+  - `components/server/platform/capacity_hybrid.go` now owns capacity, demand, availability, and hybrid placement contracts at `155` lines
+  - `components/server/platform/reset_contracts.go` now owns Forward tenant reset contracts at `152` lines
+- [x] Split `platform/store_overview.go` by concern
+  - `components/server/platform/store_overview_types.go` now owns `PlatformOverview` contracts
+  - `components/server/platform/store_overview_admin.go` now owns admin aggregation orchestration in `buildPlatformOverview`
+  - `components/server/platform/store_overview_user.go` now owns user aggregation orchestration in `buildPlatformUserOverview`
+  - `components/server/platform/store_overview_usage.go` now owns `loadPlatformUserUsage`
+  - `components/server/platform/store_overview_helpers.go` now owns query helper support in `getReservedBlocksByClass`
+- [x] Split `platform/policy.go` by concern
+  - `components/server/platform/policy_capabilities.go` now owns capability defaults and capability resolution helpers at `80` lines
+  - `components/server/platform/policy_profiles.go` now owns profile defaults/normalization and profile-to-capability defaults at `76` lines
+  - `components/server/platform/policy_operating_modes.go` now owns operating-mode resolution and ordering helpers at `65` lines
+  - `components/server/platform/policy_quota.go` now owns quota merging/override logic at `47` lines
+  - `components/server/platform/policy_resource_class.go` now owns resource class comparison and inference logic at `50` lines
+  - `components/server/platform/policy_utils.go` now owns shared policy test/helper utilities at `10` lines
+- [x] Split `platform/demand_reporting.go` by concern
+  - `components/server/platform/demand_aggregation.go` now owns demand-by-class aggregation at `134` lines
+  - `components/server/platform/availability_guidance_cost.go` now owns availability, guidance, and marginal-cost reporting at `130` lines
+  - `components/server/platform/estimate_actual_usage.go` now owns estimate-vs-actual usage rollups at `125` lines
+- [x] Split `platform/hybrid_placement.go` by concern
+  - `components/server/platform/hybrid_placement_warnings.go` now owns hybrid/degraded warning generation at `87` lines
+  - `components/server/platform/hybrid_deployment_summary.go` now owns deployment placement summaries at `168` lines
+  - `components/server/platform/hybrid_runtime_placement.go` now owns runtime task placement lookups at `56` lines
+  - `components/server/platform/hybrid_placement_helpers.go` now owns shared placement normalization/helpers at `157` lines
+- [x] Split `skyforge/forward_tenant_reset_workflow.go` by concern
+  - `components/server/skyforge/forward_tenant_reset_workflow.go` reduced to `111` lines as the reset coordinator
+  - `components/server/skyforge/forward_tenant_reset_cleanup.go` now owns local-state cleanup and managed collector teardown at `211` lines
+  - `components/server/skyforge/forward_tenant_reset_reprovision.go` now owns reprovision, baseline restore, and sync enqueue helpers at `123` lines
+  - `components/server/skyforge/forward_tenant_reset_helpers.go` now owns metadata aggregation and validation helpers at `168` lines
+- [x] Split `skyforge/cron_jobs.go` by concern
+  - `components/server/skyforge/cron_shared.go` now owns cron lock/scheduler helpers at `29` lines
+  - `components/server/skyforge/cron_task_metrics.go` now owns task-metric cron wiring at `35` lines
+  - `components/server/skyforge/cron_forward_collector_idle.go` now owns Forward collector idle reconciliation at `48` lines
+  - `components/server/skyforge/cron_capacity.go` now owns capacity rollup enqueue and maintenance scheduling at `92` lines
+  - `components/server/skyforge/cron_capacity_rollups_enqueue_helpers.go` now owns capacity-rollup enqueue helpers at `57` lines
+  - `components/server/skyforge/cron_capacity_rollups_query_helpers.go` now owns capacity-rollup query helpers at `81` lines
+  - `components/server/skyforge/cron_observability.go` now owns observability maintenance jobs at `58` lines
+  - `components/server/skyforge/cron_servicenow.go` now owns ServiceNow keepalive wiring at `97` lines
+  - `components/server/skyforge/cron_deployment_leases.go` now owns deployment lease sweep scheduling at `38` lines
 - [x] Remove any stale deleted originals only after replacements are staged and compile-confirmed
 
 Success gates:
@@ -187,7 +307,7 @@ Success gates:
     - `components/portal/src/hooks/use-user-settings-multi-cloud-credentials.ts` at `189` lines
   - `components/portal/src/hooks/use-user-settings-byol-servers.ts` now owns BYOL server queries/state/mutations at `216` lines
 - [x] Continue hard-cutting admin settings orchestration into focused hooks
-  - `components/portal/src/hooks/use-admin-settings-page.tsx` reduced from `961` lines to `520` lines, and now to `178`
+  - `components/portal/src/hooks/use-admin-settings-page.tsx` reduced from `961` lines to `520` lines, then `178`, and now to `120` as a thin coordinator
   - `components/portal/src/hooks/use-admin-settings-auth.tsx` now owns auth mode, OIDC settings, effective config, and quick-deploy catalog orchestration at `337` lines
   - `components/portal/src/hooks/use-admin-settings-operations.tsx` now owns impersonation, task reconciliation, and workspace cleanup flows at `155` lines
   - `components/portal/src/hooks/use-admin-settings-users-access.tsx` is now a coordinator at `84` lines
@@ -196,22 +316,106 @@ Success gates:
   - `components/portal/src/hooks/use-admin-settings-user-api-permissions.ts` now owns API catalog, per-user permission draft state, and save mutation logic at `169` lines
   - `components/portal/src/hooks/use-admin-settings-users-purge.ts` now owns user purge query/filter/mutation logic at `55` lines
   - `components/portal/src/hooks/admin-settings-users-access-shared.ts` now owns the shared hook arg type at `68` lines
+  - `components/portal/src/hooks/use-admin-settings-audit.tsx` now owns audit-log query/filter orchestration at `62` lines
+  - `components/portal/src/hooks/use-admin-settings-platform-policy-selection.ts` now owns platform-policy user targeting and search selection at `30` lines
+  - `components/portal/src/hooks/use-admin-settings-platform-policy-drafts.ts` now owns per-user policy draft/query/mutation state at `121` lines
+- [x] Reduce admin settings route to a real shell
+  - `components/portal/src/routes/admin/settings.tsx` now acts as a thin route shell over the admin tabs
+  - `components/portal/src/routes/admin/-admin-settings-tab-props.ts` now owns Overview/Audit/Tasks/Users tab prop assembly
 - [x] Hard-cut root app shell into route shell plus focused layout helpers
   - `components/portal/src/routes/__root.tsx` reduced to `26` lines
   - `components/portal/src/hooks/use-root-layout.tsx` now owns session, UI config, auth/login/logout, command-menu, notifications, and breadcrumb orchestration at `278` lines
   - `components/portal/src/components/root-layout-shell.tsx` now owns the authenticated layout shell, nav chrome, footer, and login-gate integration at `271` lines
   - `components/portal/src/components/root-error-content.tsx` now owns the route-level error surface at `57` lines
   - `components/portal/src/components/root-not-found.tsx` now owns the route-level not-found surface at `32` lines
-- [x] Hard-cut design system route into shell plus focused page component
+- [x] Hard-cut design system route into shell plus focused page component and section presenters
   - `components/portal/src/routes/design.tsx` reduced to `6` lines
-  - `components/portal/src/components/design-system-page.tsx` now owns the design-system showcase surface at `335` lines
+  - `components/portal/src/components/design-system-page.tsx` now owns coordinator behavior
+  - `components/portal/src/components/design-system-page-header.tsx`
+  - `components/portal/src/components/design-system-page-button-section.tsx`
+  - `components/portal/src/components/design-system-page-badge-card-section.tsx`
+  - `components/portal/src/components/design-system-page-bento-section.tsx`
+  - `components/portal/src/components/design-system-page-form-tabs-section.tsx`
+  - `components/portal/src/components/design-system-page-feedback-toast-section.tsx`
+  - `components/portal/src/components/design-system-page-breadcrumb-section.tsx`
 - [x] Finalize sidebar IA hard-cut for integrations/platform/admin boundaries
   - `components/portal/src/components/side-nav.tsx`
   - keep only intended items; avoid duplicate launch points
 - [x] Ensure embedded tool routing behavior is consistent
   - integrations should open in-frame through `tools.$tool` where intended
+- [x] Split platform capacity page into focused presentational components
+  - `components/portal/src/components/platform-capacity-page-content.tsx` now acts as a thin coordinator
+  - `components/portal/src/components/platform-capacity-summary-cards.tsx` now owns KPI cards
+  - `components/portal/src/components/platform-capacity-infra-comparison-card.tsx` now owns blended infra rendering
+  - `components/portal/src/components/platform-capacity-tables.tsx` now owns detailed tables and reservation controls
+  - `components/portal/src/components/platform-capacity-formatting.ts` now owns shared display helpers
+- [x] Split platform capacity page hook into coordinator plus focused helpers
+  - `components/portal/src/hooks/use-platform-capacity-page.tsx` reduced to `16` lines as the coordinator
+  - `components/portal/src/hooks/use-platform-capacity-overview.tsx` now owns overview queries and normalized derived state at `118` lines
+  - `components/portal/src/hooks/use-platform-capacity-reservation-actions.tsx` now owns admin reservation mutations and reserved-block form state at `92` lines
+  - `components/portal/src/hooks/platform-capacity-page-normalize.ts` reduced to `17` lines as a re-export surface
+  - `components/portal/src/hooks/platform-capacity-page-shared.ts` now owns shared overview normalization helpers at `147` lines
+  - `components/portal/src/hooks/platform-capacity-page-pools.ts` now owns pool, availability, and blended-infra normalization at `104` lines
+  - `components/portal/src/hooks/platform-capacity-page-costs.ts` now owns estimate-vs-actual and cost rollup normalization at `137` lines
+- [x] Split portal admin API client by domain
+  - `components/portal/src/lib/api-client-admin.ts` reduced to a thin re-export surface
+  - `components/portal/src/lib/api-client-admin-auth.ts` now owns auth/admin config APIs
+  - `components/portal/src/lib/api-client-admin-integrations.ts` now owns integration admin APIs
+  - `components/portal/src/lib/api-client-admin-audit.ts` now owns audit APIs
+  - `components/portal/src/lib/api-client-admin-rbac.ts` now owns RBAC/admin-permission APIs
+  - `components/portal/src/lib/api-client-admin-tasks.ts` now owns task and ops admin APIs
+  - `components/portal/src/lib/api-client-admin-users.ts` now owns admin user-management APIs
+  - `components/portal/src/lib/api-client-admin-quick-deploy.ts` now owns quick-deploy admin APIs
+  - `components/portal/src/lib/api-client-admin-platform.ts` now owns platform policy and reservation admin APIs
+  - `components/portal/src/lib/api-client-admin-deployments.ts` now owns deployment admin APIs
+  - `components/portal/src/lib/api-client-admin-groups.ts` now owns group/admin membership APIs
+- [x] Split portal user-scope API client by domain
+  - `components/portal/src/lib/api-client-user-user-scope.ts` reduced to a thin re-export surface
+  - `components/portal/src/lib/api-client-user-shared.ts` now owns shared user-scope types
+  - `components/portal/src/lib/api-client-user-dashboard.ts` now owns dashboard and user-scope fetch APIs
+  - `components/portal/src/lib/api-client-user-notifications.ts` now owns notification APIs
+  - `components/portal/src/lib/api-client-user-byos.ts` now owns BYOS/EVE/containerlab server APIs
+  - `components/portal/src/lib/api-client-user-integrations.ts` now owns user integration APIs for Forward, ServiceNow, Teams, and Infoblox
+  - `components/portal/src/lib/api-client-user-settings.ts` now owns git/settings/AWS SSO/cloud credential APIs
+- [x] Split portal Forward client by domain
+  - `components/portal/src/lib/api-client-forward.ts` reduced to a thin re-export surface
+  - `components/portal/src/lib/api-client-forward-collectors.ts` now owns Forward collector and tenant-credential APIs
+  - `components/portal/src/lib/api-client-forward-scope.ts` now owns user-scope Forward/artifact/storage APIs
+  - `components/portal/src/lib/api-client-forward-events.ts` now owns webhook/syslog/SNMP and notification-setting APIs
+  - `components/portal/src/lib/api-client-forward-observability.ts` now owns admin and user observability APIs
+- [x] Split portal deployment-capacity client by domain
+  - `components/portal/src/lib/api-client-deployments-capacity.ts` reduced to a thin re-export surface
+  - `components/portal/src/lib/api-client-deployments-capacity-shared.ts` now owns shared capacity response/types
+  - `components/portal/src/lib/api-client-deployments-capacity-summary.ts` now owns summary APIs
+  - `components/portal/src/lib/api-client-deployments-capacity-inventory.ts` now owns inventory APIs
+  - `components/portal/src/lib/api-client-deployments-capacity-growth.ts` now owns growth/history APIs
+  - `components/portal/src/lib/api-client-deployments-capacity-perf.ts` now owns performance API access
+  - `components/portal/src/lib/api-client-deployments-capacity-path.ts` now owns path-specific capacity helpers
+- [x] Split portal deployment-actions client by domain
+  - `components/portal/src/lib/api-client-deployments-actions.ts` reduced to a thin re-export surface
+  - `components/portal/src/lib/api-client-deployments-actions-runtime.ts` now owns deployment Forward runtime and topology action APIs
+  - `components/portal/src/lib/api-client-deployments-actions-estimates.ts` now owns resource-estimate and template-validate APIs
+  - `components/portal/src/lib/api-client-deployments-actions-designer.ts` now owns designer YAML/template deployment APIs
+  - `components/portal/src/lib/api-client-deployments-actions-scope.ts` now owns user-scope deployment and membership mutation APIs
+- [x] Split platform reservations page by UI concern
+  - `components/portal/src/components/platform-reservations-page-content.tsx` reduced to `46` lines as the coordinator
+  - `components/portal/src/components/platform-reservations-guidance-card.tsx` now owns reservation guidance and user quota summary at `127` lines
+  - `components/portal/src/components/platform-reservations-request-card.tsx` now owns the reservation form and submit action at `147` lines
+  - `components/portal/src/components/platform-reservations-preflight-card.tsx` now owns preflight result rendering at `118` lines
+  - `components/portal/src/components/platform-reservations-lifecycle-card.tsx` now owns lifecycle detail rendering at `103` lines
+  - `components/portal/src/components/platform-reservations-table.tsx` now owns the reservation table and actions at `109` lines
+  - `components/portal/src/components/platform-reservations-shared.ts` now owns shared reservation page formatting helpers
+- [x] Split platform capacity tables by UI concern
+  - `components/portal/src/components/platform-capacity-tables.tsx` reduced to `50` lines as the coordinator
+  - `components/portal/src/components/platform-capacity-pools-table.tsx` now owns capacity-pool rendering at `46` lines
+  - `components/portal/src/components/platform-capacity-demand-table.tsx` now owns demand rendering at `48` lines
+  - `components/portal/src/components/platform-capacity-availability-table.tsx` now owns availability rendering at `46` lines
+  - `components/portal/src/components/platform-capacity-cost-estimate-cards.tsx` now owns estimate/actual and pool-cost cards at `173` lines
+  - `components/portal/src/components/platform-capacity-reservation-metrics.tsx` now owns reservation metric cards at `81` lines
+  - `components/portal/src/components/platform-capacity-reservation-admin.tsx` now owns reserved-block and reservation-admin controls at `206` lines
+  - `components/portal/src/components/platform-capacity-render-unavailable.tsx` now owns the unavailable placeholder helper
 - [x] Remove obsolete routes and leftovers
-  - confirm removed governance route is not referenced from nav or links
+  - confirm removed legacy policy route is not referenced from nav or links
 - [x] Start breaking up deployment capacity route
   - move shared capacity row types to `components/portal/src/components/capacity/deployment-capacity-types.ts`
   - move shared formatting/math/export helpers to `components/portal/src/components/capacity/deployment-capacity-utils.ts`
@@ -322,6 +526,27 @@ Success gates:
   - `components/portal/src/hooks/use-lab-designer-topology-actions.tsx` now owns quickstart, layout, rename, and delete/menu flows at `266` lines
   - `components/portal/src/hooks/use-lab-designer-persistence-actions.tsx` now owns draft, import-sync, export, and map launch flows at `199` lines
   - `components/portal/src/hooks/use-lab-designer-dnd-actions.tsx` now owns drag/drop palette insertion and image-tag resolution at `81` lines
+- [x] Split labs designer orchestration hook by coordinator/state/model responsibilities
+  - `components/portal/src/hooks/use-lab-designer-page.tsx` reduced from `362` lines to `145` lines as a thin coordinator
+  - `components/portal/src/hooks/use-lab-designer-page-state.ts` now owns state, node/edge state mutators, warnings handlers, and component node type memoization at `189` lines
+  - `components/portal/src/hooks/use-lab-designer-page-model.ts` now owns normalized design/yaml/template helper calculations at `83` lines
+- [x] Split labs designer page by focused render/editor surfaces
+  - `components/portal/src/components/lab-designer-page.tsx` reduced from `272` lines to `167` lines as a coordinator
+  - `components/portal/src/components/lab-designer-command-bar.tsx` now owns the top command bar at `126` lines
+  - `components/portal/src/components/lab-designer-inspector-tabs.tsx` now owns the right-rail tab shell at `31` lines
+  - `components/portal/src/components/lab-designer-inspector-lab-tab.tsx` now owns the lab tab body at `194` lines
+  - `components/portal/src/components/lab-designer-inspector-lab-tab-panel.tsx` now owns the lab tab panel wrapper at `11` lines
+  - `components/portal/src/components/lab-designer-inspector-link-tab.tsx` now owns the link tab panel at `28` lines
+  - `components/portal/src/components/lab-designer-inspector-node-tab.tsx` now owns the node tab panel at `11` lines
+  - `components/portal/src/components/lab-designer-inspector-yaml-tab.tsx` now owns warnings/mode controls and YAML editor at `133` lines
+  - `components/portal/src/components/lab-designer-inspector-tab-types.ts` now owns shared tab props at `15` lines
+  - `components/portal/src/components/lab-designer-selection-editors.tsx` now owns a focused exported coordinator surface at `34` lines
+  - `components/portal/src/components/lab-designer-editor-utils.ts` now owns shared selection update/edit format helpers at `77` lines
+  - `components/portal/src/components/lab-designer-node-editor.tsx` now owns the node editor content fields at `182` lines
+  - `components/portal/src/components/lab-designer-link-editor.tsx` now owns the link editor content fields at `141` lines
+  - `components/portal/src/components/lab-designer-status-rail.tsx` now owns the bottom status rail at `66` lines
+  - `components/portal/src/components/lab-designer-inspector-tabs.tsx` split into focused tab panel subcomponents while preserving current props and route wiring
+  - `components/portal/src/components/lab-designer-selection-editors.tsx` split into focused node/link field groups while preserving exported editor contracts
 - [x] Continue hard-cutting deployment capacity route by moving shell-only surfaces out of the route
   - `components/portal/src/routes/dashboard/deployments/$deploymentId.capacity.tsx` reduced from `2117` lines to `1523` lines
   - `components/portal/src/components/capacity/deployment-capacity-header.tsx` now owns the page header and top-level filter/action controls at `149` lines
@@ -359,9 +584,12 @@ Success gates:
     - `components/portal/src/hooks/use-deployment-capacity-overview.tsx` at `19` lines
   - derived concerns now live under:
     - `components/portal/src/hooks/use-deployment-capacity-history.tsx`
-    - `components/portal/src/hooks/use-deployment-capacity-growth.tsx`
-    - `components/portal/src/hooks/use-deployment-capacity-routing.tsx`
-    - `components/portal/src/hooks/use-deployment-capacity-columns.tsx`
+  - `components/portal/src/hooks/use-deployment-capacity-growth.tsx`
+  - `components/portal/src/hooks/use-deployment-capacity-routing.tsx`
+  - `components/portal/src/hooks/use-deployment-capacity-columns.tsx`
+  - `components/portal/src/hooks/use-deployment-capacity-interface-columns.tsx` split interface rendering + per-metric branching
+  - `components/portal/src/hooks/use-deployment-capacity-device-columns.tsx` split device table column rendering
+  - `components/portal/src/hooks/use-deployment-capacity-column-helpers.tsx` extracted shared forecast/cell formatting helpers
 - [x] Convert create-deployment page hook into a real coordinator over focused helper hooks
   - `components/portal/src/hooks/use-create-deployment-page.tsx` reduced from `1111` lines to `211` lines
   - `components/portal/src/hooks/use-create-deployment-data.tsx` reduced from `680` lines to `81` lines
@@ -417,16 +645,24 @@ Success gates:
   - `components/portal/src/hooks/use-servicenow-page.tsx` now owns install/config/status orchestration at `229` lines
   - `components/portal/src/components/servicenow-page-content.tsx` now owns the ServiceNow setup/status render surface at `286` lines
 - [x] Hard-cut deployments list route into shell plus focused page hook/components
-  - `components/portal/src/routes/dashboard/deployments/index.tsx` reduced to `29` lines
-  - `components/portal/src/hooks/use-deployments-page.tsx` is now a coordinator at `83` lines
-  - `components/portal/src/hooks/use-deployments-page-data.tsx` now owns deployments list query/filter/scope/auth-mode orchestration at `203` lines
-  - `components/portal/src/hooks/use-deployments-page-actions.tsx` now owns start/stop/destroy/lifetime/login actions at `267` lines
-  - `components/portal/src/hooks/deployments-page-utils.ts` now owns deployment formatting/filtering/status helpers at `231` lines
-  - `components/portal/src/components/deployments/deployments-page-content.tsx` now owns the primary list render surface at `335` lines
-  - side surfaces moved to:
-    - `components/portal/src/components/deployments/deployments-activity-feed.tsx`
-    - `components/portal/src/components/deployments/deployments-lifetime-dialog.tsx`
-    - `components/portal/src/components/deployments/deployments-delete-dialog.tsx`
+	- `components/portal/src/routes/dashboard/deployments/index.tsx` reduced to `29` lines
+	- `components/portal/src/hooks/use-deployments-page.tsx` is now a coordinator at `83` lines
+	- `components/portal/src/hooks/use-deployments-page-data.tsx` now owns deployments list query/filter/scope/auth-mode orchestration at `203` lines
+	- `components/portal/src/hooks/use-deployments-page-actions.tsx` now owns start/stop/destroy/lifetime/login actions at `267` lines
+	- `components/portal/src/hooks/deployments-page-utils.ts` now owns deployment formatting/filtering/status helpers at `231` lines
+	- `components/portal/src/components/deployments/deployments-page-content.tsx` now owns the primary list coordinator surface
+- [x] `components/portal/src/components/forward-analytics-page-content.tsx` -> coordinator + header/add/saved/portfolio components
+	- list render is now split into focused surfaces:
+		- `components/portal/src/components/deployments/deployments-page-header.tsx`
+		- `components/portal/src/components/deployments/deployments-page-loading-state.tsx`
+		- `components/portal/src/components/deployments/deployments-page-toolbar.tsx`
+		- `components/portal/src/components/deployments/deployments-page-table.tsx`
+		- `components/portal/src/components/deployments/deployments-page-columns.tsx`
+		- `components/portal/src/components/deployments/deployments-page-actions-menu.tsx`
+	- side surfaces moved to:
+		- `components/portal/src/components/deployments/deployments-activity-feed.tsx`
+		- `components/portal/src/components/deployments/deployments-lifetime-dialog.tsx`
+		- `components/portal/src/components/deployments/deployments-delete-dialog.tsx`
   - shared status rendering now reuses `components/portal/src/components/deployments/deployment-status-badge.tsx` with `xs` support instead of a route-local badge helper
 - [x] Continue hard-cutting topology viewer by extracting reusable node/util/body surfaces
   - `components/portal/src/components/topology-viewer.tsx` remains a thin wrapper over `TopologyViewerSurface`
@@ -459,6 +695,13 @@ Success gates:
   - `components/portal/src/components/admin-users-rbac-card.tsx` now owns RBAC assignment and effective-role rendering at `177` lines
   - `components/portal/src/components/admin-users-api-permissions-card.tsx` now owns per-user API permission override rendering at `156` lines
   - `components/portal/src/components/admin-users-purge-card.tsx` now owns the dev-only purge surface at `70` lines
+- [x] Split admin users platform-policy card into focused components
+  - `components/portal/src/components/admin-users-platform-policy-card.tsx`
+  - `components/portal/src/components/admin-users-platform-policy-user-selector.tsx`
+  - `components/portal/src/components/admin-users-platform-policy-effective-policy.tsx`
+  - `components/portal/src/components/admin-users-platform-policy-profiles-card.tsx`
+  - `components/portal/src/components/admin-users-platform-policy-quota-card.tsx`
+  - `components/portal/src/components/admin-users-platform-policy-shared.tsx`
 - [x] Hard-cut root app shell into route shell plus focused layout components/hooks
   - `components/portal/src/routes/__root.tsx` reduced to `26` lines
   - `components/portal/src/hooks/use-root-layout.tsx` now owns auth/session/layout orchestration
@@ -485,12 +728,42 @@ Success gates:
     - `components/portal/src/components/admin-users-purge-card.tsx`
 - [x] Hard-cut quick deploy route into shell plus focused page hook/component
   - `components/portal/src/routes/dashboard/deployments/quick.tsx` reduced to `12` lines
-  - `components/portal/src/hooks/use-quick-deploy-page.tsx` now owns catalog, lease policy, preview, deploy, and Forward-sync orchestration at `265` lines
+  - `components/portal/src/hooks/use-quick-deploy-page.tsx` is now a thin coordinator
+  - focused helpers split out for:
+    - `components/portal/src/hooks/use-quick-deploy-page-queries.ts`
+    - `components/portal/src/hooks/use-quick-deploy-page-template-selection.ts`
+    - `components/portal/src/hooks/use-quick-deploy-page-mutations.ts`
+    - `components/portal/src/hooks/use-quick-deploy-page-forward-sync.ts`
+    - `components/portal/src/hooks/use-quick-deploy-page-estimate.ts`
+    - former responsibilities preserved at equivalent behavior (catalog, lease policy, preview, deploy, and Forward-sync orchestration)
   - `components/portal/src/components/quick-deploy-page-content.tsx` now owns the quick deploy lease/card/preview render surface at `166` lines
+- [x] Split quick deploy server API by concern
+  - `components/server/skyforge/quick_deploy_catalog.go` now owns the catalog response and `GetQuickDeployCatalog` surface
+  - `components/server/skyforge/quick_deploy_estimate.go` now owns template-estimate fanout helpers
+  - `components/server/skyforge/quick_deploy_run.go` now owns `RunQuickDeploy`
+  - `components/server/skyforge/quick_deploy_helpers.go` now owns normalization/filter helpers
+  - `components/server/skyforge/quick_deploy_api.go` removed after the split
+- [x] Split dashboard landing page by section
+  - `components/portal/src/components/dashboard-page-content.tsx` reduced to `85` lines as the coordinator
+  - `components/portal/src/components/dashboard-hero-card.tsx` now owns entry actions at `48` lines
+  - `components/portal/src/components/dashboard-guidance-card.tsx` now owns reservation guidance at `65` lines
+  - `components/portal/src/components/dashboard-availability-card.tsx` now owns availability-by-class rendering at `66` lines
+  - `components/portal/src/components/dashboard-policy-summary-card.tsx` now owns policy summary rendering at `94` lines
+  - `components/portal/src/components/dashboard-reservations-card.tsx` now owns reservation status rendering at `55` lines
+  - `components/portal/src/components/dashboard-admin-summary-card.tsx` now owns admin platform summary rendering at `79` lines
+  - `components/portal/src/components/dashboard-next-steps-card.tsx` now owns non-admin next steps at `25` lines
+  - `components/portal/src/components/dashboard-shared.tsx` now owns shared dashboard formatting and small card helpers at `68` lines
 - [x] Hard-cut Forward credentials route into shell plus focused page hook/component
-  - `components/portal/src/routes/dashboard/forward.credentials.tsx` reduced to `12` lines
-  - `components/portal/src/hooks/use-forward-credentials-page.tsx` now owns tenant credential, custom credential-set, and delete/reset orchestration at `146` lines
-  - `components/portal/src/components/forward-credentials-page-content.tsx` now owns the managed-credential, add-credential, and saved-credential render surface at `255` lines
+	  - `components/portal/src/routes/dashboard/forward.credentials.tsx` reduced to `12` lines
+	  - `components/portal/src/hooks/use-forward-credentials-page.tsx` now owns tenant credential, custom credential-set, and delete/reset orchestration at `146` lines
+	  - `components/portal/src/components/forward-credentials-page-content.tsx` now acts as a thin coordinator over focused card components
+	  - focused render components added:
+	    - `components/portal/src/components/forward-credentials-managed-tenant-card.tsx`
+	    - `components/portal/src/components/forward-tenant-rebuild-card.tsx`
+	    - `components/portal/src/components/forward-tenant-reset-run-row.tsx`
+	    - `components/portal/src/components/forward-credentials-add-card.tsx`
+	    - `components/portal/src/components/forward-credentials-saved-card.tsx`
+	    - `components/portal/src/components/forward-credentials-saved-credential-row.tsx`
 
 Success gates:
 - [x] `make lint-portal` passes
@@ -647,7 +920,9 @@ Success gates:
     - query/read models
   - result:
     - `components/server/internal/taskstore/taskstore.go` reduced to `69` lines
-    - `components/server/internal/taskstore/enqueue_dispatch_persistence.go` at `349` lines
+    - `components/server/internal/taskstore/enqueue_dispatch_create_persistence.go` at `163` lines
+    - `components/server/internal/taskstore/enqueue_dispatch_counts_persistence.go` at `83` lines
+    - `components/server/internal/taskstore/enqueue_dispatch_state_persistence.go` at `119` lines
     - `components/server/internal/taskstore/run_history_persistence.go` at `62` lines
     - `components/server/internal/taskstore/queries.go` at `645` lines
 - [x] Split worker runtime service by concern
@@ -727,6 +1002,16 @@ Success gates:
   - result:
     - `components/server/internal/kubeutil/clabernetes_topology_resource_data_helpers.go` added
     - `components/server/internal/kubeutil/clabernetes_topology_resource_transform_helpers.go` added
+- [x] Split clabernetes topology transform helpers by concern
+  - source: `components/server/internal/kubeutil/clabernetes_topology_resource_transform_helpers.go`
+  - target split:
+    - namespace bootstrap helpers
+    - secret helpers
+    - service-account image-pull-secret helpers
+  - result:
+    - `components/server/internal/kubeutil/clabernetes_namespace_helpers.go` at `147` lines
+    - `components/server/internal/kubeutil/clabernetes_secret_helpers.go` at `76` lines
+    - `components/server/internal/kubeutil/clabernetes_serviceaccount_helpers.go` at `143` lines
 - [x] Split Gitea integration client by auth/repo/content concerns
   - source: `components/server/integrations/gitea/gitea.go`
   - result:
@@ -738,9 +1023,38 @@ Success gates:
 - [x] Split `load_config` primary path into explicit normalization and validation helpers
   - source: `components/server/internal/skyforgeconfig/load_config.go`
   - result:
-    - `components/server/internal/skyforgeconfig/load_config_normalize.go` added
+    - `components/server/internal/skyforgeconfig/load_config_normalize_types.go` now owns normalization-only helper structs
+    - `components/server/internal/skyforgeconfig/load_config_normalize_core.go` now owns core/admin/netlab/worker/notification normalization
+    - `components/server/internal/skyforgeconfig/load_config_normalize_integrations.go` now owns integration, UI, OIDC, DNS, and user-scope normalization
     - `components/server/internal/skyforgeconfig/load_config_validate.go` added
     - `components/server/internal/skyforgeconfig/load_config.go` reduced to orchestration path
+- [x] Split `internal/taskengine/netlab_node_status_current.go` by concern
+  - source: `components/server/internal/taskengine/netlab_node_status_current.go`
+  - target split:
+    - row/construction and row-shape validation
+    - persistence/load/delete adapters
+    - status graph/materialization conversion
+    - manifest-device/forward-type mapping helpers
+  - result:
+    - `components/server/internal/taskengine/netlab_node_status_current_types.go` added
+    - `components/server/internal/taskengine/netlab_node_status_current_row_builder.go` added
+    - `components/server/internal/taskengine/netlab_node_status_current_persistence.go` added
+    - `components/server/internal/taskengine/netlab_node_status_current_graph.go` added
+- [x] Split `containerlab-yaml.ts` into library-focused modules
+  - `components/portal/src/lib/containerlab-yaml.ts` now re-exports the library contract
+  - `components/portal/src/lib/containerlab-yaml-types.ts` now owns design/link/interface types
+  - `components/portal/src/lib/containerlab-yaml-helpers.ts` now owns name/interface parsing helpers
+  - `components/portal/src/lib/containerlab-yaml-serialize.ts` now owns design -> containerlab YAML conversion
+  - `components/portal/src/lib/containerlab-yaml-parse.ts` now owns containerlab YAML -> design conversion
+- [x] Split `internal/taskengine/gitea_provision.go` by concern
+  - source: `components/server/internal/taskengine/gitea_provision.go`
+  - result:
+    - `components/server/internal/taskengine/gitea_provision_client.go` added
+    - `components/server/internal/taskengine/gitea_provision_users.go` added
+    - `components/server/internal/taskengine/gitea_provision_collaborators.go` added
+    - `components/server/internal/taskengine/gitea_provision_blueprints.go` added
+    - `components/server/internal/taskengine/gitea_provision_identity.go` added
+    - `components/server/internal/taskengine/gitea_provision_sync.go` added
 
 Success gates:
 - [x] `cd components/server && go build ./...` passes

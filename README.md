@@ -2,7 +2,8 @@
 
 Product documentation and OSS readiness/policy documents for Skyforge.
 
-Key deployment runbooks:
+Key active docs:
+- `components/docs/architecture-guidelines.md`
 - `components/docs/k3d-local-dev.md`
 - `components/docs/prod-promotion-checklist.md`
 - `components/docs/hetzner-kube-hetzner.md`

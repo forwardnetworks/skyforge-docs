@@ -114,12 +114,13 @@ Current local parity target:
 - local deploy now skips rendering Forward DB credential secrets when operator-
   managed `postgres.fwd-pg-*.credentials` secrets already exist, preventing
   Helm upgrade conflicts during normal local upgrades
-- mutable recovery actions (Forward DB secret recreation, Forward DB-auth reconcile,
-  Rapid7 home reset) are no longer part of normal deploy flow; use
-  `scripts/deploy/local/integration-repair.sh` explicitly when needed
-- Forward observability UI routes (`/grafana`, `/prometheus`) are disabled in
-  local overlay by default because the current Forward local chart profile does
-  not render `fwd-grafana-service`/`fwd-prometheus` backends
+- local deploy now runs `scripts/deploy/local/integration-repair.sh` before and
+  after Helm apply so Forward Postgres leaders are reconciled to the desired
+  `postgres.fwd-pg-*.credentials` secrets on every deploy
+- Forward observability UI routes (`/grafana`, `/prometheus`) are enabled in
+  local overlay and currently route through `fwd-appserver`
+  (`/monitoring`, `/prometheus`) rather than dedicated Grafana/Prometheus
+  services
 - local parity validation should be done through the shared Envoy/Gateway routes
   (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/rapid7`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
@@ -189,7 +190,7 @@ Bootstrap and upgrade are now separated:
   - `./scripts/deploy/local/integration-repair.sh post-helm`
   - toggle specific actions with env flags:
     - `SKYFORGE_RECREATE_FORWARD_DB_SECRETS=true`
-    - `SKYFORGE_FORWARD_RECONCILE_DB_AUTH=true`
+    - `SKYFORGE_FORWARD_RECONCILE_DB_AUTH=true|false`
     - `SKYFORGE_RAPID7_AUTO_RESET_BROKEN_HOME=true`
 
 - Jira visibility in the side-nav can be enabled with
@@ -215,12 +216,11 @@ the shared Gateway path:
 The preferred local implementation is managed KubeVirt:
 - set `skyforge.infoblox.managed=true`
 - set `skyforge.infoblox.image` to a KubeVirt containerDisk image
-- use a single management NIC on pod network by default:
-  - `skyforge.infoblox.vm.podNetworkBinding=bridge` (or `masquerade`)
-  - keep `skyforge.infoblox.vm.multus.enabled=false`
-- only enable Multus NICs if you explicitly need LAN/HA/LAN2 attachment:
-  - `skyforge.infoblox.vm.multus.enabled=true`
-  - `skyforge.infoblox.vm.multus.createNADs=true`
+- local k3d uses a single management NIC:
+  - `skyforge.infoblox.vm.podNetworkBinding=masquerade`
+  - `skyforge.infoblox.vm.interfaceModel=e1000`
+  - `skyforge.infoblox.vm.multus.enabled=false`
+  - `skyforge.infoblox.vm.multus.createNADs=false`
 - enable VM lifecycle policy for resource savings and periodic reseed:
   - `skyforge.infoblox.lifecycle.enabled=true`
   - `skyforge.infoblox.lifecycle.autoStop.enabled=true`
@@ -231,6 +231,9 @@ The preferred local implementation is managed KubeVirt:
   - `skyforge.infoblox.lifecycle.license.enabled=true`
 - keep route target on `skyforge.infoblox.serviceName` (default `infoblox`) and
   `skyforge.infoblox.servicePort` (default `443`)
+- local k3d should route `/infoblox` directly to the managed KubeVirt Service;
+  the older LAN-side proxy path is only a temporary fallback and should remain
+  disabled in normal local values
 - build/push a containerDisk from a local qcow2 with:
   `scripts/build-kubevirt-containerdisk-from-qcow2.sh --src-qcow2 <path> --dst <ghcr-image> --push`
 
