@@ -110,3 +110,66 @@ Helm:
   allowing capacity bursts up to roughly 256 vCPU / 1 TiB when demanded.
 - Config currently sets `allow_scheduling_on_control_plane=true` so lightweight
   workloads can use control-plane headroom at baseline.
+
+## Recommended Hybrid Prod Layout
+
+The preferred production topology is a single Skyforge `k3s` cluster with:
+
+- Hetzner-hosted control-plane nodes
+- Hetzner-hosted lightweight app capacity for core platform workloads
+- on-prem worker-only nodes for heavy lab execution
+- optional Hetzner burst workers for overflow demand
+
+This is the recommended cost and operability model because it keeps the control
+plane and public ingress stable in Hetzner while pushing heavy lab compute onto
+reclaimed on-prem servers first.
+
+### Target Pool Model
+
+- `control`: Hetzner control-plane nodes
+- `app`: Hetzner nodes for Skyforge API, worker, Git, DB, Redis, observability
+- `onprem-lab`: on-prem worker nodes for clabernetes, NOS, and other heavy lab
+  workloads
+- `burst`: autoscaled Hetzner overflow worker nodes when on-prem lab capacity is
+  exhausted
+
+### Placement Guidance
+
+Keep the following cloud-side by default:
+
+- `skyforge-server`
+- `skyforge-server-worker`
+- DB/Redis/Gitea/object storage
+- observability stack
+- Gateway/API-facing workloads
+
+Prefer `onprem-lab` for:
+
+- clabernetes workloads
+- KubeVirt NOS workloads
+- heavy integration workloads that do not need to stay near the public edge
+
+Use `burst` only as overflow, not as the baseline heavy-lab pool.
+
+### Connectivity Model
+
+Use routed L3 connectivity, not stretched L2:
+
+- Hetzner private network for cloud nodes
+- site-to-site WireGuard or equivalent between Hetzner and the on-prem site
+- Cilium native routing
+- on-prem nodes join as worker-only `k3s` agents
+
+Do not place control-plane nodes on-prem in this model.
+
+### Operational Model
+
+- Baseline platform cost stays low in Hetzner.
+- Heavy workloads land on the two on-prem servers first.
+- When local heavy capacity is full or unavailable, Hetzner `burst` workers can
+  scale out.
+- If the on-prem workers disappear, Skyforge should degrade to cloud-only mode
+  and report the placement/capacity warning rather than failing silently.
+
+For the detailed worker onboarding and verification procedure, see
+`components/docs/hybrid-worker-onboarding.md`.
