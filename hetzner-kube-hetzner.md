@@ -29,6 +29,7 @@ Phase 2 (enabled/ready):
   - `deploy/hetzner/variables.tf`
 - Terraform baseline:
   - `deploy/hetzner/profiles/prod.tfvars`
+  - `deploy/hetzner/profiles/prod-hybrid-onprem.example.tfvars`
 - Helm overlay baseline:
   - `deploy/examples/values-hetzner-prod.yaml`
 - Scripts:
@@ -173,3 +174,8 @@ Do not place control-plane nodes on-prem in this model.
 
 For the detailed worker onboarding and verification procedure, see
 `components/docs/hybrid-worker-onboarding.md`.
+
+For the current planned hybrid control-plane-in-Hetzner plus WireGuard-connected
+on-prem worker model, see:
+
+- `components/docs/plans/hetzner-hybrid-wireguard-onprem.md`

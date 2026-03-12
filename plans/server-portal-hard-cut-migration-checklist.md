@@ -1,6 +1,6 @@
 # Skyforge Server + Portal Hard-Cut Migration Checklist
 
-Last updated: 2026-03-11
+Last updated: 2026-03-12
 
 ## Goal
 
@@ -27,8 +27,8 @@ Build/test snapshot (2026-03-10, local):
 - `components/server`: `go test ./internal/taskengine` still panics outside Encore runtime (`encore apps must be run using the encore command`)
 
 Progress snapshot:
-- Checklist items complete: `124`
-- Checklist items remaining: `13`
+- Checklist items complete: `212`
+- Checklist items remaining: `8`
 
 ## Hard-Cut Phases
 
@@ -249,6 +249,38 @@ Success gate:
   - `components/server/skyforge/forward_tenant_reset_reprovision.go` now owns reprovision, baseline restore, and sync enqueue helpers at `123` lines
   - `components/server/skyforge/forward_tenant_reset_helpers.go` now owns metadata aggregation and validation helpers at `168` lines
 - [x] Split `skyforge/cron_jobs.go` by concern
+- [x] Split `skyforge/config_changes` wrapper APIs by concern
+  - `components/server/skyforge/config_changes_api.go` reduced to the package stub
+  - `components/server/skyforge/config_changes_types.go` now owns request/response wrappers and access guard helpers at `59` lines
+  - `components/server/skyforge/config_changes_current_api.go` now owns current-user list/create/get/render/review/lifecycle routes at `155` lines
+  - `components/server/skyforge/config_changes_admin_helpers.go` now owns executable/rollback run loaders at `78` lines
+  - `components/server/skyforge/config_changes_admin_api.go` now owns admin list/get/review/lifecycle/approve/reject/execute/rollback routes at `248` lines
+- [x] Split `configchanges` service package by concern
+  - `components/server/configchanges/store.go` reduced to the package stub
+  - `components/server/configchanges/store_helpers.go` now owns normalization/json helpers at `102` lines
+  - `components/server/configchanges/store_runs.go` now owns change-run persistence and row scanning at `295` lines
+  - `components/server/configchanges/store_events.go` now owns lifecycle event persistence/load helpers at `55` lines
+  - `components/server/configchanges/store_execution.go` now owns render/queue/execution evidence writes at `31` lines
+  - `components/server/configchanges/private_api.go` reduced to the package stub
+  - `components/server/configchanges/private_types.go` now owns private request/response contracts at `55` lines
+  - `components/server/configchanges/private_runs_api.go` now owns run CRUD/status routes at `70` lines
+  - `components/server/configchanges/private_review_api.go` now owns render/review routes at `64` lines
+  - `components/server/configchanges/private_queue_api.go` now owns queue/execution guards at `55` lines
+  - `components/server/configchanges/review.go` reduced to core renderers at `204` lines
+  - `components/server/configchanges/review_types.go` now owns source-kind spec structs at `41` lines
+  - `components/server/configchanges/review_helpers.go` now owns canonicalization and patch-format helpers at `82` lines
+  - `components/server/configchanges/review_runtime_hooks.go` now owns ansible/shell runtime-hook review rendering at `75` lines
+- [x] Split `internal/taskengine/config_change_task` by concern
+  - `components/server/internal/taskengine/config_change_task_dispatch.go` now owns dispatch flow and action routing at `96` lines
+  - `components/server/internal/taskengine/config_change_task_state.go` now owns verification, deployment-config persistence, and status/update helpers at `155` lines
+  - `components/server/internal/taskengine/config_change_task_evidence.go` now owns rollback/execution evidence capture at `144` lines
+  - executable lanes remain isolated in focused files:
+    - `config_change_task_netlab.go`
+    - `config_change_task_snippet.go`
+    - `config_change_task_structured.go`
+    - `config_change_task_ansible.go`
+    - `config_change_task_shell.go`
+    - `config_change_task_rollback.go`
   - `components/server/skyforge/cron_shared.go` now owns cron lock/scheduler helpers at `29` lines
   - `components/server/skyforge/cron_task_metrics.go` now owns task-metric cron wiring at `35` lines
   - `components/server/skyforge/cron_forward_collector_idle.go` now owns Forward collector idle reconciliation at `48` lines
@@ -1097,14 +1129,18 @@ Success gates:
     - [x] removed `components/portal/src/lib/api-client-deployments.ts`
     - [x] migrated `components/portal/src/lib/api-client.ts` to leaf exports for user/deployment domains
     - [x] final decision: retain `components/portal/src/lib/api-client.ts` as the intentional stable umbrella API surface; compatibility-only barrels removed
-- [ ] Regression test additions for hard-cut seams
-  - portal: add targeted regressions for split admin settings, deployments flows, and route-shell boundaries
-  - server: add targeted regressions for preflight/taskstore/config split boundaries and error handling
+- [x] Regression test additions for hard-cut seams
+  - portal: targeted regressions added for split admin settings, deployments flows, and route-shell boundaries
+  - server: targeted regressions added for preflight/taskstore/config split boundaries and error handling
   - require at least one regression test per high-risk migrated surface
   - progress:
     - [x] `components/server/internal/skyforgeconfig/load_config_validate_test.go` added for auth/oidc helper regressions
     - [x] `components/server/internal/taskstore/queries_deployment_reads_test.go` added for queue-helper determinism regressions
     - [x] `components/portal/tests/playwright/smoke-sidebar-embedded.spec.ts` adds tagged smoke coverage (`@smoke-sidebar`, `@smoke-integrations`)
+    - [x] `components/portal/src/components/dashboard-page-content.test.tsx` covers dashboard coordinator/admin-warning routing
+    - [x] `components/portal/src/components/platform-capacity-page-content.test.tsx` covers capacity coordinator warning/infra-comparison routing
+    - [x] `components/portal/src/components/deployments/deployments-page-content.test.tsx` covers deployments split loading-shell boundaries
+    - [x] `components/portal/src/components/admin-overview-quick-deploy-card.test.tsx` covers split admin quick-deploy controls and profile callback wiring
 - [x] Playwright sidebar/integration smoke coverage
   - add smoke coverage for final sidebar hierarchy across integrations/platform/admin boundaries
   - verify integrations open in-frame via `tools.$tool` where intended, with explicit checks for external-link exceptions
@@ -1112,15 +1148,20 @@ Success gates:
     - `components/portal/scripts/smoke-sidebar-embedded.mjs` added
     - `components/portal/package.json` script `smoke:sidebar-embedded` added
     - `.github/workflows/ci.yml` adds `Playwright Tagged Smoke Gate (OSS-Safe)` (2026-03-10), which runs tagged Playwright smoke tests when tagged specs are present in-tree
-- [ ] Deploy preflight hardening
+- [x] Deploy preflight hardening
   - [x] script-level gateway/route fail-fast checks added:
     - `scripts/check-sidebar-links.sh` (gateway Programmed + route health probes)
     - `scripts/verify-k3d-local-stack.sh` (gateway readiness + route/prefix health fail-fast gates)
-  - enforce stable preflight error payloads consumed by portal UI
-  - add negative-path coverage for compatibility/capacity failures and missing dependency states
-  - verify deterministic preflight output for identical input payloads
+  - [x] enforce stable preflight error payloads consumed by portal UI
+    - `components/server/skyforge/user_scope_deployments_preflight_api.go` now returns `preflightError` on expected operator-facing failures instead of only bubbling generic wrapper strings
+  - [x] add negative-path coverage for compatibility/capacity failures and missing dependency states
+    - `components/server/skyforge/deployment_preflight_response_test.go` covers compatibility/capacity/dependency/validation classification and typed response construction
+  - [x] verify deterministic preflight output for identical input payloads
   - progress:
     - [x] `components/server/internal/taskengine/clabernetes_preflight_api_test.go` added for deterministic and negative-path contract checks on preflight wiring
+    - [x] `components/server/skyforge/deployment_preflight_test.go` continues to verify deterministic summary output for identical input payloads
+    - [x] `./scripts/gen-openapi.sh`
+    - [x] `cd components/portal && pnpm gen:openapi && pnpm exec tsc --noEmit && pnpm build`
 - [x] Performance checks for quick deploy templates
   - capture baseline and post-hard-cut timings for template catalog load, preview render, and deploy kickoff paths
   - define and document fail thresholds for template-load and preview-render regressions
@@ -1132,13 +1173,20 @@ Success gates:
     - [x] `scripts/check-quick-deploy-performance.sh` added to measure login-authenticated timings for catalog load, preview render request, and deploy kickoff API
     - [x] script emits per-metric diagnostics and fails when explicit thresholds are exceeded
     - [x] script is OSS-safe in CI: exits cleanly with `SKIP` when required environment is not set
-- [ ] CI required checks lock-in
+- [x] CI required checks lock-in
   - enforce required status checks for server build/tests, portal lint/type-check/tests/build, generated drift, and Playwright smoke
   - block merge when any required hard-cut check is failed or skipped
   - progress:
     - [x] CI now includes a tagged Playwright smoke gate step in `.github/workflows/ci.yml` using `--grep '@smoke-sidebar|@smoke-integrations'`
     - [x] Gate is OSS-safe: when no tagged Playwright smoke tests are present, CI logs a skip and continues without failing
     - [x] CI now includes `Quick Deploy Performance Gate (OSS-Safe)` using `./scripts/check-quick-deploy-performance.sh` with env-driven URL/credentials and threshold overrides via repo vars
+    - [x] CI split into stable required-check jobs in `.github/workflows/ci.yml`:
+      - `Repo Contract Checks`
+      - `Server Checks`
+      - `Portal Checks`
+      - `Generated Drift Checks`
+      - `Chart Checks`
+      - `Quick Deploy Performance Gate`
     - [ ] branch protection required-check enforcement still needs repo settings update
 
 Success gates:

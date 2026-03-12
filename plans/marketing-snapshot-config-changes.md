@@ -142,15 +142,15 @@ Pages:
    normal deployments
 6. verification runs and optionally triggers Forward recollect
 
-### Escape hatches
+### Bundled hook lanes
 
-Supported later, but still on the same contract:
+The widened source kinds still use the same contract:
 
 - `ansible-playbook`
 - `shell-script`
 
-These must still become change runs and go through review, approval, apply, and
-verification. They must not bypass the durable control-plane model.
+These are not separate executors. They become executable only as deterministic
+bundled `post-apply` runtime hooks inside the existing `netlab-c9s` seam.
 
 ## API Design Principles
 
@@ -245,7 +245,23 @@ Current status:
 - the worker task now reuses the existing `netlab-c9s` seam directly for:
   - `targetType=deployment`
   - `sourceKind=netlab-model`
+  - `sourceKind=structured-patch`
+  - `sourceKind=config-snippet`
   - template-backed C9S deployments only
+- `config-snippet` now uses a topology/bundle-backed execution contract:
+  - snippet lines compile into generated per-device startup-config sidecars
+  - `topology.yml` is patched so targeted nodes reference those sidecars
+    through `clab.startup-config`
+  - the resulting bundle still executes through the same `netlab-c9s`
+    patched-bundle seam
+- `structured-patch` now uses a standards-based execution contract:
+  - RFC 6902 JSON Patch operations
+  - applied to the source `topology.yml`
+  - then repackaged into a patched netlab bundle
+  - and executed through the same `netlab-c9s` runtime seam
+- the same queued `config-change-run` task contract now supports:
+  - `action=execute`
+  - `action=rollback`
 - deployment-targeted queueing now resolves the actual target deployment scope
   instead of falling back to "latest scope for username"
 - unsupported source kinds and topologyPath-only netlab edits still stop at
@@ -257,6 +273,27 @@ Current status:
 - attach rollback payloads/artifacts
 - trigger Forward recollect or post-check task
 - record verification results in lifecycle events
+
+Current status:
+
+- execution evidence now captures per-device results from
+  `sf_netlab_node_status_current`, including management reachability fields and
+  runtime task ownership
+- the operator UI now exposes a dedicated per-device verification surface with:
+  - reachable vs non-reachable counts
+  - management endpoint visibility
+  - per-device execution task ownership
+  - device-scoped verification hints
+- rollback evidence now stores the previous deployment config JSON so rollback
+  can replay the same `netlab-c9s` seam instead of inventing a second apply
+  path
+- admin rollback is now queued through the same durable control-plane task type:
+  - `POST /api/admin/config-changes/:id/rollback`
+- rollback remains intentionally scoped to the first executable lane:
+  - `targetType=deployment`
+  - `sourceKind=netlab-model`
+  - `sourceKind=structured-patch`
+  - template-backed C9S deployments
 
 Current status:
 
@@ -285,6 +322,8 @@ Current status:
   - rollback evidence captured before apply
   - execution evidence captured after apply/verify
   - task/artifact/verification summaries on the selected run
+  - lifecycle phase timeline for the selected run
+  - per-device verification detail as a separate operator card
 - the first worker-side tests now cover:
   - rollback summary aggregation
   - execution summary construction
@@ -298,6 +337,10 @@ Current status:
   - dedupe short-circuiting
   - task-spec metadata shape
   - queue handoff request shape
+- the configchanges service now has direct lifecycle coverage for:
+  - queue execution state transition
+  - queue rollback state transition
+  - queued task id persistence on the run record
 
 ### Phase 5: Broader source support
 
@@ -331,6 +374,11 @@ Current status:
   - current-user create/list/render/review
   - admin list/review/lifecycle across all runs
   - admin approve/reject/execute controls on executable runs
+- the create flow now defaults to the safe executable lane:
+  - `targetType=deployment`
+  - `sourceKind=structured-patch`
+  - executable vs bounded-review-only source kinds are explicitly labeled in the
+    UI
 - approval and execution remain explicit separate actions; approval does not
   auto-queue apply
 
@@ -350,13 +398,174 @@ not a new permission system.
 - rendered artifact diff tests
 - task handoff tests through netlab apply seam
 - rollback artifact creation tests
+- admin wrapper tests for:
+  - approve state guards
+  - execute eligibility for `netlab-model`, `structured-patch`,
+    `config-snippet`, `ansible-playbook`, and `shell-script`
+  - rollback eligibility for the same supported lanes
+- stateful operator-flow test for:
+  - approve -> execute -> rollback on a supported `structured-patch` run
+- render-state transition proof for:
+  - `structured-patch` apply-mode runs entering `awaiting-approval`
+- focused portal tests for:
+  - executable vs bounded-review-only source labels
+  - selected-run operator gating
 - end-to-end approval/apply/verify workflow tests
 
 ## Immediate Next Slice
 
-The next meaningful slice is:
+The plan is complete for the safe executable scope:
 
-- broaden executable source support beyond template-backed `netlab-model`
-- persist explicit rollback artifact references from the apply seam
-- add post-apply verification richer than topology-artifact presence
-- add focused end-to-end tests for approve -> execute -> task lifecycle
+- `targetType=deployment`
+- `sourceKind=netlab-model`
+- `sourceKind=structured-patch`
+- `sourceKind=config-snippet`
+- `sourceKind=ansible-playbook`
+- `sourceKind=shell-script`
+- template-backed C9S deployments
+
+Future expansion, if needed, should be treated as a new follow-on track:
+
+- broaden operator-flow testing to full rendered/apply/verify lifecycle
+- decide whether any source kinds beyond the current safe lanes are worth
+  supporting
+
+## Follow-on Design: Topology/Bundle-Backed Execution Contract
+
+If new source kinds become executable later, they must not introduce a
+second apply path. The only acceptable execution target is still the existing:
+
+- queued control-plane task type: `netlab-c9s-run`
+- runtime manifest contract: `skyforge.netlab-c9s.manifest/v1`
+
+The design rule is:
+
+- every executable change source must normalize into a patched topology bundle
+- the worker must still hand the result to the same `netlab-c9s` seam
+- review, approval, rollback, and verification continue to operate on the same
+  durable change-run resource
+
+### Contract Shape
+
+Add a normalized execution contract to the review payload for follow-on source
+kinds:
+
+- `executionPath`
+  - `planned-netlab-c9s-patched-bundle`
+- `bundleTransform`
+  - `topology-json-patch`
+  - `topology-overlay`
+  - `generated-sidecar`
+- `bundleInputs`
+  - source topology bundle reference
+  - source topology path within the bundle
+  - optional sidecar artifact references
+- `bundleOutputs`
+  - patched topology bundle reference
+  - rollback bundle reference or previous deployment config reference
+
+The worker remains responsible for materializing the patched bundle only after
+approval and queueing. The control plane persists the normalized transform
+contract, not an imperative execution recipe.
+
+### Source-Kind Mapping
+
+#### `config-snippet`
+
+`config-snippet` becomes executable only after it compiles into a topology-level
+change contract.
+
+Required normalization:
+
+- parse the device-scoped snippet request
+- map it to device targets in the source topology
+- generate a deterministic sidecar artifact inside the bundle, for example:
+  - `skyforge/changes/<run-id>/device-snippets/<device>.cfg`
+- patch `topology.yml` so the targeted nodes reference the generated sidecar
+  through the same startup/config hooks already honored by netlab
+
+This keeps the runtime path topology-backed. The snippet is never pushed
+directly to devices from the control plane.
+
+#### `ansible-playbook`
+
+`ansible-playbook` now executes as a deterministic bundle extension.
+
+Current normalization:
+
+- vendor the approved playbook into the generated bundle under:
+  - `skyforge/changes/<run-id>/ansible/playbook.yml`
+- emit `skyforge/runtime-hooks.json`
+- execute the playbook as a bounded `post-apply` hook through the same
+  `netlab-c9s` runtime entrypoint
+
+#### `shell-script`
+
+`shell-script` now executes as the most restricted bundled hook lane.
+
+Current normalization:
+
+- store script content as a generated bundle artifact:
+  - `skyforge/changes/<run-id>/hooks/post-apply.sh`
+- emit `skyforge/runtime-hooks.json`
+- execute it as a bounded `post-apply` hook in the same `netlab-c9s` runtime
+
+Freeform shell outside the bounded hook model remains out of scope.
+
+### Required Manifest Evolution
+
+Do not add a second runtime manifest. Extend the existing
+`skyforge.netlab-c9s.manifest/v1` boundary only if needed with explicit optional
+fields such as:
+
+- `topologyBundleB64`
+  - already used for patched-bundle execution
+- `generatedArtifacts`
+  - deterministic artifact refs emitted by review/render
+- `runtimeHooks`
+  - ordered bundled hook references
+- `postRenderActions`
+  - deterministic, reviewable actions derived from the source kind
+
+These fields must stay declarative. The manifest should describe the approved
+bundle and ordered runtime actions, not embed ad hoc imperative controller
+logic.
+
+### Review and Approval Requirements
+
+Before any new source kind becomes executable, review must show:
+
+- the patched `topology.yml` diff
+- all generated bundle artifacts
+- targeted devices
+- declared hook points or post-render actions
+- rollback evidence that will be captured if execution proceeds
+
+Approval remains explicit and separate from render.
+
+### Rollback Contract
+
+New source kinds must reuse the same rollback model:
+
+- previous deployment config JSON or previous topology bundle reference
+- generated artifact references tied to the run
+- replay through the same `config-change-run` task type and `netlab-c9s` seam
+
+If a source kind cannot support deterministic rollback evidence, it should not
+become executable.
+
+### Acceptance Gate For Widening Scope
+
+Treat a new source kind as eligible for execution only when all of the
+following are true:
+
+- it normalizes into a patched bundle, deterministic bundled sidecars, or
+  deterministic bundled runtime hooks
+- review can display the resulting topology/bundle delta
+- execution uses the same `netlab-c9s` worker seam
+- rollback uses the same captured deployment-config or bundle replay path
+- verification reuses the existing topology-current and node-status evidence
+  model
+
+Until then, leaving the source kind out of the executable set is the correct
+behavior.

@@ -216,11 +216,12 @@ the shared Gateway path:
 The preferred local implementation is managed KubeVirt:
 - set `skyforge.infoblox.managed=true`
 - set `skyforge.infoblox.image` to a KubeVirt containerDisk image
-- local k3d uses a single management NIC:
-  - `skyforge.infoblox.vm.podNetworkBinding=masquerade`
-  - `skyforge.infoblox.vm.interfaceModel=e1000`
-  - `skyforge.infoblox.vm.multus.enabled=false`
-  - `skyforge.infoblox.vm.multus.createNADs=false`
+- local k3d should keep the appliance in its expected multi-NIC shape:
+  - `skyforge.infoblox.vm.podNetworkBinding=bridge`
+  - `skyforge.infoblox.vm.managementInterfaceModel=virtio`
+  - `skyforge.infoblox.vm.auxiliaryInterfaceModel=virtio`
+  - `skyforge.infoblox.vm.multus.enabled=true`
+  - `skyforge.infoblox.vm.multus.createNADs=true`
 - enable VM lifecycle policy for resource savings and periodic reseed:
   - `skyforge.infoblox.lifecycle.enabled=true`
   - `skyforge.infoblox.lifecycle.autoStop.enabled=true`
