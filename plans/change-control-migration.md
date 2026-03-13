@@ -23,15 +23,24 @@ The new model keeps the durable lifecycle, approval flow, queueing, task
 execution, and rollback evidence, but changes the unit of work from "push this
 snippet or hook" to "execute this reviewed change plan".
 
-## Current Backend
+## Current Backends
 
-The first migration slice still executes `change-plan` runs through the
-`netlab-kne` worker seam. This keeps the existing deployment worker and task
-evidence path intact while removing the old push-centric contract from the UI.
+`change-plan` currently supports:
+
+- `netlab-kne`
+- `ansible-push`
+
+Both backends still execute through the existing `netlab-kne` worker seam. This
+keeps the deployment worker and task evidence path intact while removing the old
+push-centric contract from the UI.
+
+The `ansible-push` backend packages the supplied playbook as a bounded runtime
+hook inside the same bundle-backed seam. It is intentionally execution-only for
+now; the current rollback model does not capture enough device pre-change state
+to safely roll back arbitrary Ansible pushes.
 
 Future backends should plug into the same change-plan lifecycle:
 
-- `ansible-push`
 - `forward-verify-only`
 - other native deployment backends as needed
 
