@@ -209,6 +209,7 @@ Portal evidence surfaces:
 - Execution Summary shows the latest auto-rollback outcome badge and reason.
 - Selected Run shows latest auto-rollback outcome/reason in the run detail card.
   It also shows an explicit rollback-blocked reason when rollback is disabled.
+  Execution backend is shown even pre-execution via rendered review metadata.
 - Queue view supports auto-rollback outcome badges and outcome filters.
   It also surfaces pre-execution `autoRollback` requested/eligibility state.
   Requested state filters can isolate eligible vs unsupported plans.
