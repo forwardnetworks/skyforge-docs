@@ -210,6 +210,7 @@ Portal evidence surfaces:
 - Selected Run shows latest auto-rollback outcome/reason in the run detail card.
   It also shows an explicit rollback-blocked reason when rollback is disabled.
 - Queue view supports auto-rollback outcome badges and outcome filters.
+  It also surfaces pre-execution `autoRollback` requested/eligibility state.
 - Lifecycle view shows an auto-rollback summary tile and the latest correlated
   lifecycle event when available.
 
