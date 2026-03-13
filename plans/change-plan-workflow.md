@@ -133,6 +133,9 @@ For `ansible-push`, review should answer:
   - inline plan payload
   - existing bundled file path
 - which Forward checks and diff categories will be used after execution
+- whether `verify.autoRollback` is eligible for this backend:
+  - `netlab-kne`: eligible and enforced on verification failure
+  - `ansible-push`: marked unsupported in review output
 
 ## Step 4: Approve
 
