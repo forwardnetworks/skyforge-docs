@@ -74,6 +74,25 @@ Example `ansible-push` plan:
 }
 ```
 
+Example `ansible-push` using a playbook already present in the deployment bundle:
+
+```json
+{
+  "name": "edge-acl-push",
+  "deploy": {
+    "backend": "ansible-push",
+    "devices": ["leaf-1", "leaf-2"],
+    "playbookSource": "bundle-file",
+    "playbookPath": "automation/push.yml"
+  },
+  "verify": {
+    "backend": "forward",
+    "networkId": "network-123",
+    "checks": ["Critical reachability"]
+  }
+}
+```
+
 ## Step 2: Render
 
 Render normalizes the spec and produces a review payload.
@@ -110,7 +129,9 @@ For `ansible-push`, review should answer:
 
 - which KNE deployment is being targeted
 - which devices will be limited via Ansible `--limit`
-- where the playbook came from
+- where the playbook came from:
+  - inline plan payload
+  - existing bundled file path
 - which Forward checks and diff categories will be used after execution
 
 ## Step 4: Approve
