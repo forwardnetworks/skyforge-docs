@@ -211,6 +211,7 @@ Portal evidence surfaces:
 - Selected Run shows latest auto-rollback outcome/reason in the run detail card.
   It also shows an explicit rollback-blocked reason when rollback is disabled.
   Execution backend is shown even pre-execution via rendered review metadata.
+  Verification backend is also shown pre-execution via rendered review metadata.
   If execution evidence is not present yet, it shows requested auto-rollback state.
   A rollback-readiness badge shows whether rollback is currently actionable.
 - Queue view supports auto-rollback outcome badges and outcome filters.
