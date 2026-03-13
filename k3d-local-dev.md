@@ -74,6 +74,8 @@ Defaults:
   readiness for `skyforge-tools-extra` when that route exists
 - local deploy now runs a dedicated ELK health gate after rollout
   (`kibana` service reachability probe with retries) before final verification
+- local deploy now enforces `vm.max_map_count=262144` on k3d node containers
+  before Helm apply (required by Elasticsearch bootstrap checks)
 - Gitea Actions runner token reconciliation is chart-owned via a post-install/
   post-upgrade hook job (the deploy script no longer mutates that secret)
 - deployment verification now uses an aggregate-fail contract via
