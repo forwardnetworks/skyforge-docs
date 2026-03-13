@@ -208,6 +208,7 @@ Portal evidence surfaces:
 - Review card shows `verify.autoRollback` plan eligibility from rendered artifacts.
   It also shows execution and verification backends from render output.
 - Execution Summary shows the latest auto-rollback outcome badge and reason.
+  It also shows execution and verification backends captured in evidence.
 - Selected Run shows latest auto-rollback outcome/reason in the run detail card.
   It also shows an explicit rollback-blocked reason when rollback is disabled.
   Execution backend is shown even pre-execution via rendered review metadata.
