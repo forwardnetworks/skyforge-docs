@@ -179,6 +179,11 @@ Bootstrap and upgrade are now separated:
   - `SKYFORGE_NETWORK_RESILIENCE_PROBE_TIMEOUT_SECONDS=<n>`
   - `SKYFORGE_NETWORK_RESILIENCE_CILIUM_WAIT_TIMEOUT_SECONDS=<n>`
   - `SKYFORGE_NETWORK_RESILIENCE_NODE_NAME_REGEX=<regex>`
+- CoreDNS upstream fix (k3d local, optional):
+  - `SKYFORGE_COREDNS_UPSTREAM_FIX_ENABLE=true|false` (default `true`)
+  - `SKYFORGE_COREDNS_UPSTREAMS="1.1.1.1 8.8.8.8"` (default shown)
+  - applied before pre-helm resilience gate to avoid DNS egress failures from
+    CoreDNS forwarding to unreachable host resolvers in some local setups
 - integration health gate tuning (optional):
   - `SKYFORGE_STRICT_INTEGRATION_HEALTH=true|false`
   - `SKYFORGE_AUTO_INSTALL_KEDA=true|false`
@@ -195,6 +200,15 @@ Bootstrap and upgrade are now separated:
   - set `SKYFORGE_ENABLE_NGROK=true` for deploy-time enable, or set
     `skyforge.publicTunnel.ngrok.enabled=true` in values
   - provide token at deploy time with `SKYFORGE_NGROK_AUTHTOKEN=<token>`
+  - when enabled via `SKYFORGE_ENABLE_NGROK=true`, local deploy forces:
+    - `skyforge.publicTunnel.ngrok.hostNetwork=true`
+    - `skyforge.publicTunnel.ngrok.dnsPolicy=Default`
+    - `skyforge.publicTunnel.ngrok.targetAddress=k3d-<cluster>-server-0:30080`
+    - `skyforge.gateway.additionalHostnames[0]=*.ngrok-free.dev`
+  - chart-level controls (optional):
+    - `skyforge.publicTunnel.ngrok.hostNetwork=true|false`
+    - `skyforge.publicTunnel.ngrok.dnsPolicy=<policy>`
+    - `skyforge.publicTunnel.ngrok.targetAddress=<host:port>`
   - optional secret name/key overrides:
     - `SKYFORGE_NGROK_AUTHTOKEN_SECRET_NAME=<name>`
     - `SKYFORGE_NGROK_AUTHTOKEN_SECRET_KEY=<key>`
