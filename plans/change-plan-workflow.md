@@ -205,6 +205,7 @@ Current Forward verification behavior:
 
 Portal evidence surfaces:
 
+- Review card shows `verify.autoRollback` plan eligibility from rendered artifacts.
 - Execution Summary shows the latest auto-rollback outcome badge and reason.
 - Selected Run shows latest auto-rollback outcome/reason in the run detail card.
 - Queue view supports auto-rollback outcome badges and outcome filters.
