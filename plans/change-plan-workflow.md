@@ -196,7 +196,8 @@ Current Forward verification behavior:
 - `networkId`: resolved and persisted in evidence
 - `diffCategories`: executed as baseline-vs-post snapshot deltas by running all
   embedded checks in each requested category
-- `autoRollback`: recorded as requested, but not implemented yet
+- `autoRollback`: on verification failure, automatically rolls back only for
+  rollback-eligible change plans (`netlab-kne` backend)
 
 Verification fails the run if:
 

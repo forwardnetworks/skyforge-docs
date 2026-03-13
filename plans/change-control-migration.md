@@ -46,8 +46,10 @@ Forward verification is now partially live for `change-plan` runs:
 - requested embedded Forward checks run against the post-change snapshot
 - requested `diffCategories` run baseline-vs-post category deltas using
   embedded checks mapped from the Forward catalog
+- `autoRollback` is now enforced for verification failures on rollback-eligible
+  change plans (`netlab-kne` backend)
 
-Automatic rollback remains planned, but is not executed yet.
+`autoRollback` remains unsupported for `ansible-push`.
 
 Future backends should plug into the same change-plan lifecycle:
 
