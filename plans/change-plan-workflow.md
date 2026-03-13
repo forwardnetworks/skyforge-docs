@@ -211,6 +211,7 @@ Portal evidence surfaces:
   It also shows an explicit rollback-blocked reason when rollback is disabled.
 - Queue view supports auto-rollback outcome badges and outcome filters.
   It also surfaces pre-execution `autoRollback` requested/eligibility state.
+  Requested state filters can isolate eligible vs unsupported plans.
 - Lifecycle view shows an auto-rollback summary tile and the latest correlated
   lifecycle event when available.
 
