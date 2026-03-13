@@ -198,6 +198,7 @@ Current Forward verification behavior:
   embedded checks in each requested category
 - `autoRollback`: on verification failure, automatically rolls back only for
   rollback-eligible change plans (`netlab-kne` backend)
+  Auto-rollback outcomes are recorded in execution warnings and artifacts.
 
 Verification fails the run if:
 

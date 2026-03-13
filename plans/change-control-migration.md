@@ -48,6 +48,7 @@ Forward verification is now partially live for `change-plan` runs:
   embedded checks mapped from the Forward catalog
 - `autoRollback` is now enforced for verification failures on rollback-eligible
   change plans (`netlab-kne` backend)
+  Auto-rollback outcomes are persisted in run execution evidence.
 
 `autoRollback` remains unsupported for `ansible-push`.
 
