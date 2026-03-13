@@ -200,6 +200,14 @@ Current Forward verification behavior:
   rollback-eligible change plans (`netlab-kne` backend)
   Auto-rollback outcomes are recorded in execution warnings and artifacts.
 
+Portal evidence surfaces:
+
+- Execution Summary shows the latest auto-rollback outcome badge and reason.
+- Selected Run shows latest auto-rollback outcome/reason in the run detail card.
+- Queue view supports auto-rollback outcome badges and outcome filters.
+- Lifecycle view shows an auto-rollback summary tile and the latest correlated
+  lifecycle event when available.
+
 Verification fails the run if:
 
 - Forward credentials are unavailable
