@@ -146,6 +146,9 @@ Bootstrap and upgrade are now separated:
   prerequisites when the CRDs are missing
 - if KEDA is enabled (`skyforge.keda.enabled=true`), local deploy auto-installs
   KEDA cluster-wide before Helm apply when `ScaledObject` CRDs are missing
+- if KNE meshnet is enabled (`skyforge.kne.enabled=true`), Helm installs the
+  vendored upstream meshnet manifests (CRDs + daemonset) using
+  `skyforge.kne.meshnetMode` (`grpc` or `vxlan`)
 - `db-provision` is chart-owned and runs as a Helm hook on install/upgrade
 - use `SKYFORGE_REGENERATE_SECRETS=true` only when you are intentionally
   resetting local credentials/state
@@ -179,6 +182,12 @@ Bootstrap and upgrade are now separated:
 - integration health gate tuning (optional):
   - `SKYFORGE_STRICT_INTEGRATION_HEALTH=true|false`
   - `SKYFORGE_AUTO_INSTALL_KEDA=true|false`
+  - when `skyforge.kne.enabled=true`, post-helm health requires:
+    - CRD `topologies.networkop.co.uk`
+    - wire CRD by mode:
+      - `gwirekobjs.networkop.co.uk` for `meshnetMode=grpc`
+      - `wirekobjs.networkop.co.uk` for `meshnetMode=vxlan`
+    - `meshnet` daemonset rollout in namespace `meshnet`
   - `SKYFORGE_INFOBLOX_HEALTH_STRICT=true|false` (default `false`; when `true`, Infoblox HTTPS must be reachable or deploy fails)
   - `SKYFORGE_ELK_HEALTH_ATTEMPTS=<n>`
   - `SKYFORGE_ELK_HEALTH_SLEEP_SECONDS=<n>`
