@@ -211,6 +211,7 @@ Portal evidence surfaces:
   It also shows an explicit rollback-blocked reason when rollback is disabled.
   Execution backend is shown even pre-execution via rendered review metadata.
   If execution evidence is not present yet, it shows requested auto-rollback state.
+  A rollback-readiness badge shows whether rollback is currently actionable.
 - Queue view supports auto-rollback outcome badges and outcome filters.
   It also surfaces pre-execution `autoRollback` requested/eligibility state.
   Requested state filters can isolate eligible vs unsupported plans.
