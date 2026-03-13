@@ -221,6 +221,7 @@ Portal evidence surfaces:
   Requested state filters can isolate eligible vs unsupported plans.
   Unsupported requested rows include backend badges (for example `ansible-push`).
   Filter chips show counts for each auto-rollback state.
+  Queue summary shows how many runs match the current filter.
 - Lifecycle view shows an auto-rollback summary tile and the latest correlated
   lifecycle event when available.
 
