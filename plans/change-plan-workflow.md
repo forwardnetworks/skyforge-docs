@@ -194,8 +194,8 @@ Current Forward verification behavior:
 
 - `checks`: executed for real during verify
 - `networkId`: resolved and persisted in evidence
-- `diffCategories`: recorded in evidence, but live Forward diff execution is not
-  implemented yet
+- `diffCategories`: executed as baseline-vs-post snapshot deltas by running all
+  embedded checks in each requested category
 - `autoRollback`: recorded as requested, but not implemented yet
 
 Verification fails the run if:
@@ -205,6 +205,8 @@ Verification fails the run if:
 - Forward snapshot lookup fails
 - a requested Forward check cannot be executed
 - a Forward check returns one or more findings
+- a requested diff category cannot be executed (for example missing baseline
+  snapshot or check execution failure)
 
 ## Rollback Semantics
 

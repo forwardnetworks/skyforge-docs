@@ -44,9 +44,10 @@ Forward verification is now partially live for `change-plan` runs:
 - baseline snapshot capture happens before apply
 - post-change snapshot lookup happens during verify
 - requested embedded Forward checks run against the post-change snapshot
+- requested `diffCategories` run baseline-vs-post category deltas using
+  embedded checks mapped from the Forward catalog
 
-Forward snapshot diff categories and automatic rollback remain planned, but are
-not executed yet.
+Automatic rollback remains planned, but is not executed yet.
 
 Future backends should plug into the same change-plan lifecycle:
 
