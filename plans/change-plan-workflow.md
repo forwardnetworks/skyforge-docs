@@ -215,6 +215,7 @@ Portal evidence surfaces:
   Verification backend is also shown pre-execution via rendered review metadata.
   Verification readiness shows whether Forward verification is configured.
   If execution evidence is not present yet, it shows requested auto-rollback state.
+  Requested unsupported state includes backend detail (for example `ansible-push`).
   A rollback-readiness badge shows whether rollback is currently actionable.
 - Queue view supports auto-rollback outcome badges and outcome filters.
   It also surfaces pre-execution `autoRollback` requested/eligibility state.
