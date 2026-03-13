@@ -55,6 +55,16 @@ In user-scope settings, BYOS is enabled per provider:
   - `ssh_host` (optional)
   - `work_root`
 
+- Fixia Baremetal
+  - `base_url` (for example `https://fixia.example.com`)
+  - `username` + `password`
+  - `skip_tls_verify` (optional)
+  - API paths:
+    - `GET /api/byos/me/fixia/servers`
+    - `PUT /api/byos/me/fixia/servers`
+    - `DELETE /api/byos/me/fixia/servers/:serverID`
+  - Composite plans can reference these saved servers with `server: "user:<server-id>"`.
+
 Credential storage should match existing patterns (like EVE credentials): encrypted-at-rest, scoped to the user scope, never logged.
 
 ## Template delivery

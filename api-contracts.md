@@ -21,7 +21,7 @@ Skyforge represents “runs” as tasks in Postgres.
 
 Stable identifiers:
 - `task_type` values are considered stable DB/API identifiers.
-  - Examples: `netlab-c9s-run`, `containerlab-run`, `netlab-run`, `eve-ng-run`, `terraform-*`
+  - Examples: `netlab-c9s-run`, `containerlab-run`, `netlab-run`, `terraform-*`
 - Do not rename task types without a DB migration / translation layer.
 
 ### Terraform runner binary resolution

@@ -180,6 +180,13 @@ Bootstrap and upgrade are now separated:
   - `SKYFORGE_INFOBLOX_HEALTH_STRICT=true|false` (default `false`; when `true`, Infoblox HTTPS must be reachable or deploy fails)
   - `SKYFORGE_ELK_HEALTH_ATTEMPTS=<n>`
   - `SKYFORGE_ELK_HEALTH_SLEEP_SECONDS=<n>`
+- ngrok public tunnel (optional, still routed through Cilium Gateway API):
+  - set `SKYFORGE_ENABLE_NGROK=true` for deploy-time enable, or set
+    `skyforge.publicTunnel.ngrok.enabled=true` in values
+  - provide token at deploy time with `SKYFORGE_NGROK_AUTHTOKEN=<token>`
+  - optional secret name/key overrides:
+    - `SKYFORGE_NGROK_AUTHTOKEN_SECRET_NAME=<name>`
+    - `SKYFORGE_NGROK_AUTHTOKEN_SECRET_KEY=<key>`
 - aggregate verification ELK probe tuning (optional):
   - `SKYFORGE_VERIFY_ELK_PROBE_ATTEMPTS=<n>`
   - `SKYFORGE_VERIFY_ELK_PROBE_SLEEP_SECONDS=<n>`
@@ -283,6 +290,20 @@ Legacy fallback is still available for external appliances:
   `skyforge.infoblox.upstreamHost`/`upstreamPort`.
 
 If `~/.docker/config.json` exists, the script also creates `ghcr-pull` in the `skyforge` namespace.
+
+Clabernetes local image behavior is deterministic by default in local deploys:
+
+- `SKYFORGE_CLABERNETES_BUILD_LOCAL_IMAGES=true` (default): build manager/launcher from `vendor/clabernetes` and import into k3d before Helm apply.
+- `SKYFORGE_CLABERNETES_MANAGER_IMAGE` (default `skyforge-clabernetes-manager:local-dev`)
+- `SKYFORGE_CLABERNETES_LAUNCHER_IMAGE` (default `skyforge-clabernetes-launcher:local-dev`)
+- `SKYFORGE_CLABERNETES_SOURCE_DIR` (default `vendor/clabernetes`)
+- `SKYFORGE_K3D_CLUSTER` (default `skyforge`)
+
+Disable local image build only when intentionally testing published images:
+
+```bash
+SKYFORGE_CLABERNETES_BUILD_LOCAL_IMAGES=false ./scripts/deploy-skyforge-local.sh
+```
 
 Override the local login only when needed:
 

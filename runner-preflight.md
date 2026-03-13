@@ -1,6 +1,6 @@
-# Runner preflight (EVE hosts)
+# Runner preflight (BYOS hosts)
 
-These checks validate the external EVE-NG hosts are ready for Netlab/EVE-NG runs.
+These checks validate external BYOS hosts used for Netlab/Containerlab runs.
 
 ## What should be consistent across hosts
 - `netlab` installed (same version)
@@ -9,7 +9,7 @@ These checks validate the external EVE-NG hosts are ready for Netlab/EVE-NG runs
 - `netlab-api.service` and `containerlab-api.service` running (if used)
 - User shell auth configured (if Skyforge expects user-scoped paths like `/home/{user}/...`)
 
-## Quick commands (run on each EVE host)
+## Quick commands (run on each BYOS host)
 ```bash
 netlab version
 containerlab version

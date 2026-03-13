@@ -72,7 +72,7 @@ creating a duplicate task (useful for double-clicks and refreshes).
 Skyforge also uses the same queue/worker path for non-topology bootstrap work
 that used to run as request-scoped goroutines:
 
-- `user-bootstrap` now includes best-effort Forward tenant bootstrap for the
+- `user-bootstrap` now includes best-effort Forward org bootstrap for the
   user (`forward.ensure_tenant` task step in the worker).
 - `forward-collector-deploy` is a dedicated background task used to reconcile
   managed in-cluster Forward collector deployment state.

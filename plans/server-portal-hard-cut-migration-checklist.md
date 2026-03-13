@@ -220,7 +220,7 @@ Success gate:
   - `components/server/platform/policy_contracts.go` now owns profiles, capabilities, operating modes, and quotas at `113` lines
   - `components/server/platform/reservations.go` now owns reservation records, lifecycle, and preflight contracts at `139` lines
   - `components/server/platform/capacity_hybrid.go` now owns capacity, demand, availability, and hybrid placement contracts at `155` lines
-  - `components/server/platform/reset_contracts.go` now owns Forward tenant reset contracts at `152` lines
+  - `components/server/platform/reset_contracts.go` now owns Forward org reset contracts at `152` lines
 - [x] Split `platform/store_overview.go` by concern
   - `components/server/platform/store_overview_types.go` now owns `PlatformOverview` contracts
   - `components/server/platform/store_overview_admin.go` now owns admin aggregation orchestration in `buildPlatformOverview`
@@ -411,7 +411,7 @@ Success gates:
   - `components/portal/src/lib/api-client-user-settings.ts` now owns git/settings/AWS SSO/cloud credential APIs
 - [x] Split portal Forward client by domain
   - `components/portal/src/lib/api-client-forward.ts` reduced to a thin re-export surface
-  - `components/portal/src/lib/api-client-forward-collectors.ts` now owns Forward collector and tenant-credential APIs
+  - `components/portal/src/lib/api-client-forward-collectors.ts` now owns Forward collector and org-credential APIs
   - `components/portal/src/lib/api-client-forward-scope.ts` now owns user-scope Forward/artifact/storage APIs
   - `components/portal/src/lib/api-client-forward-events.ts` now owns webhook/syslog/SNMP and notification-setting APIs
   - `components/portal/src/lib/api-client-forward-observability.ts` now owns admin and user observability APIs

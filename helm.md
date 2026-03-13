@@ -96,7 +96,7 @@ Populate the following before installing:
   `skyforge-admin-shared`, database/object-storage/Dex secrets).
 - If `secrets.create=true` (local/dev compatibility): provide `secrets.items.*`
   values for passwords, TLS certs, and credentials from a local untracked file.
-- If you use EVE-NG / Netlab integrations: `secrets.items.eve-runner-ssh-key`, `secrets.items.netlab-runner-rsa`, and the server pool secrets (`secrets.items.skyforge-eve-servers`, `secrets.items.skyforge-netlab-servers`). The server pool values accept either a JSON array or `{"servers":[...]}`; see `deploy/skyforge-secrets.example.yaml`.
+- If you use Netlab integrations: `secrets.items.netlab-runner-rsa` and server-pool secrets such as `secrets.items.skyforge-netlab-servers`. Server-pool values accept either a JSON array or `{"servers":[...]}`; see `deploy/skyforge-secrets.example.yaml`.
 
 Use `--set-file` for large values (TLS, SSH keys):
 

@@ -185,7 +185,7 @@ This procedure does not:
 
 - define a custom scheduler
 - move control-plane workloads onto reclaimed colo nodes
-- replace the current Hetzner/cloud baseline
+- replace the current cloud baseline
 - guarantee that all workloads should run on-prem
 
 It only defines the supported way to add on-prem worker capacity into the same

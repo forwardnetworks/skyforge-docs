@@ -1,0 +1,69 @@
+{
+  "name": "baremetal-netlab-reference",
+  "inputs": {
+    "fixia_server": "user:<fixia-server-id>",
+    "netlab_server": "user:<server-id>",
+    "netlab_template": "netlab/BGP/Default-NH/topology.yml"
+  },
+  "stages": [
+    {
+      "id": "bm-reserve",
+      "provider": "baremetal",
+      "action": "reserve",
+      "inputs": {
+        "server": "user:<fixia-server-id>",
+        "devices": "edge01,edge02",
+        "reservation_profile": "default-edge-lab",
+        "durationSeconds": "14400"
+      },
+      "outputs": [
+        "reservation_id"
+      ]
+    },
+    {
+      "id": "netlab-up",
+      "provider": "netlab",
+      "action": "up",
+      "dependsOn": [
+        "bm-reserve"
+      ],
+      "inputs": {
+        "server": "user:<server-id>",
+        "deployment": "baremetal-uplink-lab",
+        "topologyPath": "netlab/BGP/Default-NH/topology.yml"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "fromStageId": "inputs",
+      "fromOutput": "fixia_server",
+      "toStageId": "bm-reserve",
+      "toInput": "server"
+    },
+    {
+      "fromStageId": "inputs",
+      "fromOutput": "netlab_server",
+      "toStageId": "netlab-up",
+      "toInput": "server"
+    },
+    {
+      "fromStageId": "inputs",
+      "fromOutput": "netlab_template",
+      "toStageId": "netlab-up",
+      "toInput": "topologyPath"
+    },
+    {
+      "fromStageId": "bm-reserve",
+      "fromOutput": "reservation_id",
+      "toStageId": "netlab-up",
+      "toInput": "env.BAREMETAL_RESERVATION_ID"
+    }
+  ],
+  "outputs": [
+    {
+      "stageId": "bm-reserve",
+      "output": "reservation_id"
+    }
+  ]
+}

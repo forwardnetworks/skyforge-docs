@@ -1,101 +1,157 @@
-# Composite Deployments (Design)
+# Composite Deployments (Scaffold v1)
 
-Skyforge today models a deployment as a single provider run (Terraform, Netlab/Containerlab, EVE-NG, etc). For multi-provider demos and real workflows, we want a **composite deployment** that can orchestrate multiple providers as one “deployment” with shared state, ordering, and consistent UX.
+Skyforge treats each deployment as a single engine today (`terraform`, `netlab`, `containerlab`).
+This scaffold defines the **next contract** for chaining stages (for example `terraform -> netlab`) with explicit variable handoff and no ad-hoc glue.
 
-This doc describes the intended model for a composite that combines:
-- **On‑prem containerlab/netlab** (running on a host like `netlab.local.forwardnetworks.com`)
-- **Cloud Terraform** (AWS/Azure/GCP)
-- A **tunnel/interconnect** so cloud resources and on‑prem lab nodes can reach each other.
+## Scope
 
-## Concept: Two Resource Planes + Interconnect
+This document defines planning and contract semantics only.
+Execution wiring is tracked separately.
 
-Think in terms of:
-- **Cloud plane**: VPC/VNet, subnets, security groups, transit gateway/VPN gateway, instances, etc.
-- **On‑prem lab plane**: containerlab/netlab topology with mgmt subnet(s), services, and optionally traffic generators.
-- **Interconnect**: a VPN/overlay link between those planes plus routing and firewall rules.
+## Terraform Target Model
 
-The interconnect can be implemented in multiple ways:
-- WireGuard (site-to-site or “cloud gateway” + on‑prem gateway container)
-- IPsec (strongSwan, cloud-managed VPN)
-- Tailscale/Headscale subnet router
-- SSH-based tunnels (good for quick demos, limited for routing)
+Terraform stages are no longer limited to public-cloud-only semantics.
 
-## Desired UX
+- `cloud`/target values such as `aws`, `azure`, and `gcp` keep current auth bootstrap behavior.
+- Non-cloud targets (for example `nsxt`, `kubevirt`, `vsphere`, `onprem`) are valid when
+  stage/template authors provide explicit `templatesDir` and required provider credentials as environment variables.
+- The execution contract stays Terraform-native: Skyforge orchestrates `init/plan/apply/destroy`,
+  and provider behavior remains inside Terraform templates/modules.
+- Runtime guardrail: non-cloud targets fail closed when `templatesDir` is missing.
 
-One deployment shows:
-- A single **Create / Start / Stop / Destroy** lifecycle
-- A single run history with step-level status
-- Outputs and useful links for each phase (e.g. cloud console links)
+This is the foundation for multi-topology workflows where Terraform can provision
+on-prem/virtualization infrastructure that netlab/containerlab stages consume via explicit bindings.
 
-## Proposed Execution Model
+### KubeVirt-First On-Prem Pattern
 
-A composite deployment has an ordered set of **stages**. Each stage is a provider action with inputs and outputs.
+For on-prem lab expansion, prefer a Terraform target profile like `kubevirt` with:
 
-Example stages:
-1. `terraform.apply` (provision cloud network + VPN endpoint)
-2. `tunnel.up` (establish on‑prem side of the tunnel)
-3. `netlab.up` or `containerlab.up` (bring up the on‑prem lab)
-4. `post.configure` (optional: configure routes, register devices, Forward sync, etc)
+- explicit `templatesDir` (for example `onprem/terraform/kubevirt`)
+- provider-native auth/env vars passed through deployment environment
+- Terraform outputs for downstream stage bindings (`vm_mgmt_ips`, `service_endpoints`, `edge_peer_ips`)
 
-The composite should support:
-- **Dependencies**: stage B waits for stage A outputs
-- **Idempotency**: “Start” skips completed work when safe
-- **Partial failure semantics**: later “best effort” steps don’t necessarily fail the whole run
+This keeps Skyforge orchestration generic while letting Terraform own virtualization specifics.
 
-## Output Passing (“Connection Facts”)
+## Contract Goals
 
-Terraform produces “connection facts” needed by later stages:
-- Tunnel peer IPs / endpoint address
-- Pre-shared keys / WireGuard public keys
-- Routes (cloud CIDRs, on‑prem CIDRs)
-- Security group rules (allowed ports)
+- One deployment intent, multiple ordered stages.
+- Explicit output-to-input handoff (for VPN/tunnel values and similar runtime facts).
+- Deterministic stage graph validation before execution.
+- Native provider seams only (`terraform`, `netlab`, `containerlab`, `baremetal`).
 
-On‑prem stages consume these facts to:
-- Create tunnel config (`wg0.conf`, IPsec config, Tailscale auth key)
-- Install routes (static or BGP)
-- Validate reachability (health checks)
+## Composite Plan Contract
 
-Implementation detail:
-- Store stage outputs in task metadata (or a dedicated `deployment_outputs` table) so later stages can read them.
-- Treat sensitive values (keys/PSKs) as encrypted secrets (reuse the existing secret box pattern).
+A composite plan has:
 
-## Routing Strategy
+- `stages[]`: ordered logical units with explicit `id`, `provider`, `action`, and `dependsOn`.
+- `bindings[]`: variable handoff edges from prior stage outputs into later stage inputs.
+- `inputs`: user/admin supplied values available at plan start.
+- `outputs`: declared stage outputs promoted as deployment outputs.
 
-The on‑prem lab usually has a mgmt subnet (e.g. `192.168.X.0/24`) plus optional data-plane subnets.
+### Provider Set (v1 scaffold)
 
-To connect to cloud:
-- Add routes in the cloud (to reach on‑prem subnets via the VPN attachment)
-- Add routes on-prem (to reach cloud subnets via the tunnel)
-- Restrict with security groups/firewalls to only required demo ports (SSH, SNMP, app ports).
+- `terraform`
+- `netlab`
+- `containerlab`
+- `baremetal`
 
-Optional enhancement:
-- Use BGP over the tunnel for dynamic route exchange (useful when lab CIDRs vary per run).
+### Action Set (v1 scaffold)
 
-## Where the Tunnel Runs
+- `terraform`: `plan`, `apply`, `destroy`
+- `netlab`: `up`, `down`, `validate`
+- `containerlab`: `deploy`, `destroy`, `validate`
+- `baremetal`: `reserve`, `configure`, `release`, `validate`
 
-We need a stable “gateway” execution point:
-- **On‑prem gateway**: the netlab/containerlab host (or a dedicated lab node acting as gateway).
-- **Cloud gateway**: cloud VPN gateway or an instance acting as WireGuard/strongSwan endpoint.
+## Variable Handoff Model
 
-Skyforge should treat tunnel setup as a provider stage with a clear responsibility:
-- Generate config
-- Apply config to the gateway
-- Validate readiness
+Bindings are explicit edges:
 
-## Implementation Notes (Incremental)
+- Source: `fromStageId + fromOutput`
+- Target: `toStageId + toInput`
+- Optional transform: `as` (rename only in v1)
+- Sensitivity: `sensitive=true` marks secret output propagation
 
-We already have:
-- A task/run model with step logs
-- Provider-specific runners (Terraform/Netlab/EVE-NG)
-- A consistent way to record logs and metadata
+Example handoff for VPN-style workflow:
 
-To implement composites without rewriting everything:
-- Represent a composite run as a task whose “runner” executes provider sub-steps sequentially.
-- Keep sub-step logs in the same task log stream (prefix per stage).
-- Optionally add “child tasks” later if we want per-stage run objects in the UI.
+1. `terraform.apply` outputs:
+- `aws.vpn.public_ip`
+- `aws.vpn.psk`
+- `aws.vpc.cidr`
 
-## Open Questions
+2. `netlab.up` inputs via bindings:
+- `vpn_peer_ip <- aws.vpn.public_ip`
+- `vpn_psk <- aws.vpn.psk` (sensitive)
+- `remote_cidr <- aws.vpc.cidr`
 
-- How to expose stage outputs in the UI (per-stage “Outputs” panel vs one merged view)?
-- Which tunnel type do we standardize first (WireGuard vs IPsec vs Tailscale)?
-- Do we want reusable “connection templates” per user scope (like variable groups)?
+## Validation Rules
+
+A plan is valid only when:
+
+- All stage IDs are unique.
+- Every `dependsOn` target exists.
+- Stage graph is acyclic.
+- Every binding source stage/output exists and precedes target stage.
+- Every binding target stage/input exists.
+- Provider/action pair is allowed.
+
+## Bare Metal Integration (Scaffold)
+
+`baremetal` stages are orchestration seams, not hardware-specific drivers.
+
+v1 assumptions:
+
+- Reservation/configuration adapters stay behind provider-native contracts.
+- Output contract examples: `mgmt_ip`, `hostname`, `asset_id`, `reservation_id`.
+- Inputs can be sourced from `terraform` outputs or operator-provided values.
+
+## Execution Semantics (Future)
+
+- Stage transitions: `pending -> running -> success|failed|skipped`.
+- First failure stops downstream stages unless marked optional.
+- Sensitive bound values are redacted in logs/events.
+
+## API Scaffold
+
+Server exposes a preview endpoint that validates and normalizes a composite plan:
+
+- `POST /api/users/:id/composite/plan/preview`
+- No execution side effects.
+- Returns normalized stage order, resolved bindings, and warnings.
+
+Server also supports persisted-plan execution:
+
+- `POST /api/users/:id/composite/plans/:planID/runs`
+- Enqueues a `composite-run` task with stage-by-stage execution and binding handoff.
+- Current execution support: `terraform`, `netlab`, and `baremetal` stages.
+- `baremetal` stages can resolve user-saved Fixia connections via `server: "user:<server-id>"`.
+
+## Checklist
+
+- [x] Define provider/action enums for composite plan preview.
+- [x] Define stage/binding/input/output request schema.
+- [x] Implement server-side preview validation (DAG + binding checks).
+- [x] Add persistent composite deployment spec storage.
+  - Added user-scope composite plan CRUD API and backing DB table (`sf_composite_plans`).
+  - API paths:
+    - `GET /api/users/:id/composite/plans`
+    - `POST /api/users/:id/composite/plans`
+    - `GET /api/users/:id/composite/plans/:planID`
+    - `PUT /api/users/:id/composite/plans/:planID`
+    - `DELETE /api/users/:id/composite/plans/:planID`
+- [x] Add execution runner with stage state transitions.
+- [x] Add portal authoring UI for stage graph + bindings.
+  - Added `/dashboard/deployments/composite` with user-scope plan authoring,
+    preview, save/update/delete, and run enqueue.
+- [x] Add end-to-end `terraform -> netlab` reference blueprint.
+  - Reference payload: `components/docs/examples/composite-plan-terraform-netlab.json`
+- [x] Add `baremetal -> netlab` reference blueprint.
+  - Reference payload: `components/docs/examples/composite-plan-baremetal-netlab.json`
+- [x] Integrate baremetal server settings with Fixia user-scope credentials.
+  - Added user-scope Fixia server CRUD and taskengine resolver for `server: "user:<id>"`.
+- [x] Add targeted composite portal UI tests.
+  - Added `components/portal/src/components/deployments/composite-plans-page-content.test.tsx`.
+- [x] Add composite run history/status view in portal.
+  - Composite page now lists recent composite runs from `/api/runs` and tracks selected run state.
+- [x] Add stage-level evidence surfacing for composite execution.
+  - Composite page now renders `composite.stage.*` lifecycle events (running/success/failed) with provider/action/output summary.
+- [ ] Backlog: add first-class Terraform `kubevirt` provider profile + reference module for VM lifecycle stages.

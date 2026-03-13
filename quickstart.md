@@ -7,7 +7,7 @@ For local development using k3d (default-safe workflow), use:
 
 Environment mapping (current policy):
 - local `k3d` = dev
-- VMware/Hetzner = prod
+- VMware/on-prem = prod
 
 If you want a repeatable install workflow, use `docs/install-on-server.md`.
 

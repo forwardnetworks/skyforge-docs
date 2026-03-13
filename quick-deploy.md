@@ -11,7 +11,7 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - Admin catalog saves are validated against live blueprint template index entries to prevent drift.
 - Forward: always uses in-app Forward (`https://fwd-appserver.forward.svc.cluster.local`)
   with per-user tenant credentials + API token.
-  - Skyforge ensures the user has a Forward tenant user/password.
+  - Skyforge ensures the user has a Forward org user/password.
   - Skyforge ensures API token `skyforge` exists for that user.
   - Token `accessKey` + `secret` are stored as the managed in-cluster collector
     credential for that user.

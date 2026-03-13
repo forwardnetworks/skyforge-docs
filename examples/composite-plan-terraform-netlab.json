@@ -1,0 +1,78 @@
+{
+  "name": "terraform-netlab-vpn-reference",
+  "inputs": {
+    "netlab_server": "user:<server-id>",
+    "netlab_template": "netlab/BGP/Default-NH/topology.yml"
+  },
+  "stages": [
+    {
+      "id": "tf-apply",
+      "provider": "terraform",
+      "action": "apply",
+      "inputs": {
+        "target": "aws",
+        "templateSource": "blueprints",
+        "templatesDir": "terraform",
+        "template": "CloudAWS",
+        "env.TF_VAR_region": "us-east-1"
+      },
+      "outputs": [
+        "vpn_peer_ip",
+        "vpn_psk",
+        "remote_cidr"
+      ]
+    },
+    {
+      "id": "netlab-up",
+      "provider": "netlab",
+      "action": "up",
+      "dependsOn": [
+        "tf-apply"
+      ],
+      "inputs": {
+        "server": "user:<server-id>",
+        "deployment": "vpn-lab",
+        "topologyPath": "netlab/BGP/Default-NH/topology.yml"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "fromStageId": "tf-apply",
+      "fromOutput": "vpn_peer_ip",
+      "toStageId": "netlab-up",
+      "toInput": "env.VPN_PEER_IP"
+    },
+    {
+      "fromStageId": "tf-apply",
+      "fromOutput": "vpn_psk",
+      "toStageId": "netlab-up",
+      "toInput": "env.VPN_PSK",
+      "sensitive": true
+    },
+    {
+      "fromStageId": "tf-apply",
+      "fromOutput": "remote_cidr",
+      "toStageId": "netlab-up",
+      "toInput": "env.REMOTE_CIDR"
+    },
+    {
+      "fromStageId": "inputs",
+      "fromOutput": "netlab_server",
+      "toStageId": "netlab-up",
+      "toInput": "server"
+    },
+    {
+      "fromStageId": "inputs",
+      "fromOutput": "netlab_template",
+      "toStageId": "netlab-up",
+      "toInput": "topologyPath"
+    }
+  ],
+  "outputs": [
+    {
+      "stageId": "tf-apply",
+      "output": "vpn_peer_ip"
+    }
+  ]
+}

@@ -13,8 +13,8 @@ Status keys:
 ## 0) Decide the OSS “product shape”
 
 ⬜ **Core vs. integrations split**
-- Define a “core” distribution that works without Forward, EVE-NG integration, NetBox/Nautobot, and Gitea provisioning.
-- Define optional “integration modules” (Forward sync, collector, NetBox/Nautobot SSO, EVE-NG).
+- Define a “core” distribution that works without Forward, NetBox/Nautobot, and Gitea provisioning.
+- Define optional “integration modules” (Forward sync, collector, NetBox/Nautobot SSO).
 
 ⬜ **Deployment target**
 - Pick a default: `kind`/`k3d` (local), or “any Kubernetes 1.x”.
@@ -30,11 +30,6 @@ Status keys:
 - Keep as an optional module:
   - Forward API sync, collector provisioning, and credential management.
 - Ensure the core system runs cleanly with Forward disabled (no required config/secrets).
-
-⬜ **EVE-NG integration**
-- If the EVE-NG runner requires proprietary artifacts:
-  - Remove from OSS core or replace with a public implementation.
-  - Make it a separate private add-on repo/image if needed.
 
 ⬜ **Internal hostnames / environment assumptions**
 - Remove any hard-coded internal DNS names, domains, and cluster-specific URLs from:

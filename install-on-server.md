@@ -137,5 +137,5 @@ sudo -E ./scripts/verify-install.sh
 
 ## Notes for OSS readiness
 
-- Keep EVE-NG integration out of the default install path when it depends on private assets.
+- Keep optional third-party integrations out of the default install path when they depend on private assets.
 - Prefer to keep “core” images either public or documented with a GHCR pull secret flow.

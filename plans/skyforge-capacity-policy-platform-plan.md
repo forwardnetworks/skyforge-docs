@@ -10,7 +10,7 @@ The immediate business drivers are:
 - make Skyforge usable as `Demo Foundry 2.0`
 - support repeatable, curated demos with tenant isolation
 - support sandbox and persistent lab workflows without cross-user interference
-- support full Forward tenant reset workflows so demos and sandboxes can be
+- support full Forward org reset workflows so demos and sandboxes can be
   rebuilt from a known-good baseline
 - provide a credible cost and capacity model for GTM rollout
 - enable eventual hybrid infrastructure placement across cloud and reclaimed
@@ -45,10 +45,10 @@ capacity planning will be guesswork.
 - per-user isolation / tenant-scoped workflows
 - Git-backed templates and curated quick deploy catalog
 - task queue, task priorities, worker activation/reconciliation, and lease state
-- Hetzner deployment path with cluster autoscaler and KEDA support
+- on-prem-first deployment path with optional generic cloud burst capacity
 - platform policy foundation:
   - role profiles, capabilities, quota overrides, reservation records, and
-    Forward tenant reset runs are first-class persisted contracts
+    Forward org reset runs are first-class persisted contracts
   - effective user policy resolution exists as a dedicated Encore-native
     platform service
 - admin/user RBAC foundation:
@@ -103,7 +103,7 @@ Introduce the product-level concepts we need before deeper implementation.
   - admin reserved block
 - [x] Define **tenant reset modes**:
   - soft reset: reset Skyforge-managed deployment state only
-  - hard reset: disable/delete/recreate Forward tenant objects from scratch
+  - hard reset: disable/delete/recreate Forward org objects from scratch
   - curated reset: rebuild to a known baseline and reprovision managed
     dependencies
 - [x] Define **pool classes**:
@@ -212,7 +212,7 @@ Make deployments schedulable and costable by introducing resource intent.
 - every curated template has a declared resource class
 - the platform can show estimated resource demand before launch
 
-## Phase 2.5: Forward Tenant Reset and Reprovision
+## Phase 2.5: Forward Org Reset and Reprovision
 
 ### Objective
 
@@ -272,7 +272,7 @@ known-good baseline.
 - [x] Worker orchestration now replays managed baseline deployments from the
   persisted reset-run baseline instead of reconstructing them only from live
   runtime state during reprovision.
-- [x] User self-service reset UI exists for managed Forward tenants.
+- [x] User self-service reset UI exists for managed Forward orgs.
 - [x] Admin reset UI now exists for selected users with mode selection and
   reset-run history in Settings > Users.
 - [x] Platform reset requests now enforce a per-user cooldown window in
@@ -527,7 +527,7 @@ Make Skyforge usable for GTM without forcing every user into sandbox complexity.
 1. Phase 0: data model and contract
 2. Phase 1: RBAC hardening
 3. Phase 2: template resource classification
-4. Phase 2.5: Forward tenant reset and reprovision
+4. Phase 2.5: Forward org reset and reprovision
 5. Phase 3: reservation scheduler
 6. Phase 4: capacity and cost reporting
 7. Phase 5: hybrid cloud/on-prem placement
@@ -540,7 +540,7 @@ This is the first implementation slice we should actually start:
 - [x] Add role profiles and capability model
 - [x] Add quota model by role profile
 - [x] Add template resource class metadata for curated templates
-- [x] Add Forward tenant reset schema and state machine stubs
+- [x] Add Forward org reset schema and state machine stubs
 - [x] Add reservation schema and API stubs
 - [x] Add an admin-only capacity/reservation overview page
 
@@ -551,7 +551,7 @@ This is the first implementation slice we should actually start:
   - capabilities
   - resource classes
   - reservation types/status
-  - Forward tenant reset modes/status
+  - Forward org reset modes/status
 - [x] Added persistence-backed platform policy resolution:
   - user profile assignments
   - quota overrides
@@ -559,7 +559,7 @@ This is the first implementation slice we should actually start:
 - [x] Added typed Encore APIs for:
   - policy read/update
   - reservation create/list
-  - Forward tenant reset request/list
+  - Forward org reset request/list
 - [x] Added curated quick deploy resource-class metadata and validation
 - [x] Added quick deploy catalog validation against live blueprint estimates
 - [x] Added fallback resource-class inference for non-curated netlab templates
@@ -576,7 +576,7 @@ This is the first implementation slice we should actually start:
   from the platform capacity view
 - [x] Added admin platform overview APIs and a first admin capacity/reservations
   page in the portal
-- [x] Added queued Forward tenant reset execution with persisted status
+- [x] Added queued Forward org reset execution with persisted status
   transitions and validation
 - [x] Expanded tenant reset local cleanup to clear per-scope Forward
   credentials, deployment-scoped Forward runtime state, and best-effort
@@ -633,7 +633,7 @@ This is the first implementation slice we should actually start:
 - building hybrid infra before scheduling and cost visibility
 - keeping RBAC endpoint-centric instead of capability-centric
 - allowing custom templates without resource classification
-- treating Forward tenant reset as a manual runbook instead of a platform
+- treating Forward org reset as a manual runbook instead of a platform
   workflow
 - mixing training, curated demo, and sandbox use cases into one policy model
 
