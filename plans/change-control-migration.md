@@ -39,6 +39,15 @@ hook inside the same bundle-backed seam. It is intentionally execution-only for
 now; the current rollback model does not capture enough device pre-change state
 to safely roll back arbitrary Ansible pushes.
 
+Forward verification is now partially live for `change-plan` runs:
+
+- baseline snapshot capture happens before apply
+- post-change snapshot lookup happens during verify
+- requested embedded Forward checks run against the post-change snapshot
+
+Forward snapshot diff categories and automatic rollback remain planned, but are
+not executed yet.
+
 Future backends should plug into the same change-plan lifecycle:
 
 - `forward-verify-only`

@@ -19,7 +19,7 @@ The difference is what the execution step does.
 3. Review the planned execution path, artifacts, and Forward verification scope.
 4. Approve the run.
 5. Execute it through the worker task engine.
-6. Capture post-apply evidence and verification state.
+6. Verify it against Forward and capture final evidence.
 
 ## Step 1: Create
 
@@ -165,7 +165,11 @@ generated inventory", not "redeploy a new lab".
 
 ## Step 6: Evidence And Verification
 
-After execution, Skyforge captures:
+Before apply, when `verify.backend=forward`, Skyforge resolves the target
+Forward network and stores the latest processed snapshot as the verification
+baseline when one exists.
+
+After apply, Skyforge captures:
 
 - task id
 - topology artifact key
@@ -175,13 +179,32 @@ After execution, Skyforge captures:
 - verification backend
 - artifact references
 
-When `verify.backend=forward`, the run also carries the intended Forward
-verification scope:
+During the verify phase, when `verify.backend=forward`, Skyforge performs real
+Forward calls:
 
-- `networkId`
-- `checks`
-- `diffCategories`
-- `autoRollback`
+1. resolve `verify.networkId`, or fall back to the deployment's tracked Forward
+   network id
+2. list processed snapshots for that network
+3. capture the latest snapshot as the post-change verification target
+4. run each requested embedded check against that post-change snapshot
+5. persist snapshot refs, check refs, and verification warnings in the run
+   execution summary
+
+Current Forward verification behavior:
+
+- `checks`: executed for real during verify
+- `networkId`: resolved and persisted in evidence
+- `diffCategories`: recorded in evidence, but live Forward diff execution is not
+  implemented yet
+- `autoRollback`: recorded as requested, but not implemented yet
+
+Verification fails the run if:
+
+- Forward credentials are unavailable
+- the target Forward network cannot be resolved
+- Forward snapshot lookup fails
+- a requested Forward check cannot be executed
+- a Forward check returns one or more findings
 
 ## Rollback Semantics
 
