@@ -62,6 +62,15 @@ Tradeoffs:
 - **Deployment run**: uses the user’s Forward profile by default.
   - Still allow overrides (advanced) per user scope/deployment if needed.
 
+## Provisioning trigger contract
+
+- When `features.forwardEnabled=true`, successful Skyforge authentication triggers
+  a background ensure of the user Forward org credential.
+- The ensure call is idempotent and acts as self-heal for missing local mapping
+  and missing/rotated Forward-side user state.
+- User-initiated password reset remains available via
+  `/api/forward/org-credential/reset`.
+
 ## Implementation sketch (high level)
 
 1) Persist per-user Forward credentials in `sf_users`-adjacent table (encrypted at rest).

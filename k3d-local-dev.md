@@ -16,9 +16,11 @@ What it does:
 - writes kubeconfig to `.kubeconfig-skyforge`,
 - sets context to `k3d-skyforge`,
 - by default runs:
-  - phase 1: `./scripts/deploy-skyforge-local.sh --no-verify`
+- phase 1: `./scripts/deploy-skyforge-local.sh --no-verify`
   - phase 2: `./scripts/bootstrap-forward-local.sh`
   - phase 3: `./scripts/verify-k3d-local-stack.sh` (aggregate report + final pass/fail)
+  - `deploy-skyforge-local.sh` now auto-bootstraps Forward when
+    `forward/fwd-appserver` is missing (`SKYFORGE_AUTO_BOOTSTRAP_FORWARD_IF_MISSING=true`)
 - ensures `local-path` storage is usable by installing Rancher
   `local-path-provisioner` when needed (or reusing an existing valid one)
 - prints periodic progress heartbeats during long-running phases (cluster create,
@@ -74,14 +76,18 @@ Defaults:
   readiness for `skyforge-tools-extra` when that route exists
 - local deploy now runs a dedicated ELK health gate after rollout
   (`kibana` service reachability probe with retries) before final verification
-- local deploy now enforces `vm.max_map_count=262144` on k3d node containers
-  before Helm apply (required by Elasticsearch bootstrap checks)
+- local deploy now enforces both `vm.max_map_count=262144` and
+  `fs.inotify.max_user_instances=64000` on k3d node containers before Helm apply
+  (required by Elasticsearch bootstrap checks and KNE IOS-XR kernel constraints)
 - Gitea Actions runner token reconciliation is chart-owned via a post-install/
   post-upgrade hook job (the deploy script no longer mutates that secret)
 - deployment verification now uses an aggregate-fail contract via
   `scripts/verify-k3d-local-stack.sh` and writes a JSON report (default:
   `out/k3d-deploy-report-<timestamp>.json`)
   - verification now prints per-check progress/pass/fail lines so long probes are visible
+- KubeVirt NOS smoke matrix is available via:
+  `SKYFORGE_SMOKE_PASSWORD=<admin-password> ./scripts/smoke-kubevirt-nos.sh`
+  (runs netlab+KNE create/start/delete checks for all KubeVirt NOS smoke templates)
 
 Add a hosts entry on the local workstation:
 
@@ -361,7 +367,7 @@ Defaults:
   local-path PVC fanout in small k3d clusters.
 - release: `forward-local`
 - registry: `ghcr.io/forwardnetworks/forward`
-- image tag: `26.2.2-01`
+- image tag: `26.2.4-02`
 - local storage class: `local-path`
 - shared-cluster PVC mode with Skyforge-owned ingress
 
@@ -399,7 +405,7 @@ Mirror the airgap package into GHCR first:
 ```bash
 cd /home/captainpacket/src/skyforge
 ./scripts/mirror-forward-package-to-ghcr.sh \
-  ~/Downloads/forward-app-26.2.2-01.package
+  ~/Downloads/forward-app-26.2.4-02.package
 ```
 
 The mirror script publishes:
