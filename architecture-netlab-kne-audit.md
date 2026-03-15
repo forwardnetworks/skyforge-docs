@@ -50,7 +50,7 @@ Date: 2026-02-25
 - `pnpm -s type-check`
 - `helm lint components/charts/skyforge`
 - `./scripts/check-deployment-action-contract.sh`
-- `../skyforge-cli/bin/skyforge-cli smoke suite --scope deploy-forward` validates deployment action usage (`/action` + `/preflight`) plus Forward sync checks
+- `SKYFORGE_SMOKE_SCOPE=deploy-forward ./scripts/post-deploy-smoke.sh` validates deployment action usage (`/action` + `/preflight`) plus Forward sync checks through server-native smokecheck
 
 ## Residual Follow-ups (Non-blocking)
 
