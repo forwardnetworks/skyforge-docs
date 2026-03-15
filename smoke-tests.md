@@ -16,9 +16,15 @@ SKYFORGE_BASE_URL="https://<hostname>" \
 SKYFORGE_SMOKE_USERNAME="admin" \
 SKYFORGE_SMOKE_PASSWORD="<password>" \
 SKYFORGE_SMOKE_RUN_ACTION_CHECK=true \
-SKYFORGE_SMOKE_FWD_PROFILE="<fwd-cli-profile>" \
+SKYFORGE_SMOKE_SCOPE="deploy-forward" \
+SKYFORGE_SMOKE_SERVER_TIMEOUT_SECONDS=240 \
 ./scripts/post-deploy-smoke.sh
 ```
+
+Notes:
+- `deploy-forward` now uses server-native smokecheck execution (no separate
+  `skyforge-cli auth login` dependency).
+- For non-`deploy-forward` authenticated scopes, keep `SKYFORGE_SMOKE_FWD_PROFILE`.
 
 When credentials are provided, the script also records run results to:
 - `POST /api/admin/smoke-runs`
