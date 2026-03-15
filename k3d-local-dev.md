@@ -85,6 +85,9 @@ Defaults:
   `scripts/verify-k3d-local-stack.sh` and writes a JSON report (default:
   `out/k3d-deploy-report-<timestamp>.json`)
   - verification now prints per-check progress/pass/fail lines so long probes are visible
+- local deploy runs `scripts/post-deploy-smoke.sh` by default with bounded
+  server smoke timeout (`SMOKE_SERVER_TIMEOUT_SECONDS`, default `240`)
+  - disable only when needed: `RUN_POST_DEPLOY_SMOKE=false`
 - KubeVirt NOS smoke matrix is available via:
   `SKYFORGE_SMOKE_PASSWORD=<admin-password> ./scripts/smoke-kubevirt-nos.sh`
   (runs netlab+KNE create/start/delete checks for all KubeVirt NOS smoke templates)
@@ -97,7 +100,7 @@ Add a hosts entry on the local workstation:
 
 Authentication uses the same browser auth contract as other environments:
 - `skyforge.auth.mode=local` makes the portal use direct local login via `/login/local` (`POST /api/login`)
-- `skyforge.auth.mode=oidc` makes the portal use `/api/oidc/login`
+- `skyforge.auth.mode=oidc` makes the portal use `/api/auth/oidc/login`
 
 For local k3d, keep `skyforge.auth.mode=local` unless you are explicitly testing OIDC.
 

@@ -21,15 +21,16 @@ SKYFORGE_BASE_URL="https://<hostname>" \
 SKYFORGE_SMOKE_USERNAME="admin" \
 SKYFORGE_SMOKE_PASSWORD="<password>" \
 SKYFORGE_SMOKE_RUN_ACTION_CHECK=true \
-SKYFORGE_SMOKE_FWD_PROFILE="default" \
+SKYFORGE_SMOKE_SCOPE="deploy-forward" \
+SKYFORGE_SMOKE_SERVER_TIMEOUT_SECONDS=240 \
 SKYFORGE_CLI_BIN="../skyforge-cli/bin/skyforge-cli" \
 ./scripts/post-deploy-smoke.sh
 ```
 
 The authenticated smoke path now runs:
 
-- `skyforge-cli auth login`
-- `skyforge-cli smoke suite --scope deploy-forward`
+- server-native `components/server/cmd/smokecheck` for `deploy-forward`
+- `skyforge-cli` remains available for direct operator/stress workflows
 
 Useful suite/stress options:
 

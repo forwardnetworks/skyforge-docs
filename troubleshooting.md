@@ -163,6 +163,10 @@ Disable only when needed:
 ```bash
 RUN_POST_DEPLOY_SMOKE=false ./scripts/deploy-skyforge-prod-safe.sh
 ```
+Bounded smoke timeout (default `240s`):
+```bash
+SMOKE_SERVER_TIMEOUT_SECONDS=240 ./scripts/deploy-skyforge-prod-safe.sh
+```
 
 Smoke history (admin only) is queryable at:
 - `GET /api/admin/smoke-runs`
