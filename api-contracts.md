@@ -72,7 +72,7 @@ Payload:
 
 Skyforge exposes two browser login entry points, selected by runtime config:
 - Local mode (`skyforge.auth.mode=local`): `POST /api/login` (via `/login/local` UI route)
-- OIDC mode (`skyforge.auth.mode=oidc`): `GET /api/oidc/login?next=<path>`
+- OIDC mode (`skyforge.auth.mode=oidc`): `GET /api/auth/oidc/login?next=<path>`
 
 Unauthenticated browser/tool redirects must use the same runtime-selected contract;
 they must not hardcode OIDC-only behavior.

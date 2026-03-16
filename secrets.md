@@ -35,6 +35,12 @@ Quick Deploy specific:
 - `SKYFORGE_QUICK_DEPLOY_FORWARD_USERNAME`
 - `SKYFORGE_QUICK_DEPLOY_FORWARD_PASSWORD`
 
+Prod OIDC specific:
+- `dex-oidc-client-secret[dex-oidc-client-secret]` must be non-empty when
+  `skyforge.auth.mode=oidc` / `skyforge.dex.authMode=oidc` (for example Okta).
+- `scripts/deploy-skyforge-prod-safe.sh` enforces this preflight. You can seed
+  it for a deploy with `DEX_OIDC_CLIENT_SECRET='<secret>'`.
+
 If you accidentally committed a secret:
 1. Rotate it immediately.
 2. Remove it from git history (if required for public release).

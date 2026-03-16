@@ -39,9 +39,10 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
   - Browser login uses `/login/local` + `POST /api/login`
   - Shared bootstrap password source: `skyforge-admin-shared.password`
 - Prod baseline: `skyforge.auth.mode=oidc`
-  - Browser login uses `GET /api/oidc/login`
+  - Browser login uses `GET /api/auth/oidc/login`
   - Supported OIDC topology is `Skyforge -> Dex -> IdP`
   - For Okta, keep `skyforge.dex.enabled=true`, `skyforge.dex.manageConfig=true`, `skyforge.dex.authMode=oidc`, and populate `skyforge.dex.oidc.*` + `dex-oidc-client-secret`
+- On every Helm install/upgrade, hook job `skyforge-auth-runtime-sync` writes `sf_settings` auth keys (`ui_auth_primary_provider`, `ui_oidc_enabled`, `oidc_*`) from chart values/secrets so runtime auth mode stays aligned with declarative config.
 - Dex connector settings (`skyforge.dex.*`) control Dex's upstream identity provider. They do not replace `skyforge.auth.mode`.
 
 ## Service URLs
