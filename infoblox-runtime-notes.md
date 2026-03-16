@@ -5,10 +5,18 @@
   - management NIC first on the pod network
   - auxiliary NICs present through Multus NADs
   - explicit MAC addresses on all interfaces (default/lan1/ha/lan2) to avoid KubeVirt libvirt XML failures
+  - LAN1 should prefer DHCP IPAM (`skyforge.infoblox.vm.multus.lan1.ipamType=dhcp`) where available for resilient addressing across VM restarts
+  - HA/LAN2 can stay `host-local` unless you have DHCP on those segments
 - Multus must remain the primary CNI config when meshnet is present.
   - If `00-meshnet.conflist` is ordered before `00-multus.conf`, NAD attachments are ignored and VMI sync fails with
     `pod link ... is missing`.
 - The lifecycle autostop path must ignore the VM while `license_pending=true`; otherwise the VM can be halted during bootstrap and the licensing workflow never converges.
+- Lifecycle cronjobs (`*-vm-autostop`, `*-vm-reseed`, `*-vm-license`) are expected to stay unsuspended by default.
+  - Chart values now expose explicit `suspend` booleans under each lifecycle lane and default them to `false`.
+  - Treat `suspend=true` as a temporary operator action only.
+- License reconcile health gate:
+  - Only HTTP readiness codes `2xx`, `3xx`, `401`, `403` are considered healthy.
+  - `000`, `5xx`, and other non-ready codes keep reconcile active so first-boot and post-reseed bootstrap does not silently stall.
 - Live March 15 finding: KubeVirt + Multus plumbing is healthy, but appliance init still fails in-image during runonce. Guest console shows:
   - `Configure Public Interface for Licensing`
   - `Error code: 255 from Configure Public Interface for Licensing`

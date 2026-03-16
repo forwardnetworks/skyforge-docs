@@ -372,7 +372,7 @@ Defaults:
   by default (`SKYFORGE_FORWARD_ENABLE_AUTOPILOT=false`) to avoid unschedulable
   local-path PVC fanout in small k3d clusters.
 - release: `forward-local`
-- registry: `ghcr.io/forwardnetworks/forward`
+- registry: `harbor.local.forwardnetworks.com/forward`
 - image tag: `26.2.4-02`
 - local storage class: `local-path`
 - shared-cluster PVC mode with Skyforge-owned ingress
@@ -402,11 +402,11 @@ Important:
   saved `forward/forward-support-credentials` secret, falls back to
   `forward/forward`, then rotates away from the default password and persists
   the new random password back into `forward/forward-support-credentials`
-- valid GHCR credentials for the mirrored Forward runtime images must already
+- valid registry credentials for the Forward runtime images must already
   exist in `~/.docker/config.json`; the script does a manifest preflight and
-  fails fast if `ghcr.io/forwardnetworks/forward` is not accessible
+  fails fast if `harbor.local.forwardnetworks.com/forward` is not accessible
 
-Mirror the airgap package into GHCR first:
+Mirror or sync the package images into Harbor first:
 
 ```bash
 cd /home/captainpacket/src/skyforge
@@ -415,9 +415,10 @@ cd /home/captainpacket/src/skyforge
 ```
 
 The mirror script publishes:
-- app images to `ghcr.io/forwardnetworks/forward/*`
-- shared images such as `local-volume-provisioner-fwd` to
-  `ghcr.io/forwardnetworks/shared/*`
+- app images to your configured Forward registry (default
+  `harbor.local.forwardnetworks.com/forward/*`)
+- shared images such as `local-volume-provisioner-fwd` to the configured shared
+  registry prefix
 
 Useful overrides:
 

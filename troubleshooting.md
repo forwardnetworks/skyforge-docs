@@ -51,6 +51,35 @@ Deployment guardrail:
 - `scripts/deploy-skyforge-local.sh` and `scripts/deploy-skyforge-prod-safe.sh` run this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
 - Node-local Cilium datapath restarts are opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true` or explicit `--repair` workflows).
 
+## Forward appserver 503 / collector auth drift
+Symptom:
+- `https://skyforge-fwd...` returns `503`.
+- Forward workloads restart-loop after deploy/reboot.
+- Skyforge auto collectors fail to connect even though user/org exists.
+
+Typical cause:
+- Forward DB credential secret drift (wrong usernames/passwords in `postgres.fwd-pg-*.credentials`) causes appserver/worker DB auth failures.
+
+Checks:
+```bash
+kubectl -n forward get secret postgres.fwd-pg-app.credentials -o jsonpath='{.data.username}' | base64 -d; echo
+kubectl -n forward get secret postgres.fwd-pg-fdb.credentials -o jsonpath='{.data.username}' | base64 -d; echo
+kubectl -n forward logs deploy/fwd-appserver --tail=200 | rg -n 'password authentication failed|FATAL'
+```
+
+Expected secret usernames:
+- `postgres.fwd-pg-app.credentials` -> `fwd_app`
+- `postgres.fwd-pg-fdb*.credentials` -> `fwd_fdb`
+
+Remediation:
+```bash
+SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
+  ./scripts/deploy/local/integration-repair.sh post-helm
+```
+
+Deployment guardrail:
+- `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if Forward secret usernames drift from the `fwd_app`/`fwd_fdb` contract and validates DB role logins before finishing deploy.
+
 ## Hoppscotch failures
 ### Helm upgrade failures due to immutable Jobs
 If a Helm upgrade fails trying to patch a `Job`, it’s usually because the `spec.template` is immutable.
@@ -132,10 +161,18 @@ echo "${GOTOOLCHAIN:-unset}"
 Symptom:
 - A deploy "succeeds" but the UI still reflects older routes/pages.
 
+Critical chart-source rule:
+- Production deploys must use the canonical local chart source `components/charts/skyforge` synced to the remote temp path (`/tmp/skyforge-chart-sync/components/charts/skyforge`) by `scripts/deploy-skyforge-prod-safe.sh`.
+- Do not run ad-hoc Helm upgrades from legacy remote chart trees (for example `/home/arch/skyforge-deploy/skyforge`).
+
 Guardrails:
 - `scripts/deploy-skyforge-prod-safe.sh` now requires explicit image refs by default:
   - `SKYFORGE_SERVER_IMAGE=<repo>:<tag>`
   - `SKYFORGE_SERVER_WORKER_IMAGE=<repo>:<tag>-worker`
+- The deploy script now hard-fails when:
+  - remote synced chart hash does not match local `components/charts/skyforge`,
+  - the remote chart is missing `Chart.yaml` or selected values file,
+  - a legacy chart directory exists on remote with a different hash (default strict mode).
 - The server build now writes a build stamp:
   - `artifacts/build-stamps/server-<tag>.json`
   - `artifacts/build-stamps/latest-server-build.json`
