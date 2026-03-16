@@ -14,6 +14,11 @@ kubectl -n skyforge get gateway skyforge -o jsonpath='{range .status.conditions[
 kubectl -n skyforge get svc cilium-gateway-skyforge
 ```
 
+Note: in Cilium host-network mode (`gateway-api-hostnetwork-enabled=true`),
+Gateway `Programmed=False (AddressNotAssigned)` can still be expected; confirm
+readiness with route probes (`check-sidebar-links.sh`) rather than strict
+Programmed=True.
+
 ## ConfigMap wiring
 ```bash
 kubectl -n skyforge get configmap skyforge-config -o yaml

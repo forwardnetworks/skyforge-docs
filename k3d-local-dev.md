@@ -148,6 +148,9 @@ Bootstrap and upgrade are now separated:
   - gateway health checks accept `Programmed=False (AddressNotAssigned)` when
     `skyforge.gateway.addresses` is empty (k3d/nodeport mode), then rely on
     route probes for final readiness
+  - gateway health checks also accept `Programmed=False (AddressNotAssigned)`
+    when Cilium `gateway-api-hostnetwork-enabled=true` (host-network gateway
+    mode), then rely on route probes for final readiness
 - deploy now gates Helm apply with a machine-readable preflight contract:
   `scripts/deploy/local/preflight.sh`
 - if Infoblox managed mode is enabled (`skyforge.infoblox.enabled=true` and
