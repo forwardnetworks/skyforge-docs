@@ -48,17 +48,25 @@ The Skyforge chart sets:
 - `platform-data` PVC: `ReadWriteMany`
 - `skyforge-server-data` PVC: `ReadWriteMany`
 
-Forward in-cluster storage currently includes `forward-scratch` as `ReadWriteOnce`.
-That means:
+Forward in-cluster storage currently includes PVC-backed workloads that are
+`ReadWriteOnce`. For this model, we enforce a rollout policy instead of hard
+node pinning:
 
-- strict required co-location can create hard scheduling deadlocks under pressure
-- but removing co-location entirely can increase volume attach churn
+- PVC-backed Forward **Deployments** are forced to `strategy.type=Recreate`
+  during deploy and reboot recovery.
+- PVC-backed Forward Deployments with `replicas > 1` are rejected by deploy
+  policy.
+- Forward shared scratch is hard-cut to `forward-scratch` (`ReadWriteOnce`).
+- Deploy/recovery scripts normalize legacy `*-rwx` claim references back to
+  `forward-scratch`, `forward-cbr-backups`, and `forward-cbr-restore`.
+- `scripts/bootstrap-forward-local.sh` creates those contract PVCs directly when
+  the upstream Forward chart does not render them.
+- Forward spread/anti-affinity policy is always applied across
+  Deployments/StatefulSets with `whenUnsatisfiable=DoNotSchedule`
+  (no toggle/fallback path).
 
-Operational policy for Forward workloads is:
-
-- allow scheduling on any `forward` node
-- use **preferred** (not required) scratch-group co-location
-- avoid hard hostname pinning
+This avoids attach churn from concurrent replacement pods while still allowing
+the scheduler to place workloads across nodes.
 
 ## PVC sizing
 

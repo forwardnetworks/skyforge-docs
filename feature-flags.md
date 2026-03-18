@@ -16,7 +16,8 @@ Skyforge supports minimal and full installs through Helm values.
 - `skyforge.redoc.enabled` (default `true`)
 - `skyforge.forward.enabled` (default `true`)
 - `skyforge.forwardCluster.enabled` (default `false`)
-- `skyforge.forwardCluster.observabilityUI.enabled` (default `false`)
+- `skyforge.observability.enabled` (default `true`)
+- `skyforge.observability.managed.enabled` (default `false`)
 - `skyforge.netbox.enabled` (default `false`)
 - `skyforge.nautobot.enabled` (default `false`)
 - `skyforge.infoblox.enabled` (default `false`)
@@ -32,9 +33,16 @@ Related toggles:
 - `skyforge.keda.enabled` (default `false`)
 - `nsq.enabled` (default `true`)
 
+Integration OIDC-gate toggles (when integration is enabled):
+- `skyforge.jira.oidc.enabled` (default `true`)
+- `skyforge.rapid7.oidc.enabled` (default `true`)
+- `skyforge.elk.oidc.enabled` (default `true`)
+- `skyforge.infoblox.oidc.enabled` (default `true`)
+
 Observability notes:
-- Forward Grafana/Prometheus UI entries are gated by `skyforge.forwardCluster.observabilityUI.enabled`.
-- Forward dashboard provisioning pack is gated by `skyforge.forwardCluster.observabilityUI.dashboards.enabled`.
+- Grafana/Prometheus UI entries are gated by `skyforge.observability.enabled`.
+- Built-in Prometheus/Grafana workloads are gated by `skyforge.observability.managed.enabled`.
+- Dashboard provisioning pack is gated by `skyforge.observability.dashboards.enabled`.
 - `skyforge.nodeMetrics.enabled` uses Telegraf ingestion into Skyforge APIs/Postgres (not Prometheus scraping).
 - Syslog ingestion uses Vector when `skyforge.syslog.enabled=true`.
 - `skyforge.keda.enabled` enables KEDA resources for configured blocks (`worker`, `jira`, `netbox`, `nautobot`, `rapid7`, `elkProxy`), with per-block triggers/limits still controlled by values.
@@ -63,6 +71,10 @@ When `skyforge.auth.mode=oidc`, keep `skyforge.dex.enabled=true`. The supported 
 - `Skyforge -> Dex -> upstream IdP`
 
 Dex remains configurable via `skyforge.dex.*`, but that controls Dex's connector mode rather than the Skyforge browser-auth selector.
+
+When any integration OIDC gate is enabled (`jira/rapid7/elk/infoblox`), chart validation enforces:
+- `skyforge.dex.enabled=true`
+- `skyforge.auth.mode=oidc`
 
 Common Dex connector modes:
 - `local` (tool SSO / standalone Dex testing)

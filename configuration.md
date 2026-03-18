@@ -45,6 +45,24 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 - On every Helm install/upgrade, hook job `skyforge-auth-runtime-sync` writes `sf_settings` auth keys (`ui_auth_primary_provider`, `ui_oidc_enabled`, `oidc_*`) from chart values/secrets so runtime auth mode stays aligned with declarative config.
 - Dex connector settings (`skyforge.dex.*`) control Dex's upstream identity provider. They do not replace `skyforge.auth.mode`.
 
+## Integration auth modes (sidebar)
+- Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`.
+- Native OIDC (no Skyforge SSO proxy hop): `Grafana` (via Dex static client `grafana`).
+- OIDC-gated at edge (Skyforge/Dex SSO proxy): `Prometheus`, `Jira`, `Rapid7`, `ELK`, `Infoblox`.
+  - Gate controls (enabled by default when integration is enabled):
+    - `skyforge.jira.oidc.enabled`
+    - `skyforge.rapid7.oidc.enabled`
+    - `skyforge.elk.oidc.enabled`
+    - `skyforge.infoblox.oidc.enabled`
+  - This mode requires:
+    - `skyforge.dex.enabled=true`
+    - `skyforge.auth.mode=oidc`
+  - `Rapid7` TLS upstream is controlled by `skyforge.rapid7.oidc.upstream*`.
+  - `Infoblox` defaults to HTTP upstream port `80` in OIDC gate mode; override with
+    `skyforge.infoblox.oidc.upstream*` if HTTPS upstream is required.
+- Direct route (unauthenticated docs endpoint): `ReDoc` (`/redoc` routes directly to `redoc` service).
+- If converting a proxy-backed integration to native OIDC, hard-cut the proxy route and keep the portal launch URL on the tool's native OIDC start endpoint.
+
 ## Service URLs
 - `GITEA_ROOT_URL`: generated from `skyforge.hostname`
 - Object storage route: `https://<hostname>/files/`

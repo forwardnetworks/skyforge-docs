@@ -17,17 +17,9 @@ git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
 ```
 
-## Required automation in the repo
-
-Ensure these files are present in `skyforge/blueprints`:
-
-- `.gitea/workflows/dns-normalize.yml`
-- `tools/normalize_dns_safe.py`
-
-The workflow auto-normalizes DNS-1035-invalid node names on push.
-
 ## Verification
 
 1. Open Skyforge deployment UI and select template source `Blueprints`.
 2. Confirm templates under `netlab/` are listed.
-3. Confirm run preflight no longer fails with DNS-1035 template node-name errors.
+3. Confirm KNE-backed runs no longer fail on DNS-1035 node-name errors
+   (normalization happens in the netlab KNE plugin at generation time).

@@ -4,7 +4,7 @@ Skyforge loads templates by listing files from a shared template repository in G
 If your Gitea instance is brand new (or the repo was reset), seed the template catalog repo.
 
 This guide assumes:
-- You can reach Gitea via the Skyforge entrypoint `https://<hostname>/api/gitea/public` (preferred), or directly at `/git/`
+- You can reach Gitea via the Skyforge entrypoint `https://<hostname>/git/user/oauth2/oidc` (preferred), or directly at `/git/`
 - You have the Skyforge admin user credentials for Gitea (or any user who can create repos)
 
 ## 1) Create (or verify) the template repo in Gitea
@@ -23,12 +23,8 @@ git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
 ```
 
-The repo should include:
-
-- `tools/normalize_dns_safe.py`
-- `.gitea/workflows/dns-normalize.yml`
-
-That workflow auto-normalizes DNS-safe names on push.
+KNE DNS-1035 normalization is now plugin-native in netlab KNE generation;
+the catalog repo does not require a Gitea Action workflow for node-name fixes.
 
 ## 3) Confirm Skyforge can list templates
 

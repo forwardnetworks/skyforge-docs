@@ -55,9 +55,8 @@ git remote add gitea https://skyforge-qa.local.forwardnetworks.com/git/skyforge/
 git push -u gitea main
 ```
 
-The repo should include DNS normalization automation:
-- `.gitea/workflows/dns-normalize.yml`
-- `tools/normalize_dns_safe.py`
+DNS-1035 normalization for KNE is handled in the netlab KNE plugin during
+generation. No Gitea Action automation is required in the catalog repo.
 
 ## What the installer does
 

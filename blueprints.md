@@ -24,17 +24,11 @@ Keep templates at repo root:
 - `containerlab/...` (optional)
 - `terraform/...` (optional)
 
-## DNS-safe automation
+## DNS-safe behavior
 
-The catalog repo includes a Gitea Action workflow:
-
-- `.gitea/workflows/dns-normalize.yml`
-
-It runs:
-
-- `tools/normalize_dns_safe.py`
-
-On every push and auto-commits DNS-1035-safe node name fixes.
+KNE DNS-1035 node-name normalization is now handled in the netlab KNE plugin
+during generation (`netlab create`). No Gitea Action workflow is required for
+template name normalization.
 
 ## Actions runner prerequisite
 

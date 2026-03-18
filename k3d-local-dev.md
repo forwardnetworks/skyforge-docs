@@ -128,10 +128,11 @@ Current local parity target:
 - local deploy now runs `scripts/deploy/local/integration-repair.sh` before and
   after Helm apply so Forward Postgres leaders are reconciled to the desired
   `postgres.fwd-pg-*.credentials` secrets on every deploy
-- Forward observability UI routes (`/grafana`, `/prometheus`) are enabled in
-  local overlay and currently route through `fwd-appserver`
-  (`/monitoring`, `/prometheus`) rather than dedicated Grafana/Prometheus
-  services
+- Platform observability UI routes (`/grafana`, `/prometheus`) are enabled in
+  local overlay via `skyforge.observability.enabled=true`
+- local overlay now enables the chart-managed observability stack
+  (`skyforge.observability.managed.enabled=true`) so Grafana/Prometheus do not
+  depend on Forward appserver routes
 - local parity validation should be done through the shared Envoy/Gateway routes
   (`/git`, `/coder`, `/netbox`, `/nautobot`, `/api-testing`, `/infoblox`, `/jira`, `/rapid7`, `/dashboard/integrations`) rather
   than any separate frontdoor or localhost-only proxy layer
@@ -166,7 +167,7 @@ Bootstrap and upgrade are now separated:
   resetting local credentials/state
 - blueprint reseed now defaults to the canonical push helper:
   - deploy wrapper calls `scripts/push-blueprints-to-gitea.sh` by default
-  - helper tries route-first access (`/api/gitea/public`, `/git`, `/`) and then
+  - helper tries route-first access (`/git`, `/`) and then
     uses local `kubectl port-forward` to `svc/gitea` if needed
   - if route and port-forward are both unavailable, helper falls back to
     `scripts/reseed-blueprints-incluster.sh`
@@ -373,7 +374,7 @@ Defaults:
   local-path PVC fanout in small k3d clusters.
 - release: `forward-local`
 - registry: `harbor.local.forwardnetworks.com/forward`
-- image tag: `26.2.4-02`
+- image tag: `26.3.0-18`
 - local storage class: `local-path`
 - shared-cluster PVC mode with Skyforge-owned ingress
 
@@ -387,11 +388,10 @@ Important:
   `fwd-compute-worker`, `fwd-search-worker`) before install
 - after the Helm install, the wrapper patches the local appserver and
   backend-master pod templates with the `forwardnetworks.com/scratch-group`
-  label so the in-cluster collector can co-locate the way the upstream
-  collector deployment expects
-- the wrapper now explicitly reconciles `pvc-fwd-collector` and waits for it to
-  bind before waiting on the collector rollout; this prevents pending collector
-  pods after reinstall paths where the PVC delete/recreate timing races
+  label for stable scratch-volume placement
+- shared `forward/fwd-collector` is disabled by default
+  (`SKYFORGE_FORWARD_SHARED_COLLECTOR_ENABLED=false`) because Skyforge now
+  uses per-org collectors only
 - by default the wrapper normalizes the local on-prem org state to
   `ORG_TYPE=INTERNAL` and `ENFORCE_LICENSING=false` after core services come up;
   this avoids restricted-mode behavior in the local all-in-one cluster
@@ -410,8 +410,8 @@ Mirror or sync the package images into Harbor first:
 
 ```bash
 cd /home/captainpacket/src/skyforge
-./scripts/mirror-forward-package-to-ghcr.sh \
-  ~/Downloads/forward-app-26.2.4-02.package
+./scripts/mirror-forward-package-to-harbor.sh \
+  ~/Downloads/forward-app-26.3.0-18.package
 ```
 
 The mirror script publishes:
@@ -431,6 +431,7 @@ SKYFORGE_FORWARD_APPLY_SUPPORT_DEFAULTS=false ./scripts/bootstrap-forward-local.
 SKYFORGE_FORWARD_ENABLE_SUPPORT_USER=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_ROTATE_SUPPORT_PASSWORD=auto ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_COLLECTOR_PASSWORD=admin ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_SHARED_COLLECTOR_ENABLED=false ./scripts/bootstrap-forward-local.sh
 ```
 
 By default, a failed local Forward bootstrap now preserves the Helm release and
@@ -438,8 +439,8 @@ workloads for debugging. Set `SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true` only if
 you explicitly want the wrapper to uninstall a failed `pending-*` release.
 
 `bootstrap-forward-local.sh` now also ensures `forward/collector.credentials`
-exists (key: `password`) before applying Helm, so `fwd-collector` can start on
-clean cluster rebuilds.
+exists (key: `password`) before applying Helm so appserver collector auth
+settings remain valid.
 
 ## Required local context
 

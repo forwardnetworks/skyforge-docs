@@ -131,17 +131,19 @@ Local-only lifecycle defaults are also allowed:
 
 Jira is staged locally by turning on `skyforge.jira.enabled` in the local overlay
 and remains disabled in the prod promotion base. Local `/jira` is expected to be
-an in-cluster Gateway route that targets a Jira Service directly (no redirect
-fallback, no extra proxy tier). Local may set `skyforge.jira.managed=true` to
-run Jira in-cluster for path validation.
+an in-cluster Gateway route that forwards directly to the Jira Service. Local may
+set `skyforge.jira.managed=true` to run Jira in-cluster for path validation.
 
 ### Rapid7
 
 Rapid7 is staged locally by turning on `skyforge.rapid7.enabled` in the local
 overlay and remains disabled in the prod promotion base. Local `/rapid7` is
-expected to be an in-cluster Gateway route that targets a Rapid7 Service
-directly (no redirect fallback, no extra proxy tier). Local may set
-`skyforge.rapid7.managed=true` to run Rapid7 in-cluster for path validation.
+expected to be an in-cluster Gateway route that forwards directly to the Rapid7
+Service over HTTPS. When `skyforge.rapid7.backendTLS.enabled=true`, chart
+renders a Gateway `BackendTLSPolicy` that validates Rapid7 backend certificates
+via `skyforge.rapid7.backendTLS.caConfigMapName`.
+Local may set `skyforge.rapid7.managed=true` to run Rapid7 in-cluster for path
+validation.
 
 ### Image tags
 
@@ -153,7 +155,7 @@ The rest of the platform shape should remain the prod-shaped base.
 The local environment must not reintroduce:
 
 - a separate ingress stack such as local NGINX frontdoor
-- local-only tool proxy behavior
+- local-only tool proxy behavior that differs from the prod auth path
 - local-only API wiring
 - different platform feature toggles outside the approved list
 

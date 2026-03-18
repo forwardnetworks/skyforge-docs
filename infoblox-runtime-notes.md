@@ -10,6 +10,8 @@
 - Multus must remain the primary CNI config when meshnet is present.
   - If `00-meshnet.conflist` is ordered before `00-multus.conf`, NAD attachments are ignored and VMI sync fails with
     `pod link ... is missing`.
+  - Enforce `kube-multus-ds` arg `--multus-master-cni-file-name=05-cilium.conflist` to prevent recursive
+    `00-meshnet.conflist` generation (`multus -> multus -> ...`) after daemonset restarts.
 - The lifecycle autostop path must ignore the VM while `license_pending=true`; otherwise the VM can be halted during bootstrap and the licensing workflow never converges.
 - Lifecycle cronjobs (`*-vm-autostop`, `*-vm-reseed`, `*-vm-license`) are expected to stay unsuspended by default.
   - Chart values now expose explicit `suspend` booleans under each lifecycle lane and default them to `false`.

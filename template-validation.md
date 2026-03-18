@@ -5,17 +5,11 @@ offline (no cluster required) and expose a Netlab “Validate” action in the U
 
 ## Netlab
 
-### Node naming requirement (C9s)
+### Node naming (KNE)
 
-For C9s-backed runs, node names in `topology.yml` must be valid DNS-1035 labels:
-
-- lowercase only
-- 1-63 characters
-- start with a letter (`a-z`)
-- end with an alphanumeric character (`a-z0-9`)
-- allowed characters are `a-z`, `0-9`, and `-`
-
-This rule is enforced by the netlab `k8s` plugin in the runtime validation path (`netlab create`).
+For KNE-backed runs, the netlab KNE plugin normalizes node names to DNS-1035
+labels during `netlab create` generation. Manual pre-normalization in templates
+or Gitea workflows is no longer required.
 
 ### UI
 
@@ -62,8 +56,8 @@ refactor the templates:
 
 We validate containerlab templates against the official containerlab JSON schema (no deploy).
 
-For C9s-backed containerlab runs, Skyforge applies the same DNS-1035 node-name validation during
-template build/preflight.
+For C9s-backed containerlab runs, Skyforge continues to apply DNS-1035 checks
+during template build/preflight.
 
 ```bash
 (cd server && go run ./cmd/validatecontainerlab --root ../blueprints/containerlab) > /tmp/containerlab-validate-report.md
