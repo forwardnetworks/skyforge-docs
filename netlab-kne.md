@@ -39,6 +39,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `netlab create` from the provided topology bundle
   - manifest generation and manifest schema validation
   - writing manifest + node/shared/startup/license/output ConfigMaps
+  - best-effort per-topology image warm-up (DaemonSet pre-pull in topology namespace)
   - creating/updating the clabernetes `Topology` CR
   - waiting for topology readiness
   - running netlab apply (`netlab initial` and device-specific semantics)
@@ -53,6 +54,10 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `Mode`: `"k8s"`
   - `Image`: netlab runtime image (required for `c9s/netlab` generation and deploy/apply phases)
   - `PullPolicy`: image pull policy for runtime jobs
+- Runtime env toggles (optional, consumed by `netlab.py up`):
+  - `SKYFORGE_KNE_PREPULL_ENABLED` (default `true`)
+  - `SKYFORGE_KNE_PREPULL_MAX_IMAGES` (default `8`)
+  - `SKYFORGE_KNE_PREPULL_TIMEOUT_SECONDS` (default `180` per image)
 - Helm values (recommended):
   - `skyforge.netlab.image`
   - `skyforge.netlab.pullPolicy`
@@ -71,6 +76,7 @@ cd skyforge
 4) **Deploy via c9s**
    - Netlab runtime `up` creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
    - Netlab runtime `up` mounts runtime-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
+   - For `deployPolicy.schedulingMode=spread`, Skyforge injects both pod anti-affinity preference and pod `topologySpreadConstraints` on hostname to improve multi-node distribution.
    - The c9s controller uses **clabverter** internally to translate the containerlab definition into Kubernetes resources.
 
 5) **Apply to Kubernetes**
