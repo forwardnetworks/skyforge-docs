@@ -19,8 +19,16 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --flannel-backend=none \
   --disable-network-policy \
   --disable-kube-proxy \
-  --write-kubeconfig-mode 0644" sh -
+  --write-kubeconfig-mode 0644 \
+  --kubelet-arg=cpu-manager-policy=static \
+  --kubelet-arg=cpu-manager-reconcile-period=5s \
+  --kubelet-arg=reserved-cpus=0-1" sh -
 ```
+
+CPU manager note:
+- `cpu-manager-policy=static` requires reserved CPUs.
+- This guide reserves CPUs `0-1` for node/system workloads to avoid kubelet startup failure.
+- On existing nodes switching from `none` to `static`, delete `/var/lib/kubelet/cpu_manager_state` once during migration before restarting `k3s-agent`.
 
 Example checks:
 ```bash

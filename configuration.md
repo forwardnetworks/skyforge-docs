@@ -42,8 +42,30 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
   - Browser login uses `GET /api/auth/oidc/login`
   - Supported OIDC topology is `Skyforge -> Dex -> IdP`
   - For Okta, keep `skyforge.dex.enabled=true`, `skyforge.dex.manageConfig=true`, `skyforge.dex.authMode=oidc`, and populate `skyforge.dex.oidc.*` + `dex-oidc-client-secret`
-- On every Helm install/upgrade, hook job `skyforge-auth-runtime-sync` writes `sf_settings` auth keys (`ui_auth_primary_provider`, `ui_oidc_enabled`, `oidc_*`) from chart values/secrets so runtime auth mode stays aligned with declarative config.
+- On install, hook job `skyforge-auth-runtime-sync` writes `sf_settings` auth keys (`ui_auth_primary_provider`, `ui_oidc_enabled`, `oidc_*`) from chart values/secrets so runtime auth mode stays aligned with declarative config.
+- To also run this hook on upgrades, set `skyforge.hooks.authRuntimeSync.runOnUpgrade=true`.
 - Dex connector settings (`skyforge.dex.*`) control Dex's upstream identity provider. They do not replace `skyforge.auth.mode`.
+
+## Helm hook semantics
+- Bootstrap/reconcile hooks are install-only by default to keep upgrades deterministic:
+  - `skyforge.hooks.authRuntimeSync.runOnUpgrade`
+  - `skyforge.hooks.dbProvision.runOnUpgrade`
+  - `skyforge.hooks.gatewayNodePortsReconcile.runOnUpgrade`
+  - `skyforge.hooks.coderAdminBootstrap.runOnUpgrade`
+  - `skyforge.hooks.giteaActionsRunnerTokenReconcile.runOnUpgrade`
+- Hook jobs expose `backoffLimit` and `activeDeadlineSeconds` under each `skyforge.hooks.*` block.
+
+## Workload priority and reliability
+- Optional priority class generation:
+  - `skyforge.priorityClasses.create`
+  - `skyforge.priorityClasses.core.*`
+  - `skyforge.priorityClasses.integrations.*`
+- Assign classes:
+  - Core: `skyforge.corePriorityClassName`, `skyforge.server.priorityClassName`, `skyforge.worker.priorityClassName`
+  - Heavy integrations: `skyforge.integrationsPriorityClassName`, `skyforge.rapid7.priorityClassName`, `skyforge.elk.priorityClassName`
+- Core API disruption budget:
+  - `skyforge.server.pdb.enabled`
+  - `skyforge.server.pdb.minAvailable`
 
 ## Integration auth modes (sidebar)
 - Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`.

@@ -63,6 +63,10 @@ generation. No Gitea Action automation is required in the catalog repo.
 `scripts/install-on-host.sh`:
 - Ensures `open-iscsi` (for Longhorn) when possible.
 - Installs k3s (unless `SKYFORGE_K3S_INSTALL=false`).
+- Uses kubelet CPU manager defaults for production-style scheduling:
+  - `cpu-manager-policy=static`
+  - `cpu-manager-reconcile-period=5s`
+  - `reserved-cpus=0-1`
 - Installs Helm (unless `SKYFORGE_HELM_INSTALL=false`).
 - Sets `KUBECONFIG=/etc/rancher/k3s/k3s.yaml`.
 - Runs `scripts/install-single-node.sh` to install/upgrade Longhorn + Skyforge Helm chart.
@@ -133,6 +137,18 @@ sudo -E ./scripts/verify-install.sh
 
 - Re-run with `SKYFORGE_RESET=true`.
 - If you are iterating on clabernetes versions, `SKYFORGE_RESET=true` is the fastest way to clear conflicting CRDs.
+
+### Kubelet fails after enabling CPU manager static
+
+If a node previously ran with CPU manager policy `none`, kubelet can fail with a
+checkpoint mismatch after switching to `static`.
+
+On each affected node:
+```bash
+sudo systemctl stop k3s-agent
+sudo rm -f /var/lib/kubelet/cpu_manager_state /var/lib/kubelet/cpu_manager_checkpoint
+sudo systemctl start k3s-agent
+```
 
 ## Notes for OSS readiness
 
