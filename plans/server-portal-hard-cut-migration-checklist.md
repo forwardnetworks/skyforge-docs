@@ -776,8 +776,8 @@ Success gates:
   - `components/server/skyforge/quick_deploy_helpers.go` now owns normalization/filter helpers
   - `components/server/skyforge/quick_deploy_api.go` removed after the split
 - [x] Split dashboard landing page by section
-  - `components/portal/src/components/dashboard-page-content.tsx` reduced to `85` lines as the coordinator
-  - `components/portal/src/components/dashboard-hero-card.tsx` now owns entry actions at `48` lines
+  - `components/portal/src/components/dashboard-page-content.tsx` remains the dashboard coordinator
+  - hero actions, hero copy, and principle inventory now come from `/api/tooling/catalog`; the former `components/portal/src/components/dashboard-hero-card.tsx` drift source has been removed
   - `components/portal/src/components/dashboard-guidance-card.tsx` now owns reservation guidance at `65` lines
   - `components/portal/src/components/dashboard-availability-card.tsx` now owns availability-by-class rendering at `66` lines
   - `components/portal/src/components/dashboard-policy-summary-card.tsx` now owns policy summary rendering at `94` lines
