@@ -184,6 +184,15 @@ Guardrails:
   - embedded `Netlab.Image` in `components/server/skyforge/config.cue` or `components/server/worker/config.cue` differs from the stamp,
   - the deployed image refs do not match requested refs,
   - the live `/assets/skyforge/*` entrypoint hash does not match local built `components/server/frontend/frontend_dist`.
+- `scripts/deploy-skyforge-prod-safe.sh` does not use `helm --wait` by default. It validates
+  readiness with explicit rollout checks for core services (`skyforge-server`,
+  `skyforge-server-worker`) plus post-deploy smoke checks, so optional integrations
+  (for example a halted Infoblox VM) do not block platform rollouts.
+  - Set `HELM_WAIT_FOR_ALL_RESOURCES=true` if you intentionally want strict
+    full-release Helm wait behavior.
+- Forward DB credential reconciliation now ships `scripts/lib/forward-db-auth.sh`
+  from the local repo to a remote temp path at deploy time; remote `/opt/skyforge`
+  copies are no longer required for this step.
 
 Recommended production flow:
 ```bash
