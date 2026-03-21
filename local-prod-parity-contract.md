@@ -93,6 +93,14 @@ The local overlay may override only the following fields:
 - `skyforge.infoblox.lifecycle.license.maxAttempts`
 - `skyforge.jira.enabled`
 - `skyforge.infobloxUrl`
+- `skyforge.forwardCluster.observabilityUI.enabled`
+- `skyforge.forwardCluster.observabilityUI.grafana.serviceName`
+- `skyforge.forwardCluster.observabilityUI.grafana.servicePort`
+- `skyforge.forwardCluster.observabilityUI.grafana.rewritePrefixMatch`
+- `skyforge.forwardCluster.observabilityUI.prometheus.serviceName`
+- `skyforge.forwardCluster.observabilityUI.prometheus.servicePort`
+- `skyforge.forwardCluster.observabilityUI.prometheus.rewritePrefixMatch`
+- `skyforge.forwardCluster.observabilityUI.dashboards.enabled`
 - `images.skyforgeServer`
 - `images.skyforgeServerWorker`
 - `kubernetes.imagePullSecrets`
@@ -149,6 +157,14 @@ validation.
 
 Local may point at candidate Skyforge server/worker images under test.
 The rest of the platform shape should remain the prod-shaped base.
+
+### Forward observability UI remap
+
+Local Forward package builds currently expose Grafana/Prometheus-compatible UI
+paths from `fwd-appserver` (`/monitoring` and `/prometheus`) rather than the
+prod external endpoints. Local overlay may set
+`skyforge.forwardCluster.observabilityUI.*` to keep sidebar links functional
+without introducing a separate local proxy architecture.
 
 ## Non-goals
 
