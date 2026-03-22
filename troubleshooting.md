@@ -49,7 +49,23 @@ kubectl -n skyforge rollout status deploy/skyforge-server --timeout=5m
 
 Deployment guardrail:
 - `scripts/deploy-skyforge-local.sh` and `scripts/deploy-skyforge-prod-safe.sh` run this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
+- `scripts/deploy-skyforge-prod-safe.sh` also enforces node kernel sysctl `fs.inotify.max_user_instances=64000` pre-Helm.
+- `scripts/deploy-skyforge-prod-safe.sh` now enforces Forward worker host prerequisites pre-Helm using `scripts/k8s-forward-worker-prereqs.sh`:
+  - ensures `/etc/rancher/k3s/registries.yaml` is present on nodes with Forward worker labels
+  - ensures `/dev/sdg` exists (default alias target `/dev/sdb`) for Forward node-agent compatibility on newly joined workers
 - Node-local Cilium datapath restarts are opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true` or explicit `--repair` workflows).
+
+Forward worker prereq gate knobs:
+- `SKYFORGE_FORWARD_WORKER_PREREQS_ENABLE` (default `true`)
+- `SKYFORGE_FORWARD_WORKER_PREREQS_STRICT` (default `true`)
+- `SKYFORGE_FORWARD_WORKER_PREREQS_NAMESPACE` (default `kube-system`)
+- `SKYFORGE_FORWARD_WORKER_PREREQS_IMAGE` (default `busybox:1.36`)
+- `SKYFORGE_FORWARD_WORKER_REGISTRY_HOST` (default `harbor.local.forwardnetworks.com`)
+- `SKYFORGE_FORWARD_WORKER_REGISTRY_ENDPOINT` (default `https://harbor.local.forwardnetworks.com`)
+- `SKYFORGE_FORWARD_WORKER_REGISTRY_INSECURE_SKIP_VERIFY` (default `true`)
+- `SKYFORGE_FORWARD_WORKER_ENSURE_SDG_ALIAS` (default `true`)
+- `SKYFORGE_FORWARD_WORKER_SDG_TARGET` (default `/dev/sdb`)
+- `SKYFORGE_FORWARD_WORKER_PREREQS_NODE_TIMEOUT_SECONDS` (default `120`)
 
 ## Forward appserver 503 / collector auth drift
 Symptom:

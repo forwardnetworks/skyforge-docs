@@ -1,28 +1,44 @@
-# KNE Model Alias Contract for Netlab-Native Topologies
+# KNE Model Contract for Netlab-Native Topologies
 
 ## Goal
 
-Skyforge now emits KNE node `vendor/model/os` from netlab-native values (no runtime translation).  
-To keep this pure-orchestrator contract, KNE must accept the model strings netlab emits.
+Skyforge emits KNE node `vendor/model/os` from netlab plugin canonical values (no runtime mutation).
+KNE should stay minimal and consume canonical models directly.
 
-## Required fork work (`forwardnetworks/kne`)
+## Canonical model mapping (plugin-owned)
 
-1. Add Cisco model aliases in `topo/node/cisco/cisco.go`:
-   - `cisco_xrd` -> `xrd`
-   - `cisco_iol` -> `xrd` (container IOL path today)
-   - `cisco_n9kv` -> supported Cisco model path
-   - `cisco_asav` -> supported Cisco model path
-2. Keep existing canonical model behavior unchanged.
-3. Add unit tests in `topo/node/cisco/cisco_test.go` for each alias.
-4. Pin Skyforge netlab runtime image to a KNE commit that includes these aliases.
+- EOS -> `vendor=ARISTA`, `model=ceos`, `os=eos`
+- IOSXR/XRD -> `vendor=CISCO`, `model=xrd`, `os=ios-xr`
+- IOL -> `vendor=CISCO`, `model=iol`, `os=ios`
+- IOLL2 -> `vendor=CISCO`, `model=ioll2`, `os=ios`
 
-## Why this is required
+## KNE responsibilities
 
-- Netlab plugin now preserves source model identity.
-- Without KNE aliases, `kne_cli create` fails with `unexpected model` for netlab-native model strings.
+1. Implement canonical model behavior (no alias table).
+2. Validate model support in vendor node defaults.
+3. Keep watcher behavior namespace-scoped for per-topology isolation.
 
-## Hard-cut rule
+## IOL/IOLL2 support contract
 
-- No model rewriting in `netlab.py`.
-- No model rewriting in Skyforge taskengine.
-- All model compatibility is owned by the KNE plugin defaults + KNE controller/node implementation.
+For `model=iol` and `model=ioll2` in KNE Cisco node:
+
+1. `Config.Image` is required (no baked-in `vrnetlab/*` defaults).
+2. KNE create/status must work natively.
+3. KNE reset/config-push paths follow Cisco workflow parity with model-specific command handling.
+
+## Image build guidance (non-vrnetlab)
+
+Build/publish an IOL runtime image that:
+
+1. Runs the IOL/IOLL2 process as PID 1 (or supervised foreground).
+2. Exposes SSH on port 22 for netlab readiness/config paths.
+3. Can consume startup config from mounted file path (KNE `config.data`/`config.file` mount).
+4. Is published for cluster pull (for example `ghcr.io/<org>/cisco-iol:<tag>`).
+
+See also: `components/docs/kne-iol-image.md`.
+
+## Hard-cut rules
+
+1. No model rewriting in `netlab.py`.
+2. No model rewriting in Skyforge taskengine.
+3. Startup bootstrap stays in netlab KNE plugin, not in KNE vendor node fallback logic.

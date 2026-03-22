@@ -79,6 +79,8 @@ Run one pre-prod environment with prod auth and real ingress before prod cut:
 Cluster resiliency gate:
 - `scripts/deploy-skyforge-prod-safe.sh` now executes `scripts/k8s-network-resilience.sh`
   before and after Helm apply in strict mode.
+- `scripts/deploy-skyforge-prod-safe.sh` enforces node kernel sysctl
+  `fs.inotify.max_user_instances=64000` pre-Helm via `scripts/k8s-node-sysctl-enforce.sh`.
 - Auto-repair of node-local Cilium datapath is opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true`).
 - Tune only if needed:
   - `SKYFORGE_NETWORK_RESILIENCE_ENABLE=true|false`

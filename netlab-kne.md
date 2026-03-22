@@ -43,6 +43,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - creating/updating the clabernetes `Topology` CR
   - waiting for topology readiness
   - running netlab apply (`netlab initial` and device-specific semantics)
+  - defaulting `netlab initial` to `--fast` (Ansible free strategy) unless explicitly overridden
 - Skyforge runs one Kubernetes runtime job for teardown (`netlab.py down`):
   - deletes the clabernetes `Topology` CR
   - deletes c9s runtime ConfigMaps labeled for that topology
@@ -61,6 +62,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
 - Helm values (recommended):
   - `skyforge.netlab.image`
   - `skyforge.netlab.pullPolicy`
+  - `skyforge.netlab.runtimePrepull.enabled` (cluster-level runtime image warm cache)
 - SR OS license injection (required when deploying `sros`):
   - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
   - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
