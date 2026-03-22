@@ -99,9 +99,12 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
     `spec.deployment.filesFromConfigMap` mounts for that node.
   - IOL/IOLL2 runtime paths are supported in native mode using dedicated
     k8s-native image tags and image-owned runtime wiring.
-  - VM-class NOS nodes (for example `cisco_n9kv`) are reconciled as
-    KubeVirt `VirtualMachine` resources; launcher Deployments remain for
-    fabric connectivity only, while expose services target VM runtime pods.
+  - VM-class NOS nodes now carry an explicit KNE runtime contract in the
+    topology protobuf (`node.runtime = KUBEVIRT_VM`) instead of relying on the
+    old Skyforge-side `enableKubeVirtVMRuntime` deployment flag.
+  - The netlab KNE plugin now emits canonical vendor/model/runtime tuples for
+    VM-class nodes (for example `nxos -> vendor=CISCO, model=n9kv,
+    runtime=KUBEVIRT_VM`).
   - VM disk images should be published as KubeVirt-compatible `containerDisk`
     images (disk at `/disk/disk.qcow2`) instead of vrnetlab runtime images.
     - helper: `scripts/build-kubevirt-containerdisk-from-vrnetlab.sh`
@@ -109,17 +112,47 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
       - source: `ghcr.io/forwardnetworks/vrnetlab/vr-n9kv:9.3.8`
       - destination: `ghcr.io/forwardnetworks/kubevirt/vr-n9kv:9.3.8`
   - VM runtime classification is kind-driven with image-based kubevirt hints.
-    If a VM node resolves to a `vrnetlab/*` image path, reconcile fails fast
-    and requires a `kubevirt/*` containerDisk image instead.
-  - VM nodes now honor containerlab/netlab `startup-config` when it is
-    artifact-backed in `spec.deployment.filesFromConfigMap` for that node:
-    clabernetes resolves the mounted startup-config source and injects it as a
-    KubeVirt ConfigMap-backed boot disk. Missing startup-config artifact
-    mappings fail fast.
+    If a VM node resolves to a `vrnetlab/*` image path, the runtime contract
+    should be treated as invalid and converted to a `kubevirt/*`
+    `containerDisk` image before deployment.
+  - Startup configuration ownership remains in KNE via the existing
+    `config_data` / `config_path` / `config_file` contract. Netlab/Skyforge do
+    not inject a separate Skyforge-only VM startup-config bridge.
   - Cluster prerequisite for VM-class NOS in native mode: KubeVirt CRDs/API
     (`kubevirt.io/v1`) must be installed; VM runs fail fast when unavailable.
-  - This validation runs before deployment create/update so unsupported runtime
-    semantics do not partially apply.
+  - KNE now creates a per-node fabric contract ConfigMap
+    (`<node>-fabric-contract`) and annotates/labels launcher + VM resources with
+    that contract reference.
+    - Contract generation excludes management interface `eth0` and incomplete
+      link entries, keeping fabric reconciliation scoped to data-plane links.
+  - KNE now runs a kubevirt fabric reconciliation loop after node creation:
+    it resolves live `virt-launcher` pod names, parses each node fabric
+    contract, and updates meshnet Topology CRs so link peer-pod references
+    target the resolved VM runtime pod identities.
+    - reconciled Topology CRs are marked managed with
+      `kne.forwardnetworks.com/kubevirt-fabric-managed=true` and owner
+      annotation `kne.forwardnetworks.com/kubevirt-fabric-owner-node=<node>`
+      so stale runtime-pod topology objects can be cleaned safely on pod-name
+      rotation.
+  - KNE now waits for meshnet Topology status readiness on resolved VM runtime
+    pods (`status.net_ns` + `status.container_id`) and fails fast if fabric
+    status does not converge within the reconcile timeout window.
+  - Non-Cisco VM-class nodes (for example Juniper/Nokia/host-backed FortiOS)
+    now use the same KNE native KubeVirt runtime path when
+    `node.runtime = KUBEVIRT_VM`:
+    - KNE creates/updates VirtualMachine resources directly from topology
+      contract fields (`config.image`, startup-config, constraints, services).
+    - KNE service selectors target `kubevirt.io/domain=<node>` consistently
+      across vendors.
+  - Optional VM guest secondary-interface bridge:
+    - feature gate env: `KNE_KUBEVIRT_SECONDARY_INTERFACES=true` (per node)
+    - KNE creates/updates per-link `NetworkAttachmentDefinition` resources and
+      wires VM interfaces/networks from the node fabric contract.
+    - KNE waits for expected guest interface names to appear on VMI status
+      before marking node creation complete.
+    - gate is fail-closed and disabled by default.
+  - Guest-NIC hotplug/attach beyond current runtime-pod link reconciliation
+    remains follow-up work.
 - Netlab generator handoff uses a versioned manifest contract:
   - contract version: `skyforge.netlab-c9s.manifest/v1`
   - schema file: `components/server/internal/taskengine/netlab_c9s_manifest.schema.json`
