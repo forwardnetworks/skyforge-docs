@@ -75,6 +75,17 @@ cd skyforge
 ./scripts/build-push-skyforge-netlab.sh --tag <tag>
 ```
 
+### Build the Linux host image (SSH + periodic activity)
+
+Linux endpoints use a dedicated image (`skyforge-linux-host`) with `sshd` and a
+deterministic background activity loop (once per minute by default, configurable
+via `NETLAB_HOST_ACTIVITY_INTERVAL`).
+
+```bash
+cd skyforge
+./scripts/build-push-skyforge-linux-host.sh --tag <tag>
+```
+
 4) **Deploy via c9s**
    - Netlab runtime `up` creates a `Topology` custom resource embedding the Containerlab YAML (`spec.definition.containerlab`).
    - Netlab runtime `up` mounts runtime-produced `node_files/` and `config/` artifacts into c9s launcher pods via `spec.deployment.filesFromConfigMap`.
