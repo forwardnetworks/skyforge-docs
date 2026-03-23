@@ -48,7 +48,7 @@ The current reusable execution seam already exists in the backend:
 The concrete boundary to preserve is:
 
 - queued control-plane task type: `netlab-c9s-run`
-- runtime manifest contract: `skyforge.netlab-c9s.manifest/v1`
+- runtime manifest contract: `skyforge.netlab-kne.manifest`
 
 That manifest boundary is the right future split between review/render and
 approved apply. The config-change pipeline should persist and hand off that same
@@ -436,7 +436,7 @@ If new source kinds become executable later, they must not introduce a
 second apply path. The only acceptable execution target is still the existing:
 
 - queued control-plane task type: `netlab-c9s-run`
-- runtime manifest contract: `skyforge.netlab-c9s.manifest/v1`
+- runtime manifest contract: `skyforge.netlab-kne.manifest`
 
 The design rule is:
 
@@ -515,7 +515,7 @@ Freeform shell outside the bounded hook model remains out of scope.
 ### Required Manifest Evolution
 
 Do not add a second runtime manifest. Extend the existing
-`skyforge.netlab-c9s.manifest/v1` boundary only if needed with explicit optional
+`skyforge.netlab-kne.manifest` boundary only if needed with explicit optional
 fields such as:
 
 - `topologyBundleB64`

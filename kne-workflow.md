@@ -153,15 +153,15 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
     - gate is fail-closed and disabled by default.
   - Guest-NIC hotplug/attach beyond current runtime-pod link reconciliation
     remains follow-up work.
-- Netlab generator handoff uses a versioned manifest contract:
-  - contract version: `skyforge.netlab-c9s.manifest/v1`
-  - schema file: `components/server/internal/taskengine/netlab_c9s_manifest.schema.json`
-  - required top-level fields: `contractVersion`, `bundleSha256`, `clabYAML`, `nodes`, `k8s`
+- Netlab generator handoff uses a single manifest contract:
+  - contract: `skyforge.netlab-kne.manifest`
+  - schema file: `components/server/internal/taskengine/netlab_kne_manifest.schema.json`
+  - required top-level fields: `contractVersion`, `bundleSha256`, `kneTopologyTextProto`, `applyPlan`, `nodeNameMap`, `nodes`, `k8s`
   - optional strict field: `nodeLicenses` (per-node ConfigMap/key + mount path contract)
   - generator validates schema before publishing `manifest.json`
   - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
-  - if `clab.yml` references startup configs, runtime requires those paths to be artifact-backed in per-node `node_files` mounts (upstream netlab/containerlab pattern)
+  - if startup configs are referenced in the manifest apply plan, runtime requires those files to be artifact-backed in per-node `node_files` mounts
 - Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
   written to typed runtime-contract rows in `sf_task_runtime_contracts`
   (not environment overrides).

@@ -27,7 +27,7 @@ contract while preserving native Skyforge ownership of lifecycle and auditing.
 - Updated docs to reflect plugin-migration direction (no longer framed as
   “maybe later”).
 - Added contract v1 schema lock:
-  - canonical schema file `internal/taskengine/netlab_c9s_manifest.schema.json`
+  - canonical schema file `internal/taskengine/netlab_kne_manifest.schema.json`
   - generator validates manifest against schema before publish
   - runtime `up` path validates manifest JSON before deploy/apply
   - golden schema fixtures enforce fail-closed behavior in CI tests
