@@ -37,12 +37,25 @@ For IOL-L2, use the same script with a layer-2 command line:
 The generated image entrypoint does the following:
 
 1. Copies KNE mounted startup file (`/startup.cfg`) into your requested startup path.
-2. Starts `sshd` (best effort) when available.
-3. Launches your `--iol-cmd` process as PID 1.
-4. Exposes port `22` and the configured console port.
+2. Disables NIC offloads on `eth*` interfaces before starting IOL.
+3. Starts `sshd` on port `22`.
+4. Bridges SSH logins into the IOL console on `127.0.0.1:<console-port>`.
+5. Launches your `--iol-cmd` process as PID 1.
+
+This means external automation sees an IOS CLI over SSH on port `22`, while the
+image still uses the native local IOL console internally.
 
 ## KNE / netlab expectations
 
 1. KNE model should be canonical `iol` or `ioll2`.
 2. `Config.Image` must be set (no KNE hardcoded default image for IOL).
 3. If your image uses a non-default console port, set `IOL_CONSOLE_PORT` in node env.
+
+## Base image requirements
+
+The helper script currently assumes a Debian/apt-based base image and installs:
+
+- `openssh-server`
+- `inetutils-telnet`
+- `procps`
+- `ethtool`

@@ -432,11 +432,22 @@ SKYFORGE_FORWARD_ENABLE_SUPPORT_USER=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_ROTATE_SUPPORT_PASSWORD=auto ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_COLLECTOR_PASSWORD=admin ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_SHARED_COLLECTOR_ENABLED=false ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_WORKER_REPLICAS=5 ./scripts/bootstrap-forward-local.sh
 ```
 
 By default, a failed local Forward bootstrap now preserves the Helm release and
 workloads for debugging. Set `SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true` only if
 you explicitly want the wrapper to uninstall a failed `pending-*` release.
+
+`SKYFORGE_FORWARD_WORKER_REPLICAS` now defaults to `auto`, which pins both
+`fwd-compute-worker` and `fwd-search-worker` to the number of nodes labeled
+`forwardnetworks.com/role=forward`. Set an explicit integer only when you need
+to override that pool-sized default.
+
+In multi-node local clusters, `bootstrap-forward-local.sh` now keeps the
+Kubernetes control-plane node out of Forward placement: one non-control-plane
+worker becomes the local Forward master/monitoring node, and the remaining
+worker nodes form the Forward compute/search pool.
 
 `bootstrap-forward-local.sh` now also ensures `forward/collector.credentials`
 exists (key: `password`) before applying Helm so appserver collector auth
