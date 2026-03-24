@@ -22,8 +22,14 @@ On each k3s node:
 - Ensure `open-iscsi` is installed and `iscsid` is running.
 - Ensure the `iscsi_tcp` kernel module is loaded and persisted:
   - `/etc/modules-load.d/iscsi.conf` contains `iscsi_tcp`
-- Ensure Longhorn data path exists on the big disk:
-  - Bind mount `/var/lib/rancher/k3s/storage/longhorn` → `/var/lib/longhorn`
+- Ensure the big disk backs both Longhorn replicas and Forward's node-agent
+  data path:
+  - Bind mount `/var/lib/rancher/k3s/storage/longhorn` -> `/var/lib/longhorn`
+  - Bind mount a directory on the same big disk -> `/mnt/forward/extended`
+  - Do not leave `/mnt/forward/extended` on the root filesystem. Forward's
+    `node-agent` reports that path as the `DATA` disk, and the platform enters
+    read-only mode when that path runs low on space even if Longhorn itself is
+    healthy on a different device.
 
 ## Storage classes
 
@@ -67,6 +73,20 @@ node pinning:
 
 This avoids attach churn from concurrent replacement pods while still allowing
 the scheduler to place workloads across nodes.
+
+## Bootstrap verification
+
+`scripts/bootstrap-forward-local.sh` now validates the big-disk contract when
+the Forward chart is configured for `longhorn` storage:
+
+- Longhorn's `default-data-path` must be `/var/lib/longhorn`
+- each schedulable Longhorn disk must meet the expected capacity floor
+  (`SKYFORGE_FORWARD_LONGHORN_MIN_GIB`, default `750`)
+- after Forward deploys, `fwd-node-agent` must also see `/mnt/forward/extended`
+  on a filesystem at or above that same capacity floor
+
+If any of those checks fail, bootstrap exits with a concrete error instead of
+letting Forward drift into false low-space or read-only mode later.
 
 ## PVC sizing
 

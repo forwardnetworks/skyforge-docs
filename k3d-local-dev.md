@@ -369,9 +369,11 @@ Defaults:
 - Forward repo: `~/src/fwd`
 - chart: `ops/kubernetes/fwd-helm`
 - namespace: `forward`
-- local bootstrap pins `fwd-cbr-agent` to 1 replica and disables `fwd-autopilot`
-  by default (`SKYFORGE_FORWARD_ENABLE_AUTOPILOT=false`) to avoid unschedulable
-  local-path PVC fanout in small k3d clusters.
+- local bootstrap resolves `fwd-cbr-agent` replicas automatically across
+  eligible Forward `app` plus `control` nodes. Override with
+  `SKYFORGE_FORWARD_CBR_AGENT_REPLICAS=<n>` if you want a smaller footprint.
+- local bootstrap disables `fwd-autopilot` by default
+  (`SKYFORGE_FORWARD_ENABLE_AUTOPILOT=false`).
 - release: `forward-local`
 - registry: `harbor.local.forwardnetworks.com/forward`
 - image tag: `26.3.0-18`
@@ -405,6 +407,10 @@ Important:
 - valid registry credentials for the Forward runtime images must already
   exist in `~/.docker/config.json`; the script does a manifest preflight and
   fails fast if `harbor.local.forwardnetworks.com/forward` is not accessible
+- when the selected Forward storage class is `longhorn`, bootstrap now also
+  validates that both Longhorn's `/var/lib/longhorn` path and Forward's
+  `/mnt/forward/extended` node-agent data path are actually backed by a
+  big-disk filesystem (`SKYFORGE_FORWARD_LONGHORN_MIN_GIB`, default `750`)
 
 Mirror or sync the package images into Harbor first:
 

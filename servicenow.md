@@ -13,22 +13,21 @@ The demo app:
 
 - One global ServiceNow PDI is configured by Skyforge admins.
 - Each Skyforge user maps to a dedicated ServiceNow tenant user.
-- Each user binds their own Forward credential set.
+- Each user is bound to their managed Skyforge Forward org credential.
 - Runtime operations are server-scoped to the authenticated Skyforge user.
 
 ## Prerequisites
 
 - A ServiceNow Personal Developer Instance (PDI)
-- At least one saved Forward credential set in Skyforge.
+- Skyforge Forward tenant provisioning enabled for the user.
 
 ## Setup
 
-1) Admin: open **Settings → Admin** and configure:
+1) Admin: open **Settings → Users & Access** and configure:
    - ServiceNow instance URL
    - ServiceNow admin username/password
-   - optional bootstrap Forward credential set
-2) User: open **ServiceNow**.
-3) Select a Forward credential set (from **Forward → Credentials**).
+2) Admin: click **Install shared app assets** once after global settings are saved.
+3) User: open **ServiceNow**.
 4) Click **Save tenant binding**.
 5) Click **Run setup**.
 6) If setup pauses at `needs_manual_step`, apply remediation shown in the UI and click **Resume setup**.
@@ -37,8 +36,9 @@ The demo app:
 
 - **Reset tenant password** rotates the mapped ServiceNow user password and
   reprovisions the tenant user.
-- Forward ticketing integration is configured using tenant credentials, not the
-  global ServiceNow admin account.
+- Forward ticketing integration is configured using the user's managed Forward
+  org credential plus tenant ServiceNow credentials, not the global ServiceNow
+  admin account.
 
 ## Reachability Gate
 
@@ -49,10 +49,13 @@ The demo app:
 
 ## Notes
 
-- ServiceNow calls the selected Forward host directly.
+- ServiceNow calls the user's managed Forward org endpoint directly.
 - Skyforge attempts to create the required schema and assets via ServiceNow Table API.
 - If the ServiceNow instance blocks table creation, setup reports exact manual steps and supports resume.
-- The installer overwrites demo artifact contents by name (scripts, widget, REST message, properties).
+- The installer overwrites demo artifact contents by name (scripts, widget, tables, and properties).
+- Forward username/password are stored in a per-tenant ServiceNow binding
+  record, not in global sys_properties, so one user's setup does not overwrite
+  another user's binding in the shared PDI.
 - Skyforge runs an Encore-native keepalive cron for the global PDI (`/internal/cron/servicenow/pdi/keepalive`) every 20 minutes to reduce demo interruptions from PDI sleep/hibernation.
 
 ## Demo Asset Source-Of-Truth
