@@ -52,7 +52,12 @@ Demo-org resets are isolated from deployment state:
 
 - they do not clear deployment Forward sync state
 - they do not tear down managed collector state
-- they only rotate or reprovision the demo org itself
+- they destroy and recreate the demo org when a curated or hard reset runs
+- they replay the admin-managed demo seed catalog into a single network named
+  `Demo Network`
+- they generate synthetic performance data after the final seeded snapshot is
+  processed
+- they rotate the demo-org credential whenever the org is recreated
 
 This separation is required so a demo-org reset cannot damage the active
 deployment-backed org.
@@ -80,26 +85,36 @@ Managed-org API surfaces:
   - `GET /api/forward/demo-org/performance-networks`
   - `POST /api/forward/demo-org/performance-networks/:networkID/generate`
 
-## Current boundary
+## Demo seed catalog
 
-Skyforge now has the dual-org control-plane split, tenant-safe reset behavior,
-and per-org synthetic performance controls. It does not yet have a built-in
-curated demo data seed source that can recreate a non-empty demo org after a
-hard reset.
+Skyforge now supports an admin-managed demo seed catalog:
 
-That matters because a true daily curated demo reset requires a replayable demo
-dataset or an import/clone workflow from Forward. The local Forward API wrapper
-currently covers:
+- admins upload one or more snapshot zip archives
+- each seed has an enable flag and replay order
+- nightly and manual demo rebuilds use the same ordered seed list
+- all enabled seeds replay into the same demo network in order
 
-- org and user provisioning
-- network creation and deletion
-- device and credential upsert
-- collection control
-- synthetic performance generation
+Admin API surfaces:
 
-It does not yet include a supported export/import or org-clone path for demo
-content reseeding.
+- `GET /api/admin/integrations/forward/demo-seeds`
+- `POST /api/admin/integrations/forward/demo-seeds`
+- `PATCH /api/admin/integrations/forward/demo-seeds/:seedID`
+- `DELETE /api/admin/integrations/forward/demo-seeds/:seedID`
 
-Until a seed source is defined, the implemented demo-org reset behavior is
-limited to safe reprovisioning and credential isolation, not curated dataset
-replay.
+The seed archives are stored in the configured object store, while seed catalog
+metadata is stored in settings.
+
+## Nightly rebuilds
+
+Skyforge queues a daily demo-org curated reset for known users. That nightly
+workflow:
+
+1. destroys and recreates the demo org
+2. creates `Demo Network`
+3. uploads each enabled seed archive in order
+4. waits for the final snapshot to process
+5. generates synthetic performance data
+
+Because the org is recreated, demo-org credentials are ephemeral and rotate on
+nightly rebuilds. Users should rely on the session bridge or the reveal/copy
+controls in `Forward Org Access` for the current demo credential.
