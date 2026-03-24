@@ -1,81 +1,105 @@
-# Skyforge ↔ Forward Integration Model (Proposed)
+# Skyforge Forward Integration Model
 
-This document outlines a model for connecting Skyforge deployments (family/engine pairs such as `c9s/netlab`, `byos/containerlab`, and `byos/netlab`) to Forward (network creation + classic device onboarding) without tying the configuration to a single deployment.
+This document describes the current managed Forward model in Skyforge.
 
-## Goals
+## Managed orgs per user
 
-- Avoid re-entering Forward credentials per user scope.
-- Support multiple concurrent deployments per user.
-- Work with in-cluster (c9s) deployments without inbound connectivity requirements.
-- Keep secrets local to Skyforge (stored server-side; never committed).
+Skyforge now manages two Forward org credentials per user:
 
-## Recommendation: per-user Forward profile + in-cluster collector
+- `primary`
+  - deployment-backed org
+  - used for managed collector lifecycle
+  - used for deployment sync
+  - used for network-targeted Forward launch flows
+- `demo`
+  - isolated demo org
+  - not used for deployment sync
+  - does not require a managed collector
+  - default target for the generic Forward launch button
 
-### 1) Per-user Forward profile (preferred scope)
+Both orgs are provisioned from the platform-managed Forward tenant flow. The
+demo org uses a distinct Forward username and org name suffix to avoid relying
+on org-scoped usernames.
 
-Store these per authenticated user:
+## UI behavior
 
-- Forward base URL (`https://app.forwardnetworks.com` or equivalent).
-- Forward API token (or username/password if required).
-- Preferred collector (optional) if using a shared collector fleet.
+Forward navigation now exposes two managed-org entry points:
 
-Why per-user:
-- A user’s Forward identity is independent of a particular deployment.
-- Deployments come and go; the integration should persist.
+- `Demo Org`
+- `Deployment Org`
 
-### 2) In-cluster Forward Collector (preferred data-plane)
+The generic Forward launch action opens the `demo` org by default. Deployment
+and network-specific actions remain pinned to the `primary` org.
 
-For deployments that live in the Kubernetes cluster (`c9s/netlab`), the simplest and most reliable approach is to run a Forward collector **inside the cluster**:
+The `Forward Org Access` page now shows both managed orgs separately:
 
-- One collector per user (recommended), or one collector per user scope (simpler isolation).
-- The collector establishes outbound connectivity to Forward, and uses in-cluster networking to reach the device management IPs (pod IPs / services).
+- demo org credential, reset, and synthetic performance controls
+- deployment org credential, feature flags, synthetic performance controls, and
+  rebuild controls
 
-Benefits:
-- No inbound firewall/NAT requirements.
-- No jump/bastion required to reach pod IPs.
+Saved external Forward credential sets remain separate from the managed-org
+credentials.
 
-## BYOS: external devices / remote lab servers
+## Reset behavior
 
-For Bring-Your-Own-Server deployments (devices live outside the cluster), you typically need an additional “reachability bridge” from the collector to the devices.
+Deployment-org resets preserve the existing managed behavior:
 
-Two options:
+- managed collector state is torn down and recreated as needed
+- deployment sync state is cleared and rebound
+- managed deployment baselines are restored and resynced
 
-### Option A (recommended): collector runs near the devices
+Demo-org resets are isolated from deployment state:
 
-- User runs their own collector on the same network as their lab devices.
-- Skyforge only pushes device inventory (IP, port, type hints, credentials).
+- they do not clear deployment Forward sync state
+- they do not tear down managed collector state
+- they only rotate or reprovision the demo org itself
 
-### Option B: Skyforge provides a jump/bastion endpoint
+This separation is required so a demo-org reset cannot damage the active
+deployment-backed org.
 
-- Skyforge deploys a per-user SSH bastion inside the cluster and exposes it (NodePort/LoadBalancer).
-- The collector (outside) uses the bastion as a jump host to reach internal device addresses.
+## Synthetic performance generation
 
-Tradeoffs:
-- More operational complexity (exposure, auth, rotation).
-- Requires careful isolation to avoid cross-tenant access.
+Skyforge exposes synthetic performance generation for both managed orgs.
 
-## Suggested UX
+For each managed org, the UI lists the visible Forward networks, resolves the
+latest processed snapshot when available, and calls the internal Forward API:
 
-- **User settings**: “Forward Integration”
-  - Configure token and (optional) collector preference.
-  - Test connection.
-- **Deployment run**: uses the user’s Forward profile by default.
-  - Still allow overrides (advanced) per user scope/deployment if needed.
+- `POST /api/internal/networks/<networkId>/performance`
+  - `op=generate`
+  - `snapshotId=<snapshotId>`
+  - `generationIntervalMins=10`
+  - `healthyDeviceOdds=0.8`
+  - `healthyInterfaceOdds=0.8`
 
-## Provisioning trigger contract
+Managed-org API surfaces:
 
-- When `features.forwardEnabled=true`, successful Skyforge authentication triggers
-  a background ensure of the user Forward org credential.
-- The ensure call is idempotent and acts as self-heal for missing local mapping
-  and missing/rotated Forward-side user state.
-- User-initiated password reset remains available via
-  `/api/forward/org-credential/reset`.
+- deployment org
+  - `GET /api/forward/org/performance-networks`
+  - `POST /api/forward/org/performance-networks/:networkID/generate`
+- demo org
+  - `GET /api/forward/demo-org/performance-networks`
+  - `POST /api/forward/demo-org/performance-networks/:networkID/generate`
 
-## Implementation sketch (high level)
+## Current boundary
 
-1) Persist per-user Forward credentials in `sf_users`-adjacent table (encrypted at rest).
-2) When a deployment run reaches “sync to Forward”:
-   - Ensure a collector exists (if in-cluster model).
-   - Create/ensure Forward network.
-   - Upsert classic devices with best-effort type hints where known.
-3) Store Forward network ID in deployment config for later updates/destroy.
+Skyforge now has the dual-org control-plane split, tenant-safe reset behavior,
+and per-org synthetic performance controls. It does not yet have a built-in
+curated demo data seed source that can recreate a non-empty demo org after a
+hard reset.
+
+That matters because a true daily curated demo reset requires a replayable demo
+dataset or an import/clone workflow from Forward. The local Forward API wrapper
+currently covers:
+
+- org and user provisioning
+- network creation and deletion
+- device and credential upsert
+- collection control
+- synthetic performance generation
+
+It does not yet include a supported export/import or org-clone path for demo
+content reseeding.
+
+Until a seed source is defined, the implemented demo-org reset behavior is
+limited to safe reprovisioning and credential isolation, not curated dataset
+replay.
