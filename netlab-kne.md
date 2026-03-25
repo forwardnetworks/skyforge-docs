@@ -120,6 +120,18 @@ cd skyforge
      - reconstructs `node_files/` locally from per-node ConfigMaps
      - runs netlab runtime apply (`netlab initial` and netlab-native config modules)
 
+### KubeVirt multi-node contract
+
+- For KubeVirt-backed NOSes, `eth0` remains reserved for management. Generated
+  data-plane links must start at `eth1`; otherwise KNE meshnet peer resolution
+  and Multus attachment ordering break for VM-backed nodes.
+- The `skyforge-netlab-runtime` service account must be allowed to manage
+  `network-attachment-definitions` in the topology namespace because KNE fabric
+  reconciliation creates and updates those NADs during KubeVirt bring-up.
+- KubeVirt fabric reconciliation should preserve logical node topology aliases
+  for non-VM peers and must not add a second meshnet topology against the
+  `virt-launcher-*` pod when the VM already receives data links via Multus.
+
 8) **Export to Forward (devices/IPs)**
    - Extract the device list + reachable management endpoints.
    - In k8s, the “mgmt” address might be:
