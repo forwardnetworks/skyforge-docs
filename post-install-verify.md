@@ -71,6 +71,25 @@ Expected at idle:
 - `publishFailures10m=0`
 - `stuckQueuedCandidates=0`
 
+## Forward capacity self-heal + stale signals
+Capacity rollups and Forward network insights now self-refresh through Encore cron jobs.
+
+Verify cron endpoints are healthy from inside the cluster:
+
+```bash
+kubectl -n skyforge run skyforge-capacity-cron-check --rm -i --restart=Never --image=curlimages/curl -- \
+  sh -lc 'curl -fsS -X POST http://skyforge-server:8085/internal/cron/capacity/rollups && \
+          curl -fsS -X POST http://skyforge-server:8085/internal/cron/capacity/insights/refresh && \
+          curl -fsS -X POST http://skyforge-server:8085/internal/cron/capacity/signals/metrics'
+```
+
+If managed observability is enabled, verify stale-signal metrics in Prometheus:
+
+```bash
+kubectl -n skyforge port-forward svc/skyforge-prometheus 9090:9090
+curl -sS 'http://127.0.0.1:9090/prometheus/api/v1/query?query=skyforge_forward_capacity_signal_stale_current'
+```
+
 ## Yaade sanity (optional)
 ```bash
 kubectl -n skyforge rollout status deploy/yaade
