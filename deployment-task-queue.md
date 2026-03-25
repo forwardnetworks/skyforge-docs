@@ -122,6 +122,14 @@ Manual admin repair endpoints:
   - force-finalizes stuck `Terminating` namespaces only when they are explicitly labeled Skyforge ephemeral runtimes.
   - intended as a second-stage remediation after normal delete has already been attempted and the grace window has passed.
 
+Job retention defaults:
+
+- Skyforge runtime Jobs should set `ttlSecondsAfterFinished` so completed one-off
+  bootstrap/repair jobs do not accumulate indefinitely.
+- Skyforge CronJobs should keep small history windows (`successfulJobsHistoryLimit`
+  / `failedJobsHistoryLimit`) and also set `ttlSecondsAfterFinished` on the
+  spawned Jobs when supported.
+
 ## Helm infra config
 
 Encore PubSub requires the Helm-shipped infra configs (`infra.config.json` and

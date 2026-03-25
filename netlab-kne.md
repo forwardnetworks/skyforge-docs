@@ -63,6 +63,8 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `skyforge.netlab.image`
   - `skyforge.netlab.pullPolicy`
   - `skyforge.netlab.runtimePrepull.enabled` (cluster-level runtime image warm cache)
+  - runtime-prepull DaemonSets are worker-only and must not schedule on
+    tainted control-plane nodes
 - SR OS license injection (required when deploying `sros`):
   - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
   - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
