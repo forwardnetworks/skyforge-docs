@@ -95,12 +95,23 @@ cd skyforge
 5) **Apply to Kubernetes**
    - Uses a per-user namespace (`ws-<userScopeSlug>`) to isolate resources.
    - Netlab runtime `up` applies the `Topology` CR and waits for `status.topologyReady=true`.
+   - Skyforge now marks KNE runtime namespaces as ephemeral runtime namespaces with:
+     - label `skyforge.forwardnetworks.com/ephemeral-runtime=true`
+     - purpose label `skyforge.forwardnetworks.com/runtime-purpose=<kne-runtime|kne-topology>`
+     - owner annotations for deployment, topology, and user-scope identity
+     - expiry annotation `skyforge.forwardnetworks.com/expires-at`
+   - Default retention for these ephemeral namespaces is `24h` unless cleanup happens earlier as part of normal destroy flow.
 
 6) **Status + logs**
    - Provide a deployment “info” panel backed by Kubernetes queries:
      - CR status conditions
      - pod states
      - controller events
+   - Skyforge now also exposes a per-node authenticated browser/API proxy at:
+     - `/api/users/:id/deployments/:deploymentID/browser/:node/*rest`
+   - Default upstream target is `https://service-<node>.<runtime-namespace>.svc.cluster.local:443`.
+   - Operators can override `scheme` and `port` via query params for non-default device APIs.
+   - This path is solid for API access and best-effort for GUI access; some appliance GUIs with absolute-root redirects/assets may still need a dedicated integration route.
 
 7) **Run netlab apply phase**
    - Netlab runtime `up`:
@@ -144,6 +155,10 @@ cd skyforge
 5) **Namespace lifecycle**
    - Create namespace on deployment create?
    - Delete namespace on deployment destroy (with finalizer/owner refs)?
+   - Skyforge now performs two cleanup paths:
+     - normal destroy cleanup for active deployments
+     - periodic orphan cleanup for expired or inactive ephemeral runtime namespaces, including legacy `smoke-*`, `rt-*`, and `user-*` namespaces
+   - Stuck `Terminating` namespaces that are explicitly labeled `skyforge.forwardnetworks.com/ephemeral-runtime=true` now have a second-stage force-finalize path after the grace window passes.
 
 ## Implementation checklist (Skyforge)
 

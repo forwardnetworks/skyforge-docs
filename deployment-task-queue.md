@@ -107,6 +107,20 @@ Manual admin repair endpoints:
 - `POST /api/admin/tasks/workspace-pods/cleanup`
   - dry-run and execute mode for force-cleaning stale clabernetes topology pods/resources in `ws-*` namespaces.
   - supports targeted cleanup by `userScopeId` or explicit namespace override.
+- `GET /api/admin/tasks/ephemeral-runtimes`
+  - inventory for KNE/netlab ephemeral runtime namespaces, including:
+    - active vs inactive ownership status
+    - expiry state
+    - current `Terminating` state
+    - resource counts (pods, services, jobs, ConfigMaps, topologies, VMs, VMIs)
+    - deployment / topology / user-scope metadata
+- `POST /api/admin/tasks/ephemeral-runtimes/cleanup`
+  - deletes inactive and cleanup-eligible KNE/netlab ephemeral runtime namespaces.
+  - accepts optional explicit namespace targeting; otherwise cleans all eligible namespaces.
+  - the admin Tasks tab surfaces this inventory and delete flow for operators.
+- `POST /api/admin/tasks/ephemeral-runtimes/finalize`
+  - force-finalizes stuck `Terminating` namespaces only when they are explicitly labeled Skyforge ephemeral runtimes.
+  - intended as a second-stage remediation after normal delete has already been attempted and the grace window has passed.
 
 ## Helm infra config
 
