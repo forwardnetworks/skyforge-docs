@@ -9,6 +9,25 @@ Cold-start timing can cause transient failures in three areas:
 - Cilium/Multus datapath readiness per node.
 - Forward worker cold-start before probe budget is exhausted.
 - Infoblox VM/lifecycle lanes returning in suspended or halted states.
+- Forward node-role drift after node re-registration if master/worker labels are
+  not reconciled declaratively.
+
+## Forward role contract
+
+When `skyforge.forwardCluster.nodeRoleReconciler.enabled=true`, Skyforge
+installs a Helm-managed reconciler that continuously enforces the intended
+Forward node-role labels from chart values:
+
+- `node-role.kubernetes.io/fwd-master`
+- `node-role.kubernetes.io/fwd-monitoring`
+- `node-role.kubernetes.io/fwd-compute-worker`
+- `node-role.kubernetes.io/fwd-search-worker`
+- `forwardnetworks.com/role=forward`
+- `forwardnetworks.com/scratch-group=forward-scratch`
+
+This prevents the specific failure mode where a recreated node object loses its
+labels, Forward master pods become unschedulable, and the Forward route drops
+because `fwd-appserver` has no endpoints.
 
 ## One-command recovery
 

@@ -388,6 +388,10 @@ Important:
 - the wrapper stamps the local `k3d` nodes with the Forward scheduling labels
   expected by the upstream chart (`fwd-master`, `fwd-monitoring`,
   `fwd-compute-worker`, `fwd-search-worker`) before install
+- for managed/prod-style clusters, prefer the chart-level
+  `skyforge.forwardCluster.nodeRoleReconciler` contract over one-shot manual
+  `kubectl label` repairs so node re-registration self-heals the Forward
+  scheduling labels
 - after the Helm install, the wrapper patches the local appserver and
   backend-master pod templates with the `forwardnetworks.com/scratch-group`
   label for stable scratch-volume placement
