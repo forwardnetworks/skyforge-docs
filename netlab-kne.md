@@ -125,6 +125,10 @@ cd skyforge
 - For KubeVirt-backed NOSes, `eth0` remains reserved for management. Generated
   data-plane links must start at `eth1`; otherwise KNE meshnet peer resolution
   and Multus attachment ordering break for VM-backed nodes.
+- KubeVirt FortiOS images should use the Skyforge-native image naming scheme
+  `ghcr.io/forwardnetworks/kubevirt/fortios:<tag>` instead of `vr-*` image
+  names. That keeps runtime metadata and UI labels aligned with the actual
+  KubeVirt execution path.
 - The `skyforge-netlab-runtime` service account must be allowed to manage
   `network-attachment-definitions` in the topology namespace because KNE fabric
   reconciliation creates and updates those NADs during KubeVirt bring-up.
