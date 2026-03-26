@@ -12,8 +12,19 @@ From your workstation:
 export KUBECONFIG=skyforge/.kubeconfig-skyforge
 helm repo add longhorn https://charts.longhorn.io
 helm repo update
-helm upgrade --install longhorn longhorn/longhorn -n longhorn-system --create-namespace -f deploy/longhorn-values.yaml --wait --timeout 10m
+helm upgrade --install longhorn longhorn/longhorn \
+  -n longhorn-system --create-namespace \
+  -f deploy/longhorn-values.yaml \
+  -f deploy/longhorn-values-qa.yaml \
+  --wait --timeout 10m
 ```
+
+These values include:
+
+- `defaultSettings.taintToleration: node-role.kubernetes.io/control-plane:NoSchedule`
+
+That keeps Longhorn CSI components schedulable on control-plane nodes so
+control-plane-pinned Skyforge pods can still mount PVCs.
 
 ## Host prerequisites
 
