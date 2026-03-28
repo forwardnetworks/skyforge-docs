@@ -7,6 +7,12 @@ Skyforge supports minimal and full installs through Helm values.
 - UI navigation should match enabled backend features.
 - Some components are optional if external replacements are provided (for example Git).
 
+## Edition profile
+- `skyforge.edition` (default `enterprise`)
+  - `enterprise`: Forward features respect `skyforge.forward.enabled`
+  - `oss`: Forward route/API access is disabled and generated `ForwardEnabled` is forced off
+  - `oss` also disallows `skyforge.forwardCluster.enabled=true` at chart validation time
+
 ## Component toggles
 - `skyforge.gitea.enabled` (default `true`)
 - `skyforge.s3gw.enabled` (default `true`)
@@ -14,7 +20,7 @@ Skyforge supports minimal and full installs through Helm values.
 - `skyforge.coder.enabled` (default `true`)
 - `skyforge.yaade.enabled` (default `true`)
 - `skyforge.redoc.enabled` (default `true`)
-- `skyforge.forward.enabled` (default `true`)
+- `skyforge.forward.enabled` (default `true`, only honored when `skyforge.edition=enterprise`)
 - `skyforge.forwardCluster.enabled` (default `false`)
 - `skyforge.observability.enabled` (default `true`)
 - `skyforge.observability.managed.enabled` (default `false`)

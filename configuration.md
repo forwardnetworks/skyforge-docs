@@ -5,6 +5,12 @@ For k3s deployments, configure:
 - values: `deploy/skyforge-values.yaml`
 - secrets: `deploy/skyforge-secrets.yaml` (local-only)
 
+## Edition
+- `skyforge.edition`
+  - `enterprise` (default): Forward-enabled deployments supported
+  - `oss`: Forward integrations are disabled in generated config
+  - `oss` cannot be combined with `skyforge.forwardCluster.enabled=true`
+
 ## Core host settings
 - `skyforge.hostname`
 - `skyforge.domain`
