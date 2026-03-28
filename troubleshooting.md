@@ -140,7 +140,11 @@ Required fix path:
 - Use the canonical script only:
 
 ```bash
+# Enterprise (default)
 ./scripts/build-push-skyforge-server.sh --tag <tag>
+
+# OSS edition
+./scripts/build-push-skyforge-server.sh --tag <tag> --edition oss
 ```
 
 Notes:
