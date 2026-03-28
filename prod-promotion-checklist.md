@@ -20,6 +20,7 @@ Run both gates from the meta repo root:
 
 Expected:
 - no non-approved local-vs-prod diffs
+- CI / GitHub Actions `Edition Contract Evidence` job uploads edition artifacts (server/chart contracts + rendered manifests) for traceability
 - staged features explicitly pinned in prod values:
   - `skyforge.infoblox.enabled=false`
   - `skyforge.jira.enabled=false`
