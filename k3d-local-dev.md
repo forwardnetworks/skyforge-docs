@@ -376,7 +376,7 @@ Defaults:
   (`SKYFORGE_FORWARD_ENABLE_AUTOPILOT=false`).
 - release: `forward-local`
 - registry: `harbor.local.forwardnetworks.com/forward`
-- image tag: `26.3.0-18`
+- image tag: `26.3.3-02`
 - local storage class: `local-path`
 - shared-cluster PVC mode with Skyforge-owned ingress
 
@@ -409,32 +409,43 @@ Important:
   `forward/forward`, then rotates away from the default password and persists
   the new random password back into `forward/forward-support-credentials`
 - valid registry credentials for the Forward runtime images must already
-  exist in `~/.docker/config.json`; the script does a manifest preflight and
-  fails fast if `harbor.local.forwardnetworks.com/forward` is not accessible
+  exist in `~/.docker/config.json`; the script does a manifest preflight against
+  the effective appserver image source and fails fast when auth/manifest lookup
+  is not available
 - when the selected Forward storage class is `longhorn`, bootstrap now also
   validates that both Longhorn's `/var/lib/longhorn` path and Forward's
   `/mnt/forward/extended` node-agent data path are actually backed by a
   big-disk filesystem (`SKYFORGE_FORWARD_LONGHORN_MIN_GIB`, default `750`)
 
-Mirror or sync the package images into Harbor first:
+For stock package-based runs, mirror/sync into Harbor first:
 
 ```bash
 cd /home/captainpacket/src/skyforge
 ./scripts/mirror-forward-package-to-harbor.sh \
-  ~/Downloads/forward-app-26.3.0-18.package
+  ~/Downloads/forward-app-26.3.3-02.package
 ```
 
-The mirror script publishes:
-- app images to your configured Forward registry (default
-  `harbor.local.forwardnetworks.com/forward/*`)
-- shared images such as `local-volume-provisioner-fwd` to the configured shared
-  registry prefix
+For custom appserver builds (for example AI-enabled appserver from `~/src/fwd`),
+build and push only to GHCR, then override the appserver image at bootstrap time:
+
+```bash
+cd /home/captainpacket/src/skyforge
+./scripts/build-push-forward-appserver-ghcr.sh --tag 26.3.3-02
+SKYFORGE_FORWARD_IMAGE_VERSION=26.3.3-02 \
+SKYFORGE_FORWARD_APPSERVER_IMAGE=ghcr.io/forwardnetworks/fwd_appserver:26.3.3-02 \
+./scripts/bootstrap-forward-local.sh
+```
+
+The GHCR appserver path is intentionally separate from Harbor package mirroring.
+Do not push custom appserver images to Harbor.
 
 Useful overrides:
 
 ```bash
 SKYFORGE_FORWARD_IMAGE_VERSION=<tag> ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_REGISTRY=<registry> ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_APPSERVER_REGISTRY=ghcr.io/<org> ./scripts/bootstrap-forward-local.sh
+SKYFORGE_FORWARD_APPSERVER_IMAGE=ghcr.io/<org>/fwd_appserver:<tag> ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_SKIP_IMAGE_PREFLIGHT=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_CLEANUP_ON_FAILURE=true ./scripts/bootstrap-forward-local.sh
 SKYFORGE_FORWARD_APPLY_SUPPORT_DEFAULTS=false ./scripts/bootstrap-forward-local.sh
