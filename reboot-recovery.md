@@ -29,6 +29,12 @@ This prevents the specific failure mode where a recreated node object loses its
 labels, Forward master pods become unschedulable, and the Forward route drops
 because `fwd-appserver` has no endpoints.
 
+For the production profile in `components/charts/skyforge/values-prod-skyforge-local.yaml`,
+the `master` role should not be pinned to a single worker. Keep at least two
+healthy worker nodes in `skyforge.forwardCluster.nodeRoleReconciler.nodeRoles.master`
+so `fwd-appserver` and `fwd-backend-master` can land on another node if the
+original Longhorn attachment comes back in a bad post-reboot state.
+
 ## One-command recovery
 
 Run from repo root:
@@ -73,3 +79,26 @@ PAUSE_INFOBLOX_DURING_FORWARD_RECOVERY=false ./scripts/recover-prod-after-reboot
 - This is a recovery path, not a replacement for normal deploy.
 - Keep probe and restart logic in this script deterministic and idempotent.
 - Any additional reboot failure mode should be added here with explicit checks.
+
+## Forward scratch volume recovery
+
+If Forward core or workers come back with logs like `Read-only file system` on
+`/var/log/forward` or `/tmp`, and Longhorn shows the PVC as `attached` but not
+fully usable, treat it as a node-local attach/mount failure rather than an app
+configuration issue.
+
+Recovery steps:
+
+1. Confirm the affected pod is failing on writable paths such as
+   `/var/log/forward` or `/tmp`.
+2. Confirm the corresponding Longhorn volume is `attached` but the workload is
+   still failing.
+3. Temporarily cordon the affected node.
+4. Delete the affected Forward pod so Kubernetes reschedules it and Longhorn
+   reattaches the RWO volume onto a different healthy worker.
+5. Wait for the replacement pod to become `Ready`.
+6. Uncordon the original node only after the replacement workload is healthy.
+
+Do not patch around this by making the Forward containers writable on rootfs or
+by bypassing the scratch PVC mounts. The correct fix is to recover the volume
+attachment and keep `fwd-master` placement available on more than one worker.

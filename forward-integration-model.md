@@ -55,8 +55,8 @@ Demo-org resets are isolated from deployment state:
 - they destroy and recreate the demo org when a curated or hard reset runs
 - they replay the admin-managed demo seed catalog into a single network named
   `Demo Network`
-- they generate synthetic performance data after the final seeded snapshot is
-  processed
+- they attempt synthetic performance generation after the final seeded snapshot
+  is processed
 - they rotate the demo-org credential whenever the org is recreated
 
 This separation is required so a demo-org reset cannot damage the active
@@ -90,7 +90,8 @@ Managed-org API surfaces:
 Skyforge now supports an admin-managed demo seed catalog:
 
 - admins upload one or more snapshot zip archives
-- each seed has an enable flag and replay order
+- each seed has a Forward snapshot `note`, an enable flag, and replay order
+- the catalog also stores a single demo `networkName`
 - nightly and manual demo rebuilds use the same ordered seed list
 - all enabled seeds replay into the same demo network in order
 
@@ -110,16 +111,49 @@ Skyforge queues a daily demo-org curated reset for known users. That nightly
 workflow:
 
 1. destroys and recreates the demo org
-2. creates `Demo Network`
+2. creates the configured demo network name (default `Demo Network`)
 3. uploads each enabled seed archive in order
 4. waits for the final snapshot to process
-5. generates synthetic performance data
+5. attempts synthetic performance data generation
+6. forces the demo org back to stock feature flags with experimental features off
+
+Snapshot replay is the hard requirement for demo readiness. If Forward snapshot
+processing succeeds but synthetic performance generation times out or fails, the
+reset still completes and records that warning in reset metadata instead of
+remaining stuck in `seeding-demo`.
 
 In self-managed deployments, that nightly trigger is chart-managed as the
-Kubernetes CronJob `skyforge-forward-demo-reset`. The job logs in as the
-configured Skyforge admin user and queues the same platform-managed demo reset
-workflow used by the admin UI.
+Kubernetes CronJob `skyforge-forward-demo-reset`. The job uses a Skyforge API
+token against the in-cluster Skyforge API URL and queues the same
+platform-managed demo reset workflow used by the admin UI. The token is stored
+in the configured Kubernetes secret (default `skyforge-admin-shared` key
+`api-token`).
+
+For multi-user demo environments with replayed seed catalogs, the worker
+deployment should not stay at the smallest background defaults. The chart now
+defaults to a larger background runner queue, and the local production values
+run two worker replicas so nightly resets can drain while seed replay and
+collector follow-up tasks are in flight.
 
 Because the org is recreated, demo-org credentials are ephemeral and rotate on
 nightly rebuilds. Users should rely on the session bridge or the reveal/copy
 controls in `Forward Org Access` for the current demo credential.
+
+## Forward AI runtime split
+
+Forward AI is intentionally split across two runtime paths in this deployment:
+
+- `fwd-appserver`
+  - keeps direct Bedrock access for the NQE generator path
+  - should not run with the `ON_PREM` profile when AI features are needed
+- `fwd-baml-server`
+  - owns chat orchestration and model routing for Forward AI chats
+
+This means `appserver.ai_bedrock.*` is still required for NQE generation, but
+the live BAML bundle remains the source of truth for Sonnet-vs-Haiku routing in
+the chat flow.
+
+Skyforge deployment automation now supports an explicit
+`skyforge.forwardCluster.appserverProfiles` value. In the local production
+values this is pinned to `K8S`, which is the correct self-managed profile for
+the current AI-enabled Forward deployment.
