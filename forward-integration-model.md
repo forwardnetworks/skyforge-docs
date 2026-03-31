@@ -115,6 +115,11 @@ workflow:
 4. waits for the final snapshot to process
 5. generates synthetic performance data
 
+In self-managed deployments, that nightly trigger is chart-managed as the
+Kubernetes CronJob `skyforge-forward-demo-reset`. The job logs in as the
+configured Skyforge admin user and queues the same platform-managed demo reset
+workflow used by the admin UI.
+
 Because the org is recreated, demo-org credentials are ephemeral and rotate on
 nightly rebuilds. Users should rely on the session bridge or the reveal/copy
 controls in `Forward Org Access` for the current demo credential.
