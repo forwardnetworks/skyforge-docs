@@ -1,0 +1,60 @@
+# Forward Demo-Fast Local Overlay
+
+This overlay is intentionally local-only. It is for demo environments where AI
+chat speed matters more than upstream-default quality settings.
+
+It keeps the Forward request flow intact and changes only:
+
+- BAML chat routing to cheaper Haiku paths in the local `~/src/fwd-agent` tree
+- appserver direct Bedrock limits via `app.appserver.custom_settings`
+- `fwd-baml-server` replica count, resources, and host spreading
+- `fwd-nqe-assist` replica count, resources, and host spreading
+
+## What this profile optimizes
+
+- `DetermineNextStep`: non-reasoning Haiku with a small budget
+- `GenerateFinalResponse`: non-reasoning Haiku capped at `1024` tokens
+- `GenerateNQEQuery`: reasoning Haiku capped at `1024` tokens with a `512` thinking budget
+- `SummarizeNQEResults`: non-reasoning Haiku capped at `1024` tokens
+- appserver direct Bedrock path: `thinking.enabled=false`, `max_tokens=1024`
+
+The profile deliberately avoids introducing a new semantic response cache or a
+separate knowledge-tree layer. The current request flow already benefits from:
+
+- provider-side Bedrock prompt caching in the BAML stack
+- existing in-memory NQE assist request caching for bounded repeated prompts
+
+## Overlay files
+
+- base environment overlay: `deploy/examples/values-forward-prod.yaml`
+- demo-fast overlay: `deploy/examples/values-forward-demo-fast.yaml`
+- prod-shaped combined example: `deploy/examples/values-forward-prod-demo-fast.yaml`
+
+## Rollout pattern
+
+Build and push the local BAML image first, then deploy Forward using both
+overlays:
+
+```bash
+cd ~/src/fwd-agent
+baml-cli generate
+
+SKYFORGE_FORWARD_OVERLAY_VALUES="deploy/examples/values-forward-prod.yaml,deploy/examples/values-forward-demo-fast.yaml" \
+SKYFORGE_FORWARD_BAML_IMAGE_OVERRIDE="<registry>/fwd_baml_server:<tag>" \
+SKYFORGE_FORWARD_AICHAT_BAML_IMAGE_TAG="<tag>" \
+./scripts/bootstrap-forward-local.sh
+```
+
+## Validation focus
+
+After rollout, verify:
+
+- `fwd-baml-server` has `3` replicas across multiple nodes
+- `fwd-nqe-assist` has `2` replicas across multiple nodes
+- appserver includes the demo Bedrock flags
+- chat latency improves on the same prompt set under light concurrency
+
+## Rollback
+
+Rollback by redeploying without `deploy/examples/values-forward-demo-fast.yaml`
+and restoring the previous BAML image tag.
