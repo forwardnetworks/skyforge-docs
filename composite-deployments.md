@@ -1,157 +1,192 @@
-# Composite Deployments (Scaffold v1)
+# Composite Deployments
 
-Skyforge treats each deployment as a single engine today (`terraform`, `netlab`, `containerlab`).
-This scaffold defines the **next contract** for chaining stages (for example `terraform -> netlab`) with explicit variable handoff and no ad-hoc glue.
+Composite deployments are primarily for one workflow shape today:
 
-## Scope
+- `terraform -> netlab`
 
-This document defines planning and contract semantics only.
-Execution wiring is tracked separately.
+The engine is still generic underneath, but the authoring model should optimize for that path instead of forcing users to type raw JSON and hidden `env.*` keys.
 
-## Terraform Target Model
+## Primary Flow
 
-Terraform stages are no longer limited to public-cloud-only semantics.
+A composite plan has three visible parts in guided mode:
 
-- `cloud`/target values such as `aws`, `azure`, and `gcp` keep current auth bootstrap behavior.
-- Non-cloud targets (for example `nsxt`, `kubevirt`, `vsphere`, `onprem`) are valid when
-  stage/template authors provide explicit `templatesDir` and required provider credentials as environment variables.
-- The execution contract stays Terraform-native: Skyforge orchestrates `init/plan/apply/destroy`,
-  and provider behavior remains inside Terraform templates/modules.
-- Runtime guardrail: non-cloud targets fail closed when `templatesDir` is missing.
+- `Workflow Inputs`: named values you can set once and optionally override when you run the plan
+- `Terraform`: the template plus Terraform variables and extra environment
+- `Netlab`: the server, deployment, topology path, and Netlab environment
 
-This is the foundation for multi-topology workflows where Terraform can provision
-on-prem/virtualization infrastructure that netlab/containerlab stages consume via explicit bindings.
+Variable handoff is explicit:
 
-### KubeVirt-First On-Prem Pattern
+- workflow inputs can map into Terraform variables
+- workflow inputs can map into Terraform environment
+- workflow inputs can map into Netlab fields or Netlab environment
+- Terraform outputs can map into Netlab fields or Netlab environment
 
-For on-prem lab expansion, prefer a Terraform target profile like `kubevirt` with:
+Users should not need to type:
 
-- explicit `templatesDir` (for example `onprem/terraform/kubevirt`)
-- provider-native auth/env vars passed through deployment environment
-- Terraform outputs for downstream stage bindings (`vm_mgmt_ips`, `service_endpoints`, `edge_peer_ips`)
+- raw JSON for plan inputs
+- raw JSON for run overrides
+- hidden keys like `env.TF_VAR_region`
+- hidden keys like `env.VPN_PEER_IP`
 
-This keeps Skyforge orchestration generic while letting Terraform own virtualization specifics.
+The portal translates the guided form into the existing composite API contract.
 
-## Contract Goals
+## Guided Terraform Plus Netlab Model
 
-- One deployment intent, multiple ordered stages.
-- Explicit output-to-input handoff (for VPN/tunnel values and similar runtime facts).
-- Deterministic stage graph validation before execution.
-- Native provider seams only (`terraform`, `netlab`, `containerlab`, `baremetal`).
+### Workflow Inputs
 
-## Composite Plan Contract
+These are named values available at plan start.
 
-A composite plan has:
+Example:
 
-- `stages[]`: ordered logical units with explicit `id`, `provider`, `action`, and `dependsOn`.
-- `bindings[]`: variable handoff edges from prior stage outputs into later stage inputs.
-- `inputs`: user/admin supplied values available at plan start.
-- `outputs`: declared stage outputs promoted as deployment outputs.
+- `region = us-east-1`
+- `netlab_server = user:server-1`
+- `topology = netlab/BGP/Default-NH/topology.yml`
 
-### Provider Set (v1 scaffold)
+### Terraform Section
+
+Visible inputs:
+
+- action: `plan|apply|destroy`
+- target: for example `aws`
+- template source/repo/dir/template
+- Terraform variables table
+- extra environment table
+- declared Terraform outputs
+
+Portal translation:
+
+- Terraform variables become `env.TF_VAR_*`
+- Terraform extra environment becomes `env.*`
+
+### Netlab Section
+
+Visible inputs:
+
+- action: `up|down|validate`
+- server
+- deployment
+- topology path
+- cleanup
+- user-scope root/dir
+- Netlab environment table
+
+Portal translation:
+
+- Netlab environment becomes `env.*`
+
+## Example Variable Flow
+
+The page should make handoff visible in plain language.
+
+Example summary:
+
+- `workflow.region -> terraform.var.region`
+- `workflow.netlab_server -> netlab.server`
+- `workflow.topology -> netlab.topologyPath`
+- `terraform.vpn_peer_ip -> netlab.env.VPN_PEER_IP`
+- `terraform.vpn_psk -> netlab.env.VPN_PSK`
+
+That is the same execution model the backend already supports. The difference is only the authoring experience.
+
+## What Guided Mode Supports
+
+Guided mode only supports:
+
+- exactly two stages
+- first stage `terraform`
+- second stage `netlab`
+- workflow inputs as binding sources
+- Terraform outputs as binding sources
+- promoted outputs from Terraform
+
+If a saved plan does not fit that shape, the portal opens it in `Advanced` mode automatically.
+
+## Advanced Mode
+
+Advanced mode keeps the generic composite contract for cases such as:
+
+- `baremetal -> netlab`
+- `containerlab`
+- unusual binding patterns
+- plans with more than two stages
+
+Advanced mode still exposes the real stage graph:
+
+- `stages[]`
+- `bindings[]`
+- `inputs`
+- `outputs`
+
+That is the escape hatch. It is not the primary authoring path.
+
+## Backend Contract
+
+The backend contract does not change in this pass.
+
+Preview:
+
+- `POST /api/users/:id/composite/plan/preview`
+
+Saved plans:
+
+- `GET /api/users/:id/composite/plans`
+- `POST /api/users/:id/composite/plans`
+- `GET /api/users/:id/composite/plans/:planID`
+- `PUT /api/users/:id/composite/plans/:planID`
+- `DELETE /api/users/:id/composite/plans/:planID`
+
+Run:
+
+- `POST /api/users/:id/composite/plans/:planID/runs`
+
+The portal now translates the guided editor into the same persisted generic shape.
+
+## Underlying Generic Contract
+
+A composite plan still persists as:
+
+- `stages[]`: ordered logical units with explicit `id`, `provider`, `action`, and `dependsOn`
+- `bindings[]`: handoff edges from prior stage outputs or workflow inputs into later stage inputs
+- `inputs`: user/admin supplied values available at plan start
+- `outputs`: declared stage outputs promoted as run outputs
+
+### Provider Set
 
 - `terraform`
 - `netlab`
 - `containerlab`
 - `baremetal`
 
-### Action Set (v1 scaffold)
+### Action Set
 
 - `terraform`: `plan`, `apply`, `destroy`
 - `netlab`: `up`, `down`, `validate`
 - `containerlab`: `deploy`, `destroy`, `validate`
 - `baremetal`: `reserve`, `configure`, `release`, `validate`
 
-## Variable Handoff Model
+## Advanced JSON Reference
 
-Bindings are explicit edges:
+Reference payloads remain useful for API consumers and debugging:
 
-- Source: `fromStageId + fromOutput`
-- Target: `toStageId + toInput`
-- Optional transform: `as` (rename only in v1)
-- Sensitivity: `sensitive=true` marks secret output propagation
-
-Example handoff for VPN-style workflow:
-
-1. `terraform.apply` outputs:
-- `aws.vpn.public_ip`
-- `aws.vpn.psk`
-- `aws.vpc.cidr`
-
-2. `netlab.up` inputs via bindings:
-- `vpn_peer_ip <- aws.vpn.public_ip`
-- `vpn_psk <- aws.vpn.psk` (sensitive)
-- `remote_cidr <- aws.vpc.cidr`
+- `components/docs/examples/composite-plan-terraform-netlab.json`
+- `components/docs/examples/composite-plan-baremetal-netlab.json`
 
 ## Validation Rules
 
 A plan is valid only when:
 
-- All stage IDs are unique.
-- Every `dependsOn` target exists.
-- Stage graph is acyclic.
-- Every binding source stage/output exists and precedes target stage.
-- Every binding target stage/input exists.
-- Provider/action pair is allowed.
-
-## Bare Metal Integration (Scaffold)
-
-`baremetal` stages are orchestration seams, not hardware-specific drivers.
-
-v1 assumptions:
-
-- Reservation/configuration adapters stay behind provider-native contracts.
-- Output contract examples: `mgmt_ip`, `hostname`, `asset_id`, `reservation_id`.
-- Inputs can be sourced from `terraform` outputs or operator-provided values.
-
-## Execution Semantics (Future)
-
-- Stage transitions: `pending -> running -> success|failed|skipped`.
-- First failure stops downstream stages unless marked optional.
-- Sensitive bound values are redacted in logs/events.
-
-## API Scaffold
-
-Server exposes a preview endpoint that validates and normalizes a composite plan:
-
-- `POST /api/users/:id/composite/plan/preview`
-- No execution side effects.
-- Returns normalized stage order, resolved bindings, and warnings.
-
-Server also supports persisted-plan execution:
-
-- `POST /api/users/:id/composite/plans/:planID/runs`
-- Enqueues a `composite-run` task with stage-by-stage execution and binding handoff.
-- Current execution support: `terraform`, `netlab`, and `baremetal` stages.
-- `baremetal` stages can resolve user-saved Fixia connections via `server: "user:<server-id>"`.
+- all stage IDs are unique
+- every `dependsOn` target exists
+- stage graph is acyclic
+- every binding source stage/output exists and precedes target stage
+- every binding target stage/input exists
+- provider/action pair is allowed
 
 ## Checklist
 
-- [x] Define provider/action enums for composite plan preview.
-- [x] Define stage/binding/input/output request schema.
-- [x] Implement server-side preview validation (DAG + binding checks).
-- [x] Add persistent composite deployment spec storage.
-  - Added user-scope composite plan CRUD API and backing DB table (`sf_composite_plans`).
-  - API paths:
-    - `GET /api/users/:id/composite/plans`
-    - `POST /api/users/:id/composite/plans`
-    - `GET /api/users/:id/composite/plans/:planID`
-    - `PUT /api/users/:id/composite/plans/:planID`
-    - `DELETE /api/users/:id/composite/plans/:planID`
-- [x] Add execution runner with stage state transitions.
-- [x] Add portal authoring UI for stage graph + bindings.
-  - Added `/dashboard/deployments/composite` with user-scope plan authoring,
-    preview, save/update/delete, and run enqueue.
-- [x] Add end-to-end `terraform -> netlab` reference blueprint.
-  - Reference payload: `components/docs/examples/composite-plan-terraform-netlab.json`
-- [x] Add `baremetal -> netlab` reference blueprint.
-  - Reference payload: `components/docs/examples/composite-plan-baremetal-netlab.json`
-- [x] Integrate baremetal server settings with Fixia user-scope credentials.
-  - Added user-scope Fixia server CRUD and taskengine resolver for `server: "user:<id>"`.
-- [x] Add targeted composite portal UI tests.
-  - Added `components/portal/src/components/deployments/composite-plans-page-content.test.tsx`.
-- [x] Add composite run history/status view in portal.
-  - Composite page now lists recent composite runs from `/api/runs` and tracks selected run state.
-- [x] Add stage-level evidence surfacing for composite execution.
-  - Composite page now renders `composite.stage.*` lifecycle events (running/success/failed) with provider/action/output summary.
-- [ ] Backlog: add first-class Terraform `kubevirt` provider profile + reference module for VM lifecycle stages.
+- [x] Keep the existing generic backend contract
+- [x] Add guided Terraform-plus-Netlab authoring in portal
+- [x] Replace JSON input editors in the main path with key/value editing
+- [x] Add explicit variable-flow summaries in the portal
+- [x] Fall back to advanced mode for unsupported saved plans
+- [x] Keep advanced JSON reference payloads for debugging and API consumers
