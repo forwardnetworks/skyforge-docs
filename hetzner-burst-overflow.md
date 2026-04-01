@@ -61,6 +61,7 @@ Important detail:
 Skyforge includes a disabled-by-default Hetzner burst config block:
 
 - `skyforge.burst.hetzner.*`
+- `skyforge.burst.hetzner.provisioningEnabled=false` keeps the Hetzner scaffold configured but disarmed
 - `skyforge.burst.hetzner.wireguard.hub.*`
 - `skyforge.burst.hetzner.routeReconciler.*`
 
@@ -110,7 +111,11 @@ Do not target the control-plane unless that node truly needs Hetzner reachabilit
 - use the Hetzner WireGuard UI/bootstrap flow to configure the gateway listener on UDP `51820`
 - place future burst workers behind that gateway on the Hetzner private network
 
-2. Prepare the local WireGuard node
+2. Decide whether the environment is armed
+- keep `skyforge.burst.hetzner.enabled=true` with `skyforge.burst.hetzner.provisioningEnabled=false` for scaffold-only mode
+- set `skyforge.burst.hetzner.provisioningEnabled=true` only when you are ready for worker lifecycle automation to create burst capacity
+
+3. Prepare the local WireGuard node
 - create the Secret with `private-key` and `peers.conf`
 - enable `skyforge.burst.hetzner.wireguard.hub.enabled=true`
 - select exactly one local node with `wireguard.hub.nodeSelector`
@@ -119,28 +124,28 @@ Do not target the control-plane unless that node truly needs Hetzner reachabilit
 - set `wireguard.endpointHost` to the Hetzner gateway public hostname or IP
 - configure `peers.conf` with the Hetzner gateway public key, endpoint, and `PersistentKeepalive`
 
-3. Prepare Hetzner worker nodes
+4. Prepare Hetzner worker nodes
 - create the private network / firewall model in Hetzner
 - create worker instances intended only for `burst`
 - route worker traffic through the Hetzner gateway
 - verify tunnel establishment from the local Skyforge side
 
-4. Join Hetzner workers into Kubernetes
+5. Join Hetzner workers into Kubernetes
 - use the worker-only join flow for the current cluster profile
 - do not join them as control-plane nodes
 
-5. Label the Hetzner workers
+6. Label the Hetzner workers
 - `pool-class=burst`
 - `provider=hetzner`
 - optional monthly cost label
 
-6. Enable route reconciliation
+7. Enable route reconciliation
 - set the Hetzner burst values
 - enable `routeReconciler`
 - point `destinations` to the Hetzner burst CIDRs
 - point `via` to the local WireGuard node IP
 
-7. Verify
+8. Verify
 
 ```bash
 kubectl get nodes -L skyforge.forwardnetworks.com/pool-class,skyforge.forwardnetworks.com/provider
