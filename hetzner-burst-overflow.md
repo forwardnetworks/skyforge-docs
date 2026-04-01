@@ -1,7 +1,7 @@
-# Hetzner Burst Overflow with Outbound WireGuard
+# Hetzner Burst Overflow with Hetzner Gateway WireGuard
 
-This document defines the intended Skyforge pattern for Hetzner-backed burst
-workers.
+This document defines the supported Skyforge pattern for Hetzner-backed burst
+capacity.
 
 ## Goal
 
@@ -11,9 +11,9 @@ model:
 - Skyforge control-plane and core app workloads stay on the primary footprint
 - Hetzner worker nodes join the same Kubernetes cluster as worker-only nodes
 - Hetzner workers are labeled as `burst`
-- WireGuard is initiated outbound from the Hetzner side
-- one selected local hub node terminates the WireGuard interface
-- local worker nodes learn explicit routes back to the Hetzner burst CIDRs through that hub node
+- a small dedicated Hetzner gateway node owns the public WireGuard listener
+- one selected local Skyforge node initiates WireGuard outbound to that Hetzner gateway
+- local worker nodes learn explicit routes back to the Hetzner burst CIDRs through that local node
 
 This keeps the existing scheduling model intact while making burst capacity a
 provider-specific worker pool instead of a second cluster.
@@ -41,25 +41,24 @@ kubectl label node <node-name> \
 
 ### WireGuard topology
 
-Use a hub-and-spoke style layout:
+Use a gateway model:
 
-- `skyforge.local.forwardnetworks.com` (or a dedicated local gateway host)
-  listens for WireGuard
-- Hetzner workers initiate the tunnel outbound to that endpoint
-- local nodes do not initiate toward Hetzner
+- a small Hetzner gateway node with a public IP listens for WireGuard
+- one selected local Skyforge node initiates the tunnel outbound to that gateway
+- Hetzner burst workers sit behind that gateway on the Hetzner private network
 - the local side forwards traffic for Hetzner worker/node CIDRs
 - local worker nodes install explicit routes pointing those Hetzner CIDRs at
-  the local WireGuard gateway IP
+  the local WireGuard node IP
 
 Important detail:
 
 - node route next-hops must be IP addresses, not DNS names
-- `endpointHost` is for the Hetzner WireGuard peer
+- `endpointHost` is the Hetzner gateway listener hostname or IP
 - `gatewayNodeIP` is the local node-reachable IP used for `ip route replace`
 
 ## Chart Surfaces
 
-Skyforge now includes a disabled-by-default Hetzner burst config block:
+Skyforge includes a disabled-by-default Hetzner burst config block:
 
 - `skyforge.burst.hetzner.*`
 - `skyforge.burst.hetzner.wireguard.hub.*`
@@ -80,20 +79,20 @@ Before enabling this path, define these values:
   - Kubernetes secret: `skyforge-hetzner-burst`
   - key: `api-token`
 - Hetzner network/node CIDRs
-- local WireGuard gateway IP reachable from worker nodes
-- WireGuard endpoint hostname and UDP port
+- local WireGuard node IP reachable from worker nodes
+- Hetzner gateway hostname or public IP and UDP port
 - list of cluster nodes that should receive return routes
 
 ## Worker Route Reconciliation
 
-If local nodes need to reach Hetzner burst node CIDRs through the WireGuard
-hub, enable:
+If local nodes need to reach Hetzner burst node CIDRs through the local
+WireGuard node, enable:
 
 - `skyforge.burst.hetzner.routeReconciler.enabled=true`
 
 Set:
 
-- `via`: the local gateway node IP on the primary cluster network
+- `via`: the local WireGuard node IP on the primary cluster network
 - `dev`: optional host interface name; leave empty when the next hop is a normal node IP
 - `destinations`: the Hetzner burst CIDRs that need explicit routes
 - `nodeSelector` or `affinity`: the local worker nodes that should carry those routes
@@ -105,52 +104,61 @@ Do not target the control-plane unless that node truly needs Hetzner reachabilit
 
 ## Suggested Bring-Up Order
 
-1. Prepare the local WireGuard gateway
-- create the Secret with `private-key` and optional `peers.conf`
-- enable `skyforge.burst.hetzner.wireguard.hub.enabled=true`
-- select exactly one hub node with `wireguard.hub.nodeSelector`
-- set `wireguard.localAddressCIDR` to the hub interface address, for example `10.31.0.1/24`
-- set `wireguard.gatewayNodeIP` to the actual control-plane node IP that other workers will route toward, for example `10.128.16.73`
-- enable IP forwarding on that hub
+1. Prepare the Hetzner gateway
+- create a small dedicated Hetzner server using Hetzner's built-in WireGuard app image (`image=wireguard`) on `cpx11`
+- give it a stable public hostname or IP
+- use the Hetzner WireGuard UI/bootstrap flow to configure the gateway listener on UDP `51820`
+- place future burst workers behind that gateway on the Hetzner private network
 
-2. Prepare Hetzner worker nodes
+2. Prepare the local WireGuard node
+- create the Secret with `private-key` and `peers.conf`
+- enable `skyforge.burst.hetzner.wireguard.hub.enabled=true`
+- select exactly one local node with `wireguard.hub.nodeSelector`
+- set `wireguard.localAddressCIDR` to the local interface address, for example `10.31.0.1/24`
+- set `wireguard.gatewayNodeIP` to the actual control-plane node IP that other workers will route toward, for example `10.128.16.73`
+- set `wireguard.endpointHost` to the Hetzner gateway public hostname or IP
+- configure `peers.conf` with the Hetzner gateway public key, endpoint, and `PersistentKeepalive`
+
+3. Prepare Hetzner worker nodes
 - create the private network / firewall model in Hetzner
 - create worker instances intended only for `burst`
-- install WireGuard and configure outbound peers to
-  `skyforge.local.forwardnetworks.com:<port>`
-- verify tunnel establishment from the Hetzner side
+- route worker traffic through the Hetzner gateway
+- verify tunnel establishment from the local Skyforge side
 
-3. Join Hetzner workers into Kubernetes
+4. Join Hetzner workers into Kubernetes
 - use the worker-only join flow for the current cluster profile
 - do not join them as control-plane nodes
 
-4. Label the Hetzner workers
+5. Label the Hetzner workers
 - `pool-class=burst`
 - `provider=hetzner`
 - optional monthly cost label
 
-5. Enable route reconciliation
+6. Enable route reconciliation
 - set the Hetzner burst values
 - enable `routeReconciler`
 - point `destinations` to the Hetzner burst CIDRs
-- point `via` to the local gateway node IP
+- point `via` to the local WireGuard node IP
 
-6. Verify
+7. Verify
 
 ```bash
 kubectl get nodes -L skyforge.forwardnetworks.com/pool-class,skyforge.forwardnetworks.com/provider
 kubectl -n skyforge get ds hetzner-burst-route-reconciler
 ip route | grep <hetzner-cidr>
+wg show
 ```
 
 ## Non-Goals
 
 This does not yet automate:
 
-- Hetzner server creation from the API token
+- a full dedicated Hetzner gateway lifecycle with failover
 - WireGuard key generation/distribution
 - worker join token distribution
 - Cilium-specific route export or BGP
 
 Those can be added later, but the first step is to make the network and pool
 contract explicit and deterministic.
+
+Reference: Hetzner documents the WireGuard app install path and API examples with `image=wireguard` and `server_type=cpx11`.
