@@ -86,11 +86,11 @@ Keep host file footprint minimal: use `/tmp` and remove after the deploy.
 
 Populate the following before installing:
 
-- `skyforge.hostname` (public hostname for the ingress routes)
+- `skyforge.hostname` (primary internal hostname for the ingress routes)
 - `skyforge.domain` (email suffix for default users)
 - `skyforge.gateway.addresses` (recommended for Cilium Gateway API node-IP ingress; example `[{type: IPAddress, value: "10.128.16.60"}]`)
 - `skyforge.auth.mode` (`local` for dev/OSS, `oidc` for prod)
-- If you need an Internet-facing overlay on top of the direct Cilium Gateway: set `skyforge.publicTunnel.provider=cloudflare`, create a Secret with `ACCOUNT_ID` and `TOKEN`, set `skyforge.publicTunnel.cloudflare.credentialsSecretName` to that Secret name, and use only the public hostnames in a Cloudflare-managed zone (for example `skyforge.craigjohnson.org` and `skyforge-fwd.craigjohnson.org`). Keep legacy internal aliases such as `*.local.forwardnetworks.com` on the direct Cilium gateway only.
+- When `skyforge.gateway.additionalHostnames` is set, the managed Dex config also registers those aliases as valid OIDC redirect hosts for Skyforge and the bundled tool clients.
 - If you enable Hetzner burst workers: also create the WireGuard Secret referenced by `skyforge.burst.hetzner.wireguard.hub.privateKeySecretName` (private key plus optional `peers.conf`), and verify the selected hub node IP matches `skyforge.burst.hetzner.wireguard.gatewayNodeIP`.
 - If `skyforge.auth.mode=oidc`: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and provider values under `skyforge.dex.oidc.*`
 - If `secrets.create=false` (recommended): pre-create required Kubernetes
