@@ -40,7 +40,7 @@ cd ~/src/fwd-agent
 baml-cli generate
 
 SKYFORGE_FORWARD_OVERLAY_VALUES="deploy/examples/values-forward-prod.yaml,deploy/examples/values-forward-demo-fast.yaml" \
-SKYFORGE_FORWARD_BAML_IMAGE_OVERRIDE="<registry>/fwd_baml_server:<tag>" \
+SKYFORGE_FORWARD_BAML_IMAGE_OVERRIDE="ghcr.io/captainpacket/fwd_baml_server:<tag>" \
 SKYFORGE_FORWARD_AICHAT_BAML_IMAGE_TAG="<tag>" \
 ./scripts/bootstrap-forward-local.sh
 ```
