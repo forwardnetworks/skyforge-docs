@@ -136,6 +136,8 @@ Expected behavior:
 - lab workloads prefer `lab` / `onprem-lab`
 - cloud `burst` pools remain the fallback for elastic capacity
 
+A Hetzner burst variant fits this same contract: label those worker nodes as `burst` with `provider=hetzner`, terminate WireGuard on the local side, and make the Hetzner peers initiate the tunnel outbound.
+
 If no `onprem-lab` nodes are ready:
 
 - Skyforge should report hybrid-placement warnings

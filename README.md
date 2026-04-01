@@ -1,14 +1,13 @@
 # Skyforge Docs
 
-Product documentation and OSS readiness/policy documents for Skyforge.
+Product documentation and OSS policy documents for Skyforge.
 
 Key active docs:
-- `components/docs/architecture-guidelines.md`
-- `components/docs/k3d-local-dev.md`
-- `components/docs/prod-promotion-checklist.md`
+- `components/docs/quickstart.md`
+- `components/docs/install-on-server.md`
+- `components/docs/helm.md`
+- `components/docs/smoke-tests.md`
 
-For the full stack (including server, portal, charts, blueprints, and pinned dependencies), see the meta repo:
-`forwardnetworks/skyforge`.
-
-Historical migration notes and evidence snapshots are archived under:
-`components/docs/archive/legacy/`.
+Historical migration notes and archived plans live under:
+- `components/docs/archive/legacy/`
+- `components/docs/plans/`

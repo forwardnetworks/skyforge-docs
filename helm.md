@@ -90,6 +90,8 @@ Populate the following before installing:
 - `skyforge.domain` (email suffix for default users)
 - `skyforge.gateway.addresses` (recommended for Cilium Gateway API node-IP ingress; example `[{type: IPAddress, value: "10.128.16.60"}]`)
 - `skyforge.auth.mode` (`local` for dev/OSS, `oidc` for prod)
+- If you need an Internet-facing overlay on top of the direct Cilium Gateway: set `skyforge.publicTunnel.provider=cloudflare`, create a Secret with `ACCOUNT_ID` and `TOKEN`, and set `skyforge.publicTunnel.cloudflare.credentialsSecretName` to that Secret name.
+- If you enable Hetzner burst workers: also create the WireGuard Secret referenced by `skyforge.burst.hetzner.wireguard.hub.privateKeySecretName` (private key plus optional `peers.conf`), and verify the selected hub node IP matches `skyforge.burst.hetzner.wireguard.gatewayNodeIP`.
 - If `skyforge.auth.mode=oidc`: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and provider values under `skyforge.dex.oidc.*`
 - If `secrets.create=false` (recommended): pre-create required Kubernetes
   Secrets (for example `proxy-tls`, `skyforge-session-secret`,

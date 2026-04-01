@@ -48,7 +48,8 @@ kubectl -n skyforge rollout status deploy/skyforge-server --timeout=5m
 ```
 
 Deployment guardrail:
-- `scripts/deploy-skyforge-local.sh` and `scripts/deploy-skyforge-prod-safe.sh` run this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
+- `scripts/deploy-skyforge-prod-safe.sh` runs this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
+- local single-node k3s installs should run `./scripts/verify-local-stack.sh` after `./scripts/deploy-skyforge-local.sh`.
 - `scripts/deploy-skyforge-prod-safe.sh` also enforces node kernel sysctl `fs.inotify.max_user_instances=64000` pre-Helm.
 - `scripts/deploy-skyforge-prod-safe.sh` now enforces Forward worker host prerequisites pre-Helm using `scripts/k8s-forward-worker-prereqs.sh`:
   - ensures `/etc/rancher/k3s/registries.yaml` is present on nodes with Forward worker labels

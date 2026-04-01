@@ -1,58 +1,52 @@
-# Quickstart (k3s + Cilium Gateway API)
+# Quickstart (single-node k3s)
 
-This is the minimal single-node k3s deployment path.
-
-For local development using k3d (default-safe workflow), use:
-- `components/docs/k3d-local-dev.md`
-
-Environment mapping (current policy):
-- local `k3d` = dev
-- VMware/on-prem = prod
-
-If you want a repeatable install workflow, use `docs/install-on-server.md`.
+This is the supported OSS and local deployment path.
 
 ## 1) Prereqs
-- k3s installed and `kubectl` works.
-- Cilium installed as the cluster CNI (Gateway API enabled).
-- A DNS name for Skyforge (or `/etc/hosts` entry).
-- TLS cert + key available for `proxy-tls`.
+- single-node `k3s` installed and `kubectl` works
+- Cilium installed as the cluster CNI with Gateway API enabled
+- a DNS name for Skyforge, or a local `/etc/hosts` entry
+- TLS cert + key available for `proxy-tls`
 
-## 2) Configure values + secrets
-Edit deployment values and local-only secrets:
-
-```bash
-$EDITOR deploy/skyforge-values.yaml
-$EDITOR deploy/skyforge-secrets.yaml
-```
+## 2) Prepare values and secrets
+Populate:
+- `deploy/skyforge-values.yaml`
+- `deploy/skyforge-secrets.yaml`
 
 Minimum values to update:
 - `skyforge.hostname`
 - `skyforge.domain`
-- `skyforge.gateway.addresses` (recommended for node-IP ingress, example `type: IPAddress`, `value: 10.128.16.60`)
+- `skyforge.gateway.addresses`
 - `skyforge.gitea.url`
 - `skyforge.gitea.apiUrl`
-- `skyforge.auth.mode=local` for local/dev/OSS, or `skyforge.auth.mode=oidc` for prod
-- If using prod OIDC with Okta: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and `skyforge.dex.oidc.*`
+- `skyforge.auth.mode=local` for OSS/local, or `skyforge.auth.mode=oidc` for production
 
 Minimum secrets to populate:
 - `secrets.items.skyforge-session-secret.skyforge-session-secret`
 - `secrets.items.skyforge-admin-shared.password`
 - DB passwords
-- object storage keys (`object-storage-root-user`, `object-storage-root-password`)
+- object-storage keys
 - `proxy-tls` (`tls.crt`, `tls.key`)
 
-## 3) Deploy (Helm)
+## 3) Install
+Preferred host-first flow:
 
 ```bash
-helm upgrade --install skyforge oci://ghcr.io/forwardnetworks/charts/skyforge \
-  -n skyforge --create-namespace \
-  --reset-values \
-  -f deploy/skyforge-values.yaml \
-  -f deploy/skyforge-secrets.yaml
+export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
+sudo -E ./scripts/install-on-host.sh
 ```
 
-## 4) Smoke tests
-Follow `docs/smoke-tests.md`.
+Repo-local helper for an existing single-node k3s cluster:
 
-## 5) User data sync
-See `docs/user-data-sync.md` for per-user paths and user-scoped object-storage artifact flow.
+```bash
+./scripts/deploy-skyforge-local.sh
+```
+
+## 4) Verify
+
+```bash
+./scripts/verify-local-stack.sh
+```
+
+## 5) Template catalog
+See `components/docs/install-on-server.md` for blueprint seeding and repeatable install drills.

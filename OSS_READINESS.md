@@ -17,7 +17,7 @@ Status keys:
 - Define optional “integration modules” (Forward sync, collector, NetBox/Nautobot SSO).
 
 ⬜ **Deployment target**
-- Pick a default: `kind`/`k3d` (local), or “any Kubernetes 1.x”.
+- Pick a default: supported local OSS path is single-node `k3s`.
 - Decide whether to ship Helm as the primary path, or Helm + plain manifests.
 
 ⬜ **Licensing + policy**

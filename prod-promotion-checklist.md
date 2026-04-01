@@ -1,98 +1,52 @@
 # Prod Promotion Checklist
 
-Use this checklist before promoting Skyforge changes validated in local `k3d` to pre-prod/prod.
+Use this checklist before promoting Skyforge changes validated on the supported single-node k3s workflow to pre-prod or prod.
 
-## 1. Config and render parity gates
+## 1. Config and render gates
 
-Run both gates from the meta repo root:
+Run the production-readiness gate from the meta repo root:
 
 ```bash
-./scripts/check-k3d-parity.py \
-  components/charts/skyforge/values.yaml \
-  components/charts/skyforge/values-prod-skyforge-local.yaml \
-  deploy/examples/values-k3d-dev.yaml
-
 ./scripts/check-prod-promotion-readiness.py \
   components/charts/skyforge/values.yaml \
   components/charts/skyforge/values-prod-skyforge-local.yaml \
-  deploy/examples/values-k3d-dev.yaml
+  deploy/examples/values-local-k3s.yaml
 ```
 
 Expected:
-- no non-approved local-vs-prod diffs
-- CI / GitHub Actions `Edition Contract Evidence` job uploads edition artifacts (server/chart contracts + rendered manifests) for traceability
-- staged features explicitly pinned in prod values:
-  - `skyforge.infoblox.enabled=false`
-  - `skyforge.jira.enabled=false`
-  - `skyforge.forward.enabled=true`
-  - `skyforge.forwardCluster.enabled=true`
+- promotion-readiness script passes
+- CI / GitHub Actions `Edition Contract Evidence` job uploads edition artifacts for traceability
+- staged features are explicitly pinned in prod values
 
 ## 2. Staged feature promotion gates
 
 Before enabling staged integrations in prod values:
-- define explicit `enabled` toggles in the prod values file,
-- pin image tags and secrets in prod values,
-- provide a rollback plan (disable toggle + known-good image tags).
-
-For current staged integrations:
-- `Infoblox`: keep disabled until KubeVirt/Multus runtime and ingress path are validated in pre-prod.
-- `Jira`: keep disabled until Skyforge SSO proxy, Jira bootstrap, and runtime checks pass in pre-prod.
-- `Rapid7`: keep disabled until the Skyforge SSO proxy, backend TLS CA trust, and in-cluster runtime checks pass in pre-prod.
+- define explicit `enabled` toggles in the prod values file
+- pin image tags and secrets in prod values
+- provide a rollback plan
 
 ## 3. Forward DB/org automation rules
 
-Prod and local now use the same default support/org behavior:
-- set on-prem org to `ORG_TYPE=INTERNAL`
-- set on-prem org `ENFORCE_LICENSING=false`
-- keep support user `forward` enabled by default
+Prod and local use the same default support/org behavior:
+- on-prem org `ORG_TYPE=INTERNAL`
+- on-prem org `ENFORCE_LICENSING=false`
+- support user `forward` enabled by default
 
 Prod deploy script behavior:
 - `scripts/deploy-skyforge-prod-safe.sh` applies these defaults automatically by default
-- control flags:
-  - `FORWARD_APPLY_SUPPORT_DEFAULTS=true|false`
-  - `FORWARD_ENABLE_SUPPORT_USER=true|false` (default `true`)
-  - `FORWARD_NAMESPACE` (default `forward`)
-  - `FORWARD_ONPREM_ORG_ID` (default `101`)
 
-Local helper remains available for manual support operations:
-- `scripts/forward-local-support-access.sh`
-
-## 4. Pre-prod validation (required)
+## 4. Pre-prod validation
 
 Run one pre-prod environment with prod auth and real ingress before prod cut:
-
-1. Deploy chart with prod-auth values (`skyforge.auth.mode=oidc`).
-2. Validate routes:
-   - `/git`
-   - `/coder`
-   - `/netbox`
-   - `/nautobot`
-   - `/api-testing`
-3. Validate deployment flow:
-   - create
-   - bring up
-   - destroy
-4. Validate Forward path:
-   - Forward route reachable
-   - collector config and runtime actions
-   - sync path from deployment to Forward
-
-Cluster resiliency gate:
-- `scripts/deploy-skyforge-prod-safe.sh` now executes `scripts/k8s-network-resilience.sh`
-  before and after Helm apply in strict mode.
-- `scripts/deploy-skyforge-prod-safe.sh` enforces node kernel sysctl
-  `fs.inotify.max_user_instances=64000` pre-Helm via `scripts/k8s-node-sysctl-enforce.sh`.
-- Auto-repair of node-local Cilium datapath is opt-in (`SKYFORGE_NETWORK_RESILIENCE_REPAIR=true`).
-- Tune only if needed:
-  - `SKYFORGE_NETWORK_RESILIENCE_ENABLE=true|false`
-  - `SKYFORGE_NETWORK_RESILIENCE_STRICT=true|false`
-  - `SKYFORGE_NETWORK_RESILIENCE_REPAIR=true|false`
-  - `SKYFORGE_NETWORK_RESILIENCE_MAX_REPAIRS_PER_NODE=<n>`
+1. deploy chart with prod-auth values
+2. validate routes
+3. validate deployment create/bring-up/destroy
+4. validate Forward route and collector/runtime actions when Forward is enabled
 
 ## 5. Promotion decision
 
 Promote only when all are true:
-- parity and promotion-readiness scripts pass
+- promotion-readiness script passes
 - pre-prod validation pass is documented
-- staged feature toggles are explicitly set for the target environment
+- staged feature toggles are explicit for the target environment
 - rollback plan is prepared and tested
