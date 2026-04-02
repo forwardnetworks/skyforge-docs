@@ -30,10 +30,28 @@ separate knowledge-tree layer. The current request flow already benefits from:
 - demo-fast overlay: `deploy/examples/values-forward-demo-fast.yaml`
 - prod-shaped combined example: `deploy/examples/values-forward-prod-demo-fast.yaml`
 
+The combined example is intended to render on its own. Use it when you want a
+single-file rollout. Use the two-file stack when you want to keep the demo-fast
+delta visually separated from the base Forward production-shaped overlay.
+
 ## Rollout pattern
 
-Build and push the local BAML image first, then deploy Forward using both
-overlays:
+Build and push the local BAML image first, then deploy Forward using either the
+single combined overlay or the explicit two-file stack.
+
+Single-file rollout:
+
+```bash
+cd ~/src/fwd-agent
+baml-cli generate
+
+SKYFORGE_FORWARD_OVERLAY_VALUES="deploy/examples/values-forward-prod-demo-fast.yaml" \
+SKYFORGE_FORWARD_BAML_IMAGE_OVERRIDE="ghcr.io/captainpacket/fwd_baml_server:<tag>" \
+SKYFORGE_FORWARD_AICHAT_BAML_IMAGE_TAG="<tag>" \
+./scripts/bootstrap-forward-local.sh
+```
+
+Two-file rollout:
 
 ```bash
 cd ~/src/fwd-agent
@@ -56,5 +74,5 @@ After rollout, verify:
 
 ## Rollback
 
-Rollback by redeploying without `deploy/examples/values-forward-demo-fast.yaml`
-and restoring the previous BAML image tag.
+Rollback by redeploying without the demo-fast overlay changes and restoring the
+previous BAML image tag.
