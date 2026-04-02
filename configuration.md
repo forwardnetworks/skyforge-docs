@@ -74,8 +74,16 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
   - `skyforge.server.pdb.minAvailable`
 
 ## Integration auth modes (sidebar)
-- Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`.
+- Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`, `API Testing`.
 - Native OIDC (no Skyforge SSO proxy hop): `Grafana` (via Dex static client `grafana`).
+- `Gitea` onboarding defaults are controlled by `skyforge.gitea.oidc.*`; the prod baseline should keep
+  auto-registration enabled and account linking set to `auto` so first-time Dex users land directly in Gitea.
+- `Coder` onboarding defaults are controlled by `skyforge.coder.*`; the chart now bootstraps a first owner
+  account by default and keeps Dex-backed OIDC auto-login/signups enabled so users land directly in Coder instead
+  of the first-user setup flow.
+- `Grafana` native OIDC keeps the browser redirect on `https://<hostname>/dex/auth`, but defaults the
+  server-side token and userinfo exchange to in-cluster Dex (`http://dex:5556/dex/...`) so Grafana does not fail
+  OAuth completion on internal TLS or ingress trust issues.
 - OIDC-gated at edge (Skyforge/Dex SSO proxy): `Prometheus`, `Jira`, `Rapid7`, `ELK`, `Infoblox`.
   - Gate controls (enabled by default when integration is enabled):
     - `skyforge.jira.oidc.enabled`
@@ -85,6 +93,9 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
   - This mode requires:
     - `skyforge.dex.enabled=true`
     - `skyforge.auth.mode=oidc`
+  - Managed `Jira` can now preseed its Postgres `dbconfig.xml` from
+    `skyforge.jira.database.*` so first-run users land in the app instead of the
+    Atlassian database setup wizard.
   - `Rapid7` TLS upstream is controlled by `skyforge.rapid7.oidc.upstream*`.
   - `Infoblox` defaults to HTTP upstream port `80` in OIDC gate mode; override with
     `skyforge.infoblox.oidc.upstream*` if HTTPS upstream is required.
@@ -93,7 +104,23 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 
 ## Service URLs
 - `GITEA_ROOT_URL`: generated from `skyforge.hostname`
-- Object storage route: `https://<hostname>/files/`
+- Human-readable artifacts browser: `https://<hostname>/files` (redirects to `/dashboard/s3`)
+- Raw object storage route: `https://<hostname>/files/<object-key>`
+
+## Portal build artifacts
+- `components/server/frontend/frontend_dist` is the canonical embedded SPA output consumed by the server binary.
+- `components/portal` builds directly into that directory:
+  - `pnpm build`
+  - `scripts/sync-frontend-dist.mjs`
+- If portal code changes are part of a rollout, the corresponding `components/server/frontend/frontend_dist/*` updates must be included intentionally in the same rollout.
+
+## Embedded tool launch and wake rules
+- Tool visibility is controlled by the tool catalog and the user's UI experience mode (`simple` or `advanced`).
+- Standby integrations (`NetBox`, `Nautobot`, `Rapid7`, `Kibana`) expose a `wakeAction` through `/api/platform/integrations/status`.
+- Wake semantics are intentionally narrow:
+  - users who can already open the advanced embedded tool may wake it to `1` replica
+  - broader scale control still requires `manage_integrations`
+- If wake is blocked, the embedded tool page must say so explicitly instead of implying auto-start.
 
 ## Where to set values
 ```bash
