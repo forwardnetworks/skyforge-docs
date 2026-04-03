@@ -16,16 +16,35 @@ For k3s deployments, configure:
 - `skyforge.domain`
 - `skyforge.publicUrl`
 - `skyforge.adminUsers`
+- `skyforge.audit.retention`
+  - default `180d`
+  - set to `0` to disable automatic audit cleanup
 
 ## Required secrets (minimum)
 Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 - `skyforge-session-secret.skyforge-session-secret`
+- `skyforge-audit-export-signing-key.skyforge-audit-export-signing-key`
+  - PEM-encoded Ed25519 PKCS#8 private key used to sign audit exports
 - `skyforge-admin-shared.password`
 - `db-skyforge-server-password.db-skyforge-server-password`
 - `object-storage-root-user.object-storage-root-user`
 - `object-storage-root-password.object-storage-root-password`
 - `proxy-tls.tls.crt`
 - `proxy-tls.tls.key`
+
+## Audit integrity and export verification
+- Integrity endpoint: `GET /api/admin/audit/integrity`
+  - verifies the append-only audit hash chain
+  - uses incremental checkpoints in `sf_audit_integrity_checkpoints`
+- Export signing:
+  - every audit export is signed with `skyforge-audit-export-signing-key`
+  - signature records are persisted in `sf_audit_export_signatures`
+- Verify API:
+  - `POST /api/admin/audit/export-signatures/:signatureID/verify`
+  - request body: `{ "bodyBase64": "<base64-export-bytes>" }`
+- Admin UI flow:
+  - Settings → Maintenance → Audit
+  - use `Upload & verify` on a signature row to verify an exported file
 
 ## Integration endpoints
 - `skyforge.gitea.url`
