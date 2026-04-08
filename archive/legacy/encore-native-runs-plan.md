@@ -76,7 +76,7 @@ Keep a narrow, stable vocabulary:
 - `run.failed`
 
 For step events, include:
-- `step_key` (e.g. `sync-template`, `netlab-create`, `clabernetes-apply`, `forward-upload`)
+- `step_key` (e.g. `sync-template`, `netlab-create`, `kne-apply`, `forward-upload`)
 - `attempt`
 - `duration_ms`
 - `error` (when failed)
@@ -87,7 +87,7 @@ Split responsibilities into small packages/services over time:
 
 - `runs` service: create runs, persist state, publish/subscribe run events, expose streaming endpoints.
 - `deployments` service: user-facing deployment APIs; translates actions into run requests.
-- `runners/*`: provider-specific execution (netlab/eve-ng/containerlab/clabernetes).
+- `runners/*`: provider-specific execution (netlab/eve-ng/kne/kne).
 - `forward` integration: Forward API calls and device upload formats.
 - `blueprints` integration: template resolution/sync.
 
@@ -166,7 +166,7 @@ Outcome: long-running operations no longer block HTTP handlers; retries and resu
 Add `encore.dev/cron` jobs for:
 
 - Stuck run detection (no events for N minutes while status active).
-- Runner reconciliation (e.g., check netlab/clabernetes state).
+- Runner reconciliation (e.g., check netlab/kne state).
 - Cleanup/expiry (old logs/artifacts).
 
 Optional:
@@ -179,7 +179,7 @@ As complexity grows:
 
 - Split large services into smaller Encore services.
 - Introduce per-provider worker concurrency limits.
-- Add feature flags to gate experimental paths (e.g. clabernetes).
+- Add feature flags to gate experimental paths (e.g. kne).
 
 ## Compatibility plan
 

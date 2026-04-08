@@ -30,7 +30,7 @@ the catalog repo does not require a Gitea Action workflow for node-name fixes.
 
 In Skyforge UI:
 - Go to **Create Deployment**
-- Ensure templates load for Netlab/Containerlab/Terraform (depending on what you seeded)
+- Ensure templates load for Netlab/KNE/Terraform (depending on what you seeded)
 
 If templates still do not load:
 - Confirm user scope references the shared catalog (`skyforge/blueprints`).

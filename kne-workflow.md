@@ -1,26 +1,28 @@
-# C9s (Clabernetes) workflow
+# KNE (KNE) workflow
 
-Skyforge supports deploying labs into Kubernetes using **clabernetes** (referred to as **C9s** in the UI).
+Skyforge supports deploying labs into Kubernetes using **kne** (referred to as **KNE** in the UI).
 
-This is intended to let Skyforge scale “lab compute” horizontally by running labs as pods inside the k3s cluster (instead of SSHing to an external Containerlab/Netlab host).
+This is intended to let Skyforge scale “lab compute” horizontally by running labs as pods inside the k3s cluster (instead of SSHing to an external KNE/Netlab host).
 
 ## How it works
 
-### 1) C9s engine hard gate
+### 1) KNE engine hard gate
 
-- C9s is now **netlab-only** (`family=c9s`, `engine=netlab`).
-- Direct C9s `containerlab` engine/task paths are retired.
-- Any remaining C9s records with non-netlab engine values fail closed at API preflight/action time.
+- KNE is now **netlab-only** (`family=kne`, `engine=netlab`).
+- Direct KNE `kne` engine/task paths are retired.
+- Any remaining KNE records with non-netlab engine values fail closed at API preflight/action time.
 
-### 2) Netlab → C9s (deployment family/engine: `c9s` / `netlab`)
+### 2) Netlab → KNE (deployment family/engine: `kne` / `netlab`)
 
-Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and persists state:
+Netlab-on-KNE is a netlab-owned runtime flow where Skyforge orchestrates and persists state:
 
-1. Skyforge syncs the Netlab template folder and runs netlab in-cluster (`c9s/netlab` native mode).
+1. Skyforge syncs the Netlab template folder and runs netlab in-cluster (`kne/netlab` native mode).
    BYOS Netlab server mode is not used for this path.
 2. Runtime entrypoint is unified:
    - `python3 /app/netlab.py up` for deploy/create
    - `python3 /app/netlab.py down` for destroy/stop
+   - runtime startup fails fast if the image does not contain the native
+     `netsim.providers.kne` contract expected by this checkout
 3. `netlab up` generates:
    - `clab.yml`
    - `node_files/…`
@@ -29,70 +31,85 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
 5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
 
+### 2.0) Supported NOS onboarding scope
+
+KNE onboarding in this workflow is intentionally limited to:
+
+- `cEOS` (container runtime via CEOSLab controller)
+- `IOL` / `IOLL2` (native Cisco node path)
+- `IOS-XRd` (native Cisco node path)
+- `kubevirt` runtime class (VM-backed NOS paths)
+
+No additional KNE vendor controller stacks are required for this set.
+
 ### 2.1) Runtime contract: k8s-only
 
-- C9s netlab runtime is hard-gated to `runtimeBackend=k8s`.
+- KNE netlab runtime is hard-gated to `runtimeBackend=k8s`.
 - No runtime toggle is exposed from Skyforge for docker fallback.
 - Netlab runtime emits a k8s-only manifest contract, and taskengine rejects non-k8s backend values.
-- Clabernetes launcher/runtime paths in this deployment flow do not depend on Docker-in-Docker.
+- KNE launcher/runtime paths in this deployment flow do not depend on Docker-in-Docker.
+- Top-level provider semantics are `provider: kne`.
+- Nested upstream `clab` node/image attributes remain valid where netlab uses
+  them for container-based node metadata; Skyforge does not mass-rewrite those
+  subtrees.
 
 ### Deploy policy + phased task events
 
-- For `netlab-c9s-run` deploy actions, Skyforge resolves deploy policy once per task
+- For `netlab-kne-run` deploy actions, Skyforge resolves deploy policy once per task
   (connectivity, expose mode, scheduling mode, resource flags, deploy timeout) and stores it
-  in typed runtime contract storage (`sf_task_runtime_contracts.clabernetes_deploy_policy`).
+  in typed runtime contract storage (`sf_task_runtime_contracts.kne_deploy_policy`).
 - Retries/resume of the same task re-use this persisted policy to prevent mid-run behavior drift
   when environment inputs change.
-- Deploy tasks emit phased events under `clabernetes.deploy.phase`:
+- Deploy tasks emit phased events under `kne.deploy.phase`:
   - `policy.resolved`
   - `cr.applied`
   - `pods.ready`
   - `native_mode.verified`
   - `topology_graph.captured`
-  - `ssh_ready.completed` (containerlab-only when SSH readiness gating is enabled)
+  - `ssh_ready.completed` (kne-only when SSH readiness gating is enabled)
 
-### Source of truth chain (Netlab → Skyforge → Clabernetes)
+### Source of truth chain (Netlab → Skyforge → KNE)
 
 - Netlab device metadata is generated from upstream `vendor/netlab/netsim/devices/*.yml` into
   `internal/taskengine/netlab_device_defaults.json`.
 - Catalog generation materializes netlab SSH readiness defaults (`netlab_check_retries=20`,
   `netlab_check_delay=5`) when upstream device files do not set them, so runtime checks stay
   catalog-driven.
-- For c9s/netlab, canonical node device identity is sourced from netlab-generated
+- For kne/netlab, canonical node device identity is sourced from netlab-generated
   manifest `nodes.*.deviceKey` and persisted into DB contract rows.
 - The applier consumes generator output as-is; Skyforge no longer loads a node
   name-map ConfigMap or patches `hosts.yml` / `netlab.snapshot.pickle` at apply time.
-- For c9s/netlab apply behavior, Skyforge does not evaluate runtime `initial_policy`/SSH-auth
+- For kne/netlab apply behavior, Skyforge does not evaluate runtime `initial_policy`/SSH-auth
   gates; netlab runtime owns apply sequencing and per-device config semantics.
 - Per-node license mounts (for example SR OS) are now explicit manifest contract
   fields under `nodeLicenses` (ConfigMap/key + absolute mount paths), generated by
   netlab runtime and consumed directly by taskengine.
-- C9s/netlab persists canonical `device_key` and `forward_type` in
-  `sf_netlab_node_status_current`; c9s Forward sync consumes those DB fields directly.
-- Non-c9s Forward sync resolves device identity from node `kind+image` using the same catalog
+- KNE/netlab persists canonical `device_key` and `forward_type` in
+  `sf_netlab_node_status_current`; kne Forward sync consumes those DB fields directly.
+- Non-kne Forward sync resolves device identity from node `kind+image` using the same catalog
   resolver and fails closed when a node cannot be resolved (no kind-only fallback table).
 - SSH/auth readiness gates resolve node refs from topology graph metadata only and fail closed
   when kind/image metadata is missing.
-- Forward device credential creation for netlab/clabernetes sync is sourced from this same
+- Forward device credential creation for netlab/kne sync is sourced from this same
   generated netlab catalog (no separate hardcoded credential table).
 - Unknown or alias-only devices fail preflight (fail-closed).
-- C9s/netlab tasks persist contract summaries in typed DB rows:
+- KNE/netlab tasks persist contract summaries in typed DB rows:
   - table: `sf_task_runtime_contracts`
   - fields include `netlab_catalog_provenance`, `netlab_contract`,
     `netlab_k8s_contract`, `netlab_node_resolution_summary`,
-    `clabernetes_deploy_policy`, `clabernetes_compatibility_preflight`,
-    `clabernetes_capacity_preflight`, `clabernetes_apply_summary`
+    `kne_deploy_policy`, `kne_compatibility_preflight`,
+    `kne_capacity_preflight`, `kne_apply_summary`
   - task events remain emitted for run/audit timelines.
-- C9s/netlab artifact index is persisted in typed DB rows:
+- KNE/netlab artifact index is persisted in typed DB rows:
   - table: `sf_netlab_artifact_index`
   - keyed by `(task_id, artifact_path)` with user/deployment/task foreign keys
   - historical `metadata.netlabArtifacts` is migrated and no longer the primary index
   - read API: `GET /api/users/:id/deployments/:deploymentID/netlab/artifacts`
   - `GET /api/netlab/runs` now resolves run artifact pointers from this typed index
     (legacy log-marker parsing `SKYFORGE_ARTIFACT` is removed).
-- Clabernetes apply step persists handoff checksum/provenance:
-  - metadata key: `clabernetesApplySummary`
-  - task event: `clabernetes.apply.summary`
+- KNE apply step persists handoff checksum/provenance:
+  - metadata key: `kneApplySummary`
+  - task event: `kne.apply.summary`
 - Pure-k8s runtime contract is fail-closed at reconcile time:
   - `env-files` in resolved node definitions are rejected for k8s runtime.
   - Node `binds` are allowed only when bind sources are artifact-backed via
@@ -162,7 +179,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - taskengine validates schema at ingress before unmarshal/use
   - contract validation is hard-required (no runtime fallback toggle)
   - if startup configs are referenced in the manifest apply plan, runtime requires those files to be artifact-backed in per-node `node_files` mounts
-- Clabernetes deploy policy is persisted in deployment config (`deployPolicy`) and
+- KNE deploy policy is persisted in deployment config (`deployPolicy`) and
   written to typed runtime-contract rows in `sf_task_runtime_contracts`
   (not environment overrides).
 - Preflight now runs at API-time before runs are queued:
@@ -191,7 +208,7 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
   - `queue.expiresAt`
 - Skyforge also exposes an explicit preflight endpoint (no queue side-effects):
   - `POST /api/users/:id/deployments/:deploymentID/preflight`
-  - supported for deployment family/engine pair `c9s/netlab`
+  - supported for deployment family/engine pair `kne/netlab`
   - returns no-op/idempotent reasons when deployment state already matches requested action
 - Deployment action/preflight requests now use a short-lived advisory operation lock keyed by
   deployment operation key, which prevents duplicate clicks from running concurrent
@@ -209,30 +226,41 @@ Netlab-on-C9s is a netlab-owned runtime flow where Skyforge orchestrates and per
 
 ## What’s still “phase 2” / future work
 
-- Post-deploy configuration steps executed *after* the C9s topology becomes ready.
-  - Linux nodes are configured by running the netlab-generated `node_files/<node>/{initial,routing}` scripts directly in-pod.
-  - Network OS nodes are configured via startup configs mounted at boot time.
-  - If we need additional post-up work in the future, it should be implemented in Go (worker/taskengine) rather than via Ansible jobs.
+- Additional post-apply runtime hooks beyond the native netlab/KNE lifecycle.
+  - Current contract is:
+    - `kne create`
+    - upstream KNE provider `post_start_lab` inventory refresh
+    - `netlab initial`
+  - If we need more post-up work in the future, it should extend the existing
+    runtime hook/apply seam instead of bypassing it with ad hoc taskengine
+    mutations.
 
 ## Ops / prerequisites
 
-- Helm: `values.yaml` has `skyforge.clabernetes.enabled` (experimental).
+- Helm: `values.yaml` has `skyforge.kne.enabled` (experimental).
 - RBAC: Skyforge server needs to be able to `get/list/create/update/delete`:
-  - `topologies.clabernetes.containerlab.dev`
+  - `topologies.kne.kne.dev`
   - `configmaps`
   - `namespaces`
 
 ## Troubleshooting
 
+- Native KNE NOS smoke matrix (GHCR images from runtime defaults):
+  - `./scripts/smoke-kne-nos-native.sh`
+  - Uses `components/server/netlab/runtime/defaults.yml` as source-of-truth for
+    per-device image pins.
+  - Pass criteria per NOS: topology create succeeds, node reaches `Running/Ready`,
+    and topology namespace is deleted cleanly.
+
 - If `Topology` never becomes ready:
   - `kubectl -n <ns> get topologies`
   - `kubectl -n <ns> describe topology <name>`
-  - check clabernetes manager logs: `kubectl -n skyforge logs deploy/clabernetes-manager`
+  - check kne manager logs: `kubectl -n skyforge logs deploy/kne-manager`
 - If node pods constantly restart (Deployment `kubectl.kubernetes.io/restartedAt` keeps changing):
-  - root cause is usually the clabernetes controller thinking configs changed every reconcile.
-  - ensure the clabernetes manager image is built with the “restart on config hash” fix (Skyforge tags around `20260119-restart-hash-*`).
+  - root cause is usually the kne controller thinking configs changed every reconcile.
+  - ensure the kne manager image is built with the “restart on config hash” fix (Skyforge tags around `20260119-restart-hash-*`).
 - If you see `topology capture failed: Access Denied`:
   - the Skyforge worker stores topology graph artifacts in the `skyforge-files` bucket.
   - ensure the configured object-storage principal referenced by `SKYFORGE_OBJECT_STORAGE_ACCESS_KEY` has write access to `skyforge-files/*`.
-- If C9s/netlab deploy fails early:
+- If KNE/netlab deploy fails early:
   - confirm the Netlab server can run `netlab create` and produce `clab.yml` and `node_files/`.

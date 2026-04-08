@@ -32,7 +32,7 @@ implementation code as a library.
    - `server/internal/skyforgecore`
 2. The library package owns:
    - DB task store helpers (read task, mark running/finished, append logs/events, advisory locks).
-   - Dispatch logic (`eve-ng`, `netlab`, `terraform`, `clabernetes`, etc).
+   - Dispatch logic (`eve-ng`, `netlab`, `terraform`, `kne`, etc).
    - Any shared integration helpers needed by both API + worker.
 3. Create new service `server/taskworker` with:
    - `//encore:service`
@@ -127,11 +127,11 @@ Status: implemented
 
 ### C) Topology graph parity
 Status:
-- `netlab-c9s-run` now stores a post-deploy topology artifact (derived from clabernetes pods) for correct mgmt IP rendering.
-- `clabernetes-run` now stores a post-deploy topology artifact (derived from clabernetes pods) for correct mgmt IP rendering.
+- `netlab-kne-run` now stores a post-deploy topology artifact (derived from kne pods) for correct mgmt IP rendering.
+- `kne-run` now stores a post-deploy topology artifact (derived from kne pods) for correct mgmt IP rendering.
 
 TODO:
-- None (parity is now implemented for clabernetes-backed deployments).
+- None (parity is now implemented for kne-backed deployments).
 
 ### D) Typed config consolidation
 Goal:

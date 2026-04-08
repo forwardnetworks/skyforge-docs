@@ -106,7 +106,7 @@ If a saved plan does not fit that shape, the portal opens it in `Advanced` mode 
 Advanced mode keeps the generic composite contract for cases such as:
 
 - `baremetal -> netlab`
-- `containerlab`
+- `kne`
 - unusual binding patterns
 - plans with more than two stages
 
@@ -154,14 +154,14 @@ A composite plan still persists as:
 
 - `terraform`
 - `netlab`
-- `containerlab`
+- `kne`
 - `baremetal`
 
 ### Action Set
 
 - `terraform`: `plan`, `apply`, `destroy`
 - `netlab`: `up`, `down`, `validate`
-- `containerlab`: `deploy`, `destroy`, `validate`
+- `kne`: `deploy`, `destroy`, `validate`
 - `baremetal`: `reserve`, `configure`, `release`, `validate`
 
 ## Advanced JSON Reference

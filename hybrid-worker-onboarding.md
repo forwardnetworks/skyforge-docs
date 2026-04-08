@@ -55,7 +55,7 @@ They should not run:
 
 They are meant for:
 
-- clabernetes lab workloads
+- kne lab workloads
 - heavy integration workloads where placement policy allows it
 
 Apply a clear pool-class label:
@@ -167,7 +167,7 @@ Skyforge-side:
 - open `Dashboard`
 - open `Platform > Capacity`
 - inspect blended infrastructure, pool classes, and warnings
-- open a c9s deployment detail page and inspect the `Placement` card
+- open a kne deployment detail page and inspect the `Placement` card
 
 ## Degraded-Mode Expectations
 

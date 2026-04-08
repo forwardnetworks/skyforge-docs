@@ -2,10 +2,10 @@
 
 This document captures the current fork status for the Skyforge vendored projects and the integration cleanup gates required for clean PRs and deploy parity.
 
-## Clabernetes
+## KNE
 
-- Fork branch: `forwardnetworks/clabernetes:skyforge-upstreamable-vxlan`
-- Upstream base: `srl-labs/clabernetes:main`
+- Fork branch: `forwardnetworks/kne:skyforge-upstreamable-vxlan`
+- Upstream base: `srl-labs/kne:main`
 - Drift status: `0 behind / 13 ahead`
 - Current pinned SHA in Skyforge: `631706e0bb9a7e582bb697808b73d6c4d6f12dd4`
 
@@ -57,10 +57,10 @@ This document captures the current fork status for the Skyforge vendored project
 
 A cleanup cycle is considered complete when all of the following are true:
 
-1. Fork PRs are repo-split (`clabernetes`, `netlab`, `skyforge-*`, then meta pin).
+1. Fork PRs are repo-split (`kne`, `netlab`, `skyforge-*`, then meta pin).
 2. Skyforge submodule SHAs are pinned to reviewed fork commits.
 3. Build/tests pass:
-   - clabernetes `go test`
+   - kne `go test`
    - server targeted `go test`
    - charts `helm lint`
 4. Deployment uses the same SHAs/tags referenced in PRs.

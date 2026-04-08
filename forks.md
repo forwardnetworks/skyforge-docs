@@ -1,4 +1,4 @@
-# Fork maintenance (Netlab + Clabernetes)
+# Fork maintenance (Netlab + KNE)
 
 Skyforge intentionally vendors **very little**. When we must patch upstream components to fit our deployment model, we do it as a fork with a minimal delta and a clear upgrade path.
 
@@ -15,7 +15,7 @@ Repository: `github.com/forwardnetworks/netlab`
 
 ### Policy
 
-- Only accept changes that unblock our supported Skyforge workflows (netlab → clabernetes, single-file templates, supported NOS images).
+- Only accept changes that unblock our supported Skyforge workflows (netlab → kne, single-file templates, supported NOS images).
 - Keep changes localized (device feature flags + missing templates) so upstreaming remains possible.
 
 ### Where Skyforge pins netlab
@@ -51,31 +51,31 @@ Automation:
 - Trigger: weekly schedule + manual dispatch
 - Output: PR with submodule pointer, regenerated defaults, and image pin bumps
 
-## Clabernetes fork
+## KNE fork
 
-Upstream: `github.com/srl-labs/clabernetes`
+Upstream: `github.com/srl-labs/kne`
 
-Fork (target): `github.com/forwardnetworks/clabernetes`
+Fork (target): `github.com/forwardnetworks/kne`
 
 ### Creating the fork repo (one-time)
 
 If the fork repo doesn’t exist yet, have an org admin create it:
 
 ```bash
-gh repo create forwardnetworks/clabernetes --private --source https://github.com/srl-labs/clabernetes
+gh repo create forwardnetworks/kne --private --source https://github.com/srl-labs/kne
 ```
 
 Then add the remote:
 
 ```bash
-cd ~/Projects/skyforge/clabernetes
-git remote add fork https://github.com/forwardnetworks/clabernetes
+cd ~/Projects/skyforge/kne
+git remote add fork https://github.com/forwardnetworks/kne
 git fetch fork
 ```
 
 ### Policy
 
-- Keep Skyforge-specific logic out of clabernetes when possible (Skyforge should adapt inputs).
+- Keep Skyforge-specific logic out of kne when possible (Skyforge should adapt inputs).
 - If a controller change is required for correctness (reconcile stability, node lifecycle, etc.), keep it tightly scoped and upstreamable.
 
 ### Local workflow (syncing upstream → fork)
@@ -83,9 +83,9 @@ git fetch fork
 Assuming you have both remotes:
 
 ```bash
-cd ~/Projects/skyforge/clabernetes
-git remote add upstream https://github.com/srl-labs/clabernetes
-git remote add fork https://github.com/forwardnetworks/clabernetes
+cd ~/Projects/skyforge/kne
+git remote add upstream https://github.com/srl-labs/kne
+git remote add fork https://github.com/forwardnetworks/kne
 
 git fetch upstream
 git checkout main
@@ -98,24 +98,24 @@ git rebase upstream/main
 git push fork skyforge-patches
 ```
 
-### Where Skyforge pins clabernetes
+### Where Skyforge pins kne
 
-We ship clabernetes as images (manager + launcher). Helm values control the image tags:
+We ship kne as images (manager + launcher). Helm values control the image tags:
 
-- `skyforge.clabernetes.managerImage`
-- `skyforge.clabernetes.launcherImage`
+- `skyforge.kne.managerImage`
+- `skyforge.kne.launcherImage`
 
 Update them in:
 
 - `components/charts/skyforge/values.yaml` (base/defaults)
 - `components/charts/skyforge/values-prod-skyforge-local.yaml` (prod override example)
 
-### Building/pushing clabernetes images
+### Building/pushing kne images
 
 Skyforge uses custom images (built from the fork) under the `ghcr.io/forwardnetworks/` org, for example:
 
-- `ghcr.io/forwardnetworks/skyforge-clabernetes-manager:<tag>`
-- `ghcr.io/forwardnetworks/skyforge-clabernetes-launcher:<tag>`
+- `ghcr.io/forwardnetworks/skyforge-kne-manager:<tag>`
+- `ghcr.io/forwardnetworks/skyforge-kne-launcher:<tag>`
 
 Build/push and then bump the Helm values to match.
 

@@ -1,4 +1,4 @@
-# Template Validation (Netlab / Containerlab / Terraform)
+# Template Validation (Netlab / KNE / Terraform)
 
 Skyforge ships a large blueprint catalog. To reduce demo-time surprises, we validate templates
 offline (no cluster required) and expose a Netlab “Validate” action in the UI.
@@ -52,15 +52,15 @@ refactor the templates:
 - `routing/sr-isis-te/topology.yml`
 - `routing/sr-mpls-bgp-srlinux/topology.yml` (requires SR Linux license)
 
-## Containerlab
+## KNE
 
-We validate containerlab templates against the official containerlab JSON schema (no deploy).
+We validate kne templates against the official kne JSON schema (no deploy).
 
-For C9s-backed containerlab runs, Skyforge continues to apply DNS-1035 checks
+For KNE-backed kne runs, Skyforge continues to apply DNS-1035 checks
 during template build/preflight.
 
 ```bash
-(cd server && go run ./cmd/validatecontainerlab --root ../blueprints/containerlab) > /tmp/containerlab-validate-report.md
+(cd server && go run ./cmd/validatekne --root ../blueprints/kne) > /tmp/kne-validate-report.md
 ```
 
 ## Terraform

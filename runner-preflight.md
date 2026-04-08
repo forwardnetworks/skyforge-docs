@@ -1,19 +1,19 @@
 # Runner preflight (BYOS hosts)
 
-These checks validate external BYOS hosts used for Netlab/Containerlab runs.
+These checks validate external BYOS hosts used for Netlab/KNE runs.
 
 ## What should be consistent across hosts
 - `netlab` installed (same version)
-- `containerlab` installed (same version)
+- `kne` installed (same version)
 - `apache2` (or equivalent) running to front internal APIs on 443
-- `netlab-api.service` and `containerlab-api.service` running (if used)
+- `netlab-api.service` and `kne-api.service` running (if used)
 - User shell auth configured (if Skyforge expects user-scoped paths like `/home/{user}/...`)
 
 ## Quick commands (run on each BYOS host)
 ```bash
 netlab version
-containerlab version
-systemctl is-active apache2.service netlab-api.service containerlab-api.service
+kne version
+systemctl is-active apache2.service netlab-api.service kne-api.service
 ```
 
 If any of these fail, fix host parity before running manual deployment validation so failures don’t appear late in the workflow.
@@ -36,7 +36,7 @@ sudo systemctl restart netlab-api.service
 
 Netlab invokes privileged operations even when Skyforge runs the Netlab subprocess as the target user:
 
-- `containerlab deploy/destroy` is invoked via `sudo -E containerlab ...`
+- `kne deploy/destroy` is invoked via `sudo -E kne ...`
 - `netlab initial` uses `sudo ip netns exec ...` to run initial config scripts inside container namespaces
 
 On the runner host, each lab user must:
@@ -48,12 +48,12 @@ Recommended sudoers rule:
 
 - File: `/etc/sudoers.d/skyforge-clab`
 - Contents:
-  - `%clab_admins ALL=(root) NOPASSWD: SETENV: /usr/bin/containerlab, /usr/sbin/ip`
+  - `%clab_admins ALL=(root) NOPASSWD: SETENV: /usr/bin/kne, /usr/sbin/ip`
 
 Validate:
 
 ```bash
-sudo -u <user> bash -lc 'sudo -n -E containerlab version'
+sudo -u <user> bash -lc 'sudo -n -E kne version'
 sudo -u <user> bash -lc 'sudo -n ip netns list'
 ```
 

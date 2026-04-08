@@ -35,19 +35,19 @@ button.
 The current reusable execution seam already exists in the backend:
 
 - `components/server/skyforge/task_specs.go`
-  - task contracts for `netlab` and `netlab-c9s`
+  - task contracts for `netlab` and `netlab-kne`
 - `components/server/skyforge/deployment_create_validation.go`
-  - bundle extraction and netlab/clabernetes validation
+  - bundle extraction and netlab/kne validation
 - `components/server/internal/taskengine/netlab_task_run.go`
   - remote netlab API execution model
-- `components/server/internal/taskengine/netlab_c9s_run.go`
+- `components/server/internal/taskengine/netlab_kne_run.go`
   - in-cluster render/apply workflow
-- `components/server/internal/taskengine/netlab_c9s_apply_deploy.go`
+- `components/server/internal/taskengine/netlab_kne_apply_deploy.go`
   - the in-cluster job contract that actually performs the deployment-side apply
 
 The concrete boundary to preserve is:
 
-- queued control-plane task type: `netlab-c9s-run`
+- queued control-plane task type: `netlab-kne-run`
 - runtime manifest contract: `skyforge.netlab-kne.manifest`
 
 That manifest boundary is the right future split between review/render and
@@ -138,7 +138,7 @@ Pages:
 2. Skyforge builds a canonical change-run spec
 3. validation normalizes the change into renderable config artifacts
 4. execution queues through the task engine
-5. the apply step reuses the same netlab/clabernetes config push path used by
+5. the apply step reuses the same netlab/kne config push path used by
    normal deployments
 6. verification runs and optionally triggers Forward recollect
 
@@ -150,7 +150,7 @@ The widened source kinds still use the same contract:
 - `shell-script`
 
 These are not separate executors. They become executable only as deterministic
-bundled `post-apply` runtime hooks inside the existing `netlab-c9s` seam.
+bundled `post-apply` runtime hooks inside the existing `netlab-kne` seam.
 
 ## API Design Principles
 
@@ -242,23 +242,23 @@ Current status:
   normalized spec and review payload
 - executable admin queueing is now live for the first protected path:
   - `POST /api/admin/config-changes/:id/execute`
-- the worker task now reuses the existing `netlab-c9s` seam directly for:
+- the worker task now reuses the existing `netlab-kne` seam directly for:
   - `targetType=deployment`
   - `sourceKind=netlab-model`
   - `sourceKind=structured-patch`
   - `sourceKind=config-snippet`
-  - template-backed C9S deployments only
+  - template-backed KNE deployments only
 - `config-snippet` now uses a topology/bundle-backed execution contract:
   - snippet lines compile into generated per-device startup-config sidecars
   - `topology.yml` is patched so targeted nodes reference those sidecars
     through `clab.startup-config`
-  - the resulting bundle still executes through the same `netlab-c9s`
+  - the resulting bundle still executes through the same `netlab-kne`
     patched-bundle seam
 - `structured-patch` now uses a standards-based execution contract:
   - RFC 6902 JSON Patch operations
   - applied to the source `topology.yml`
   - then repackaged into a patched netlab bundle
-  - and executed through the same `netlab-c9s` runtime seam
+  - and executed through the same `netlab-kne` runtime seam
 - the same queued `config-change-run` task contract now supports:
   - `action=execute`
   - `action=rollback`
@@ -285,7 +285,7 @@ Current status:
   - per-device execution task ownership
   - device-scoped verification hints
 - rollback evidence now stores the previous deployment config JSON so rollback
-  can replay the same `netlab-c9s` seam instead of inventing a second apply
+  can replay the same `netlab-kne` seam instead of inventing a second apply
   path
 - admin rollback is now queued through the same durable control-plane task type:
   - `POST /api/admin/config-changes/:id/rollback`
@@ -293,7 +293,7 @@ Current status:
   - `targetType=deployment`
   - `sourceKind=netlab-model`
   - `sourceKind=structured-patch`
-  - template-backed C9S deployments
+  - template-backed KNE deployments
 
 Current status:
 
@@ -313,7 +313,7 @@ Current status:
 - verification is now materially stronger than "artifact exists":
   - deployment topology-current row must exist
   - topology-current row must point at the current task
-  - topology-current source must be `netlab-c9s`
+  - topology-current source must be `netlab-kne`
   - topology-current node count must be non-zero
   - the topology artifact object must be readable
   - current node-status rows must exist for the deployment
@@ -422,7 +422,7 @@ The plan is complete for the safe executable scope:
 - `sourceKind=config-snippet`
 - `sourceKind=ansible-playbook`
 - `sourceKind=shell-script`
-- template-backed C9S deployments
+- template-backed KNE deployments
 
 Future expansion, if needed, should be treated as a new follow-on track:
 
@@ -435,13 +435,13 @@ Future expansion, if needed, should be treated as a new follow-on track:
 If new source kinds become executable later, they must not introduce a
 second apply path. The only acceptable execution target is still the existing:
 
-- queued control-plane task type: `netlab-c9s-run`
+- queued control-plane task type: `netlab-kne-run`
 - runtime manifest contract: `skyforge.netlab-kne.manifest`
 
 The design rule is:
 
 - every executable change source must normalize into a patched topology bundle
-- the worker must still hand the result to the same `netlab-c9s` seam
+- the worker must still hand the result to the same `netlab-kne` seam
 - review, approval, rollback, and verification continue to operate on the same
   durable change-run resource
 
@@ -451,7 +451,7 @@ Add a normalized execution contract to the review payload for follow-on source
 kinds:
 
 - `executionPath`
-  - `planned-netlab-c9s-patched-bundle`
+  - `planned-netlab-kne-patched-bundle`
 - `bundleTransform`
   - `topology-json-patch`
   - `topology-overlay`
@@ -497,7 +497,7 @@ Current normalization:
   - `skyforge/changes/<run-id>/ansible/playbook.yml`
 - emit `skyforge/runtime-hooks.json`
 - execute the playbook as a bounded `post-apply` hook through the same
-  `netlab-c9s` runtime entrypoint
+  `netlab-kne` runtime entrypoint
 
 #### `shell-script`
 
@@ -508,7 +508,7 @@ Current normalization:
 - store script content as a generated bundle artifact:
   - `skyforge/changes/<run-id>/hooks/post-apply.sh`
 - emit `skyforge/runtime-hooks.json`
-- execute it as a bounded `post-apply` hook in the same `netlab-c9s` runtime
+- execute it as a bounded `post-apply` hook in the same `netlab-kne` runtime
 
 Freeform shell outside the bounded hook model remains out of scope.
 
@@ -549,7 +549,7 @@ New source kinds must reuse the same rollback model:
 
 - previous deployment config JSON or previous topology bundle reference
 - generated artifact references tied to the run
-- replay through the same `config-change-run` task type and `netlab-c9s` seam
+- replay through the same `config-change-run` task type and `netlab-kne` seam
 
 If a source kind cannot support deterministic rollback evidence, it should not
 become executable.
@@ -562,7 +562,7 @@ following are true:
 - it normalizes into a patched bundle, deterministic bundled sidecars, or
   deterministic bundled runtime hooks
 - review can display the resulting topology/bundle delta
-- execution uses the same `netlab-c9s` worker seam
+- execution uses the same `netlab-kne` worker seam
 - rollback uses the same captured deployment-config or bundle replay path
 - verification reuses the existing topology-current and node-status evidence
   model

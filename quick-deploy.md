@@ -4,7 +4,7 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 
 ## Scope
 
-- Deployment family/engine: `c9s` / `netlab` only.
+- Deployment family/engine: `kne` / `netlab` only.
 - Template source: curated Netlab blueprints managed by an admin catalog.
   - Default catalog focuses on EOS technology demos (EVPN, MPLS, BGP, VRF).
   - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.
@@ -22,7 +22,7 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 1. User selects a curated template card.
 2. Skyforge upserts a managed Forward credential profile (`in-cluster forward`)
    for the current user from token `skyforge`.
-3. Skyforge creates a deployment with family/engine `c9s` / `netlab` and
+3. Skyforge creates a deployment with family/engine `kne` / `netlab` and
    `forwardEnabled=true`.
 4. Skyforge writes deployment lease metadata via
    `PUT /api/users/:id/deployments/:deploymentID/lease`.
@@ -38,13 +38,13 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - `leaseStoppedAt`
   - `leaseStopTaskId`
 - Cron job `skyforge-deployment-leases` runs every 5 minutes.
-- For expired leases, Skyforge queues a `c9s/netlab` stop action and stamps
+- For expired leases, Skyforge queues a `kne/netlab` stop action and stamps
   `leaseStoppedAt` + `leaseStopTaskId`.
 
 ## Regular deployments
 
 - The regular Deployments page (`/dashboard/deployments`) exposes per-deployment
-  lifetime management for managed deployment families (`c9s`, `terraform`).
+  lifetime management for managed deployment families (`kne`, `terraform`).
 - Non-admin users cannot disable lifetime expiry and are capped at `72h`.
 - Admin users can select "No expiry".
 

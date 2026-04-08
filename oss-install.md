@@ -25,7 +25,7 @@ sudo -E ./scripts/install-on-host.sh
 
 Notes:
 - If your images are public, omit the `SKYFORGE_GHCR_*` vars.
-- If you’re iterating and need a clean slate, add `SKYFORGE_RESET=true` (danger: deletes the namespace + clabernetes CRDs).
+- If you’re iterating and need a clean slate, add `SKYFORGE_RESET=true` (danger: deletes the namespace + kne CRDs).
 - The script uses `deploy/longhorn-values-qa.yaml` defaults (replicas=1). For multi-node prod, override accordingly.
 - Do **not** paste tokens into your shell history. Prefer: `read -s SKYFORGE_GHCR_TOKEN; export SKYFORGE_GHCR_TOKEN`
 

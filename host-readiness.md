@@ -1,6 +1,6 @@
 # Skyforge Host Readiness Guide
 
-This guide details the requirements and configuration steps to prepare a compute host (bare metal or VM) for orchestration via Skyforge. These hosts will run network simulations using [Netlab](https://netlab.tools/) and [Containerlab](https://containerlab.dev/).
+This guide details the requirements and configuration steps to prepare a compute host (bare metal or VM) for orchestration via Skyforge. These hosts will run network simulations using [Netlab](https://netlab.tools/) and [KNE](https://kne.dev/).
 
 ## 1. System Requirements
 
@@ -14,7 +14,7 @@ This guide details the requirements and configuration steps to prepare a compute
 
 ### Operating System
 - **Linux:** Ubuntu 22.04 LTS or Debian 11/12 recommended.
-- **Kernel:** Recent kernel supported by Docker and Containerlab.
+- **Kernel:** Recent kernel supported by Docker and KNE.
 
 ## 2. Core Dependencies
 
@@ -25,10 +25,10 @@ Install the latest Docker Engine.
 curl -fsSL https://get.docker.com | sh
 ```
 
-### Containerlab
-Install Containerlab.
+### KNE
+Install KNE.
 ```bash
-bash -c "$(curl -sL https://get.containerlab.dev)"
+bash -c "$(curl -sL https://get.kne.dev)"
 ```
 
 ### Python 3
@@ -75,13 +75,13 @@ The Skyforge agent runs via the Netlab API, which requires specific permissions 
     ```
 
 3.  **Sudo & Capabilities:**
-    Netlab requires privileged access for certain operations (`ip netns`, `containerlab deploy`). Configure passwordless sudo for these commands.
+    Netlab requires privileged access for certain operations (`ip netns`, `kne deploy`). Configure passwordless sudo for these commands.
 
     Create `/etc/sudoers.d/skyforge-clab`:
     ```sudoers
-    # Allow skyforge user to run containerlab and ip commands without password
+    # Allow skyforge user to run kne and ip commands without password
     # REPLACE 'skyforge' with your actual username if different
-    skyforge ALL=(root) NOPASSWD: SETENV: /usr/bin/containerlab, /usr/sbin/ip
+    skyforge ALL=(root) NOPASSWD: SETENV: /usr/bin/kne, /usr/sbin/ip
     ```
     *Note: `SETENV` is crucial for passing environment variables.*
 
@@ -146,14 +146,14 @@ Run the following commands on the host to verify readiness:
 1.  **Check Versions:**
     ```bash
     docker version
-    containerlab version
+    kne version
     /opt/netlab/venv/bin/netlab version
     ```
 
 2.  **Verify Sudo Permissions:**
     Run as the target user (`skyforge`):
     ```bash
-    sudo -u skyforge bash -lc 'sudo -n -E containerlab version'
+    sudo -u skyforge bash -lc 'sudo -n -E kne version'
     sudo -u skyforge bash -lc 'sudo -n ip netns list'
     ```
     *These should return output without asking for a password.*

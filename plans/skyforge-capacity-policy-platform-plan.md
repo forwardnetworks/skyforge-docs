@@ -386,7 +386,7 @@ Give leadership real numbers for rollout and budget decisions.
   availability sections without depending on brittle field shapes.
 - [x] Admin platform overview now reports class-level estimate-versus-actual
   drift using declared resource class estimates and measured Kubernetes request
-  footprints for active c9s deployments.
+  footprints for active kne deployments.
 - [x] Admin platform overview now reports pool cost inputs, including provider,
   instance mix, labeled monthly node cost, and baseline monthly cost rollup.
 - [x] `/dashboard` is now a real landing surface instead of a redirect and
@@ -464,7 +464,7 @@ optional on-prem worker capacity.
   - optional hard requirement is available through `requiredPoolClass`
 - [x] Admin capacity view now shows pool class alongside raw pool identity so
   placement intent is visible in the product.
-- [x] Deployment detail now exposes runtime placement summaries for c9s labs,
+- [x] Deployment detail now exposes runtime placement summaries for kne labs,
   including preferred pool classes, live actual placement, candidate nodes, and
   degraded placement status.
 - [x] Platform overview and user availability now emit typed hybrid-placement

@@ -92,7 +92,7 @@ export SKYFORGE_RESET=true
 sudo -E ./scripts/install-on-host.sh
 ```
 
-`SKYFORGE_RESET=true` is intentionally destructive: it deletes the Skyforge namespace and clabernetes CRDs to avoid Helm/CRD schema conflicts.
+`SKYFORGE_RESET=true` is intentionally destructive: it deletes the Skyforge namespace and kne CRDs to avoid Helm/CRD schema conflicts.
 
 If you want to run the reset explicitly (without reinstalling):
 
@@ -136,7 +136,7 @@ sudo -E ./scripts/verify-install.sh
 ### Helm install conflicts / stuck releases
 
 - Re-run with `SKYFORGE_RESET=true`.
-- If you are iterating on clabernetes versions, `SKYFORGE_RESET=true` is the fastest way to clear conflicting CRDs.
+- If you are iterating on kne versions, `SKYFORGE_RESET=true` is the fastest way to clear conflicting CRDs.
 
 ### Kubelet fails after enabling CPU manager static
 

@@ -1,12 +1,12 @@
-# BYOS runners (Netlab/Containerlab) — API + SSH only
+# BYOS runners (Netlab/KNE) — API + SSH only
 
-This document captures the desired “bring your own server” (BYOS) model for Netlab and Containerlab runners.
+This document captures the desired “bring your own server” (BYOS) model for Netlab and KNE runners.
 
 ## Goal
 
 Make BYOS servers as easy to operate as possible by **minimizing dependencies**:
 
-- Prefer **native Netlab API** and **native Containerlab API** (HTTP/S).
+- Prefer **native Netlab API** and **native KNE API** (HTTP/S).
 - Use **SSH only for file sync** (templates/artifacts), not for “remote execution plumbing”.
 - Avoid requiring Skyforge-specific binaries on the BYOS host.
 
@@ -16,10 +16,10 @@ BYOS workflow is API-first and should avoid extra host-side services/scripts:
 
 1) **HTTPS API** (required)
    - Netlab: talk to the Netlab API endpoint (auth required).
-   - Containerlab: talk to the Containerlab API endpoint (auth required).
+   - KNE: talk to the KNE API endpoint (auth required).
 
 2) **Git-based templates (preferred)**
-   - Netlab/containerlab can launch from a git repo; Skyforge should pass:
+   - Netlab/kne can launch from a git repo; Skyforge should pass:
      - repo URL (internal/private Gitea URL or public URL)
      - branch/ref
      - template subdir / topology filename
@@ -30,9 +30,9 @@ The BYOS host should not need:
 - Skyforge runner images
 - a Skyforge-specific API wrapper service
 
-## Reality check: Netlab vs Containerlab template fetching
+## Reality check: Netlab vs KNE template fetching
 
-- **Containerlab API server** supports `topologySourceUrl` and can pull from git/raw URLs directly.
+- **KNE API server** supports `topologySourceUrl` and can pull from git/raw URLs directly.
 - **Netlab API server** (as documented upstream) supports `topologyUrl`, but does not clone a whole repo or fetch a template directory. If your topology depends on adjacent files (Jinja templates, config fragments, plugins), the BYOS host must already have those files in the working directory.
 
 In practice, that means Netlab BYOS needs one of:
@@ -50,7 +50,7 @@ In user-scope settings, BYOS is enabled per provider:
   - `ssh_user` + auth method (SSH key preferred; password fallback)
   - `work_root` (e.g. `/home/<user>/netlab/<scope>/`)
 
-- Containerlab BYOS
+- KNE BYOS
   - `api_url` + auth
   - `ssh_host` (optional)
   - `work_root`
@@ -75,8 +75,8 @@ Hard-cut behavior:
 - Skyforge should support both:
   - internal/private repo URLs (Gitea)
   - public URLs when explicitly intended for external BYOS delivery
-- For containerlab BYOS, Skyforge now passes only `topologySourceUrl` to the API server.
-- Topology-content/blob fallback has been removed from the BYOS containerlab run path.
+- For kne BYOS, Skyforge now passes only `topologySourceUrl` to the API server.
+- Topology-content/blob fallback has been removed from the BYOS kne run path.
 
 ## Execution semantics (API)
 
@@ -87,7 +87,7 @@ BYOS execution should use the server’s API endpoints:
   - call the provider “create/prepare” action (Netlab: `create`) using git-based template refs
 
 - Start:
-  - call the provider “up/deploy” action (Netlab: `up`; Containerlab: `deploy`) using the same git-based template refs
+  - call the provider “up/deploy” action (Netlab: `up`; KNE: `deploy`) using the same git-based template refs
 
 - Stop/Destroy:
   - call provider “down/destroy” action
@@ -102,6 +102,6 @@ BYOS runs should still produce consistent Skyforge run logs:
 
 ## Why this design
 
-- Keeps the BYOS server “vanilla”: users can run Netlab/Containerlab the way they normally do.
+- Keeps the BYOS server “vanilla”: users can run Netlab/KNE the way they normally do.
 - Avoids coupling BYOS to Skyforge Kubernetes implementation details.
 - Makes it easier to support “remote” BYOS hosts (no cluster connectivity required).

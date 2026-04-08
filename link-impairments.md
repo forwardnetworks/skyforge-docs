@@ -1,6 +1,6 @@
 # Link Impairments (Netem)
 
-Skyforge can apply basic link impairments (latency/jitter, packet loss, and bandwidth limits) to clabernetes-backed
+Skyforge can apply basic link impairments (latency/jitter, packet loss, and bandwidth limits) to kne-backed
 deployments without requiring any tooling inside the network OS containers.
 
 ## UI
@@ -12,8 +12,8 @@ On the deployment topology graph:
 
 ## How it works
 
-- Skyforge reads the resolved topology (from containerlab/clabernetes artifacts) including link endpoint interface names.
-- For each side of the link, Skyforge resolves the clabernetes node pod and executes `tc` in a **non-NOS container**
+- Skyforge reads the resolved topology (from kne/kne artifacts) including link endpoint interface names.
+- For each side of the link, Skyforge resolves the kne node pod and executes `tc` in a **non-NOS container**
   (prefers a container name containing `launcher`).
 - The impairment is applied to the link interface inside the pod network namespace (`tc qdisc … dev <if>`).
 

@@ -106,7 +106,7 @@ Do not target the control-plane unless that node truly needs Hetzner reachabilit
 ## Suggested Bring-Up Order
 
 1. Prepare the Hetzner gateway
-- create a small dedicated Hetzner server using Hetzner's built-in WireGuard app image (`image=wireguard`) on `cpx11`
+- create a small dedicated Hetzner server using Hetzner's built-in WireGuard app image (`image=wireguard`) on `cx23`
 - give it a stable public hostname or IP
 - use the Hetzner WireGuard UI/bootstrap flow to configure the gateway listener on UDP `51820`
 - place future burst workers behind that gateway on the Hetzner private network
@@ -167,4 +167,4 @@ This does not yet automate:
 Those can be added later, but the first step is to make the network and pool
 contract explicit and deterministic.
 
-Reference: Hetzner documents the WireGuard app install path and API examples with `image=wireguard` and `server_type=cpx11`.
+Reference: Hetzner documents the WireGuard app install path and API examples with `image=wireguard` and `server_type=cx23`.

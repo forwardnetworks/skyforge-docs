@@ -1,4 +1,4 @@
-# Netlab/Clabernetes Architecture Audit (Encore-Native)
+# Netlab/KNE Architecture Audit (Encore-Native)
 
 Date: 2026-02-25
 
@@ -13,15 +13,15 @@ Date: 2026-02-25
 ## Baseline Findings
 
 - Deployment action contract was split across `/action` and wrapper endpoints (`/start`, `/stop`, `/destroy`).
-- Clabernetes naming primitives were duplicated across server and taskengine and could drift.
+- KNE naming primitives were duplicated across server and taskengine and could drift.
 - Runtime image defaults were duplicated in taskengine constants and config/chart values.
-- C9s docs still referenced older namespace/mode behavior.
+- KNE docs still referenced older namespace/mode behavior.
 
 ## Hard-Cut Decisions Applied
 
 - Canonical deployment action endpoint: `POST /api/users/:id/deployments/:deploymentID/action`.
 - Remove wrapper API handlers from server surface (`/start`, `/stop`, `/destroy`).
-- Keep native-only C9s behavior; no BYOS-mode fallback in `c9s/netlab`.
+- Keep native-only KNE behavior; no BYOS-mode fallback in `kne/netlab`.
 - Require configured netlab generator/applier images at runtime; no taskengine hardcoded fallback images.
 
 ## Implemented Changes
@@ -40,7 +40,7 @@ Date: 2026-02-25
 - Updated chart config rendering to require netlab image settings for typed Encore config.
 - Updated docs to reflect current namespace and native-mode behavior.
 - Consolidated Kubernetes helper logic into `internal/kubeutil` and reduced
-  `internal/taskengine/clabernetes_kube.go` to thin wrappers to prevent helper drift.
+  `internal/taskengine/kne_kube.go` to thin wrappers to prevent helper drift.
 
 ## Verification Gates
 

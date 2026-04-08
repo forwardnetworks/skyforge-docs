@@ -63,7 +63,7 @@ Status keys:
 ⬜ **Helm chart hardening**
 - `helm lint` + template validation in CI.
 - No secrets committed; chart defaults must be safe.
-- Document required RBAC for clabernetes and any exec/terminal features.
+- Document required RBAC for kne and any exec/terminal features.
 
 ⬜ **Optional components**
 - Make external tools (NetBox/Nautobot/Coder/Yaade/Collector) explicitly toggled in values.
@@ -76,7 +76,7 @@ Status keys:
 - Ensure terminal/kube-exec endpoints cannot be used to escape namespace boundaries.
 
 ⬜ **RBAC + Kubernetes safety**
-- Ensure clabernetes + exec permissions are least-privilege (namespace-scoped where possible).
+- Ensure kne + exec permissions are least-privilege (namespace-scoped where possible).
 - Confirm delete/destroy operations are safe and idempotent.
 
 ⬜ **Secrets handling**
@@ -95,7 +95,7 @@ Status keys:
 
 ⬜ **User guide**
 - Projects + deployments overview
-- Deployment methods: Netlab (C9s), Containerlab, Terraform (optional)
+- Deployment methods: Netlab (KNE), KNE, Terraform (optional)
 - How to bring your own templates (Git-based)
 
 ⬜ **Operator guide**

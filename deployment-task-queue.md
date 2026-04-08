@@ -105,7 +105,7 @@ Manual admin repair endpoints:
 - `POST /api/admin/tasks/reconcile`
 - `POST /api/admin/tasks/reconcile-running`
 - `POST /api/admin/tasks/workspace-pods/cleanup`
-  - dry-run and execute mode for force-cleaning stale clabernetes topology pods/resources in `ws-*` namespaces.
+  - dry-run and execute mode for force-cleaning stale kne topology pods/resources in `ws-*` namespaces.
   - supports targeted cleanup by `userScopeId` or explicit namespace override.
 - `GET /api/admin/tasks/ephemeral-runtimes`
   - inventory for KNE/netlab ephemeral runtime namespaces, including:

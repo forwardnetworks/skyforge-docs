@@ -12,6 +12,12 @@
     `pod link ... is missing`.
   - Enforce `kube-multus-ds` arg `--multus-master-cni-file-name=05-cilium.conflist` to prevent recursive
     `00-meshnet.conflist` generation (`multus -> multus -> ...`) after daemonset restarts.
+- Cilium must not run in exclusive CNI mode when meshnet is expected to attach
+  data-plane links.
+  - Set `kube-system/cilium-config` `cni-exclusive: "false"`.
+  - If Cilium previously renamed `00-meshnet.conflist` to
+    `00-meshnet.conflist.cilium_bak`, restore the active file before restarting
+    the `meshnet` DaemonSet.
 - The lifecycle autostop path must ignore the VM while `license_pending=true`; otherwise the VM can be halted during bootstrap and the licensing workflow never converges.
 - Lifecycle cronjobs (`*-vm-autostop`, `*-vm-reseed`, `*-vm-license`) are expected to stay unsuspended by default.
   - Chart values now expose explicit `suspend` booleans under each lifecycle lane and default them to `false`.

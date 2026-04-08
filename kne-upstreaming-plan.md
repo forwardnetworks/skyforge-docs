@@ -1,6 +1,6 @@
-# Clabernetes Upstreaming Plan (From Skyforge Fork)
+# KNE Upstreaming Plan (From Skyforge Fork)
 
-This document defines how to upstream the fork changes in `vendor/clabernetes` with the highest
+This document defines how to upstream the fork changes in `vendor/kne` with the highest
 chance of acceptance while preserving current working container deployments (`eos`, `iol`,
 `ios-xrd`).
 
@@ -54,7 +54,7 @@ Guardrails:
 These changes should remain fork-local until upstream requests/accepts the direction:
 
 - hard cut to k8s-only runtime backend
-- removal of docker/containerlab launcher runtime surfaces
+- removal of docker/kne launcher runtime surfaces
 - Skyforge-specific operational assumptions
 
 ## Hygiene requirements before each PR

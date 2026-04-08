@@ -13,7 +13,7 @@ flowchart LR
   user --> ui[Skyforge Portal]
   ui --> api[Skyforge Server]
   api -->|references templates by repo+path| git
-  api --> runner[Native task engine<br/>(Netlab/Containerlab/Tofu)]
+  api --> runner[Native task engine<br/>(Netlab/KNE/Tofu)]
 ```
 
 ## Folder scheme
@@ -21,7 +21,7 @@ flowchart LR
 Keep templates at repo root:
 
 - `netlab/...`
-- `containerlab/...` (optional)
+- `kne/...` (optional)
 - `terraform/...` (optional)
 
 ## DNS-safe behavior

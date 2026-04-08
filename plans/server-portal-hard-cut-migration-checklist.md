@@ -60,7 +60,7 @@ Success gate:
   - `user_scope_deployment_create_update_*`
   - `user_scope_deployment_delete_cleanup_*`
 - [x] Stage and normalize run-family split
-  - containerlab/netlab/terraform run files
+  - kne/netlab/terraform run files
 - [x] Stage and normalize Forward Analytics hard cut
   - keep only the Forward Analytics API/store surface intended for the current UI
 - [x] Split `cloudcredentials` private API by provider family
@@ -142,24 +142,24 @@ Success gate:
   - `components/server/internal/taskengine/forward_netlab_deployment_devices.go` now owns orchestration for node sync and completion
   - `components/server/internal/taskengine/forward_netlab_deployment_devices_state.go` now owns sync state + upload execution
   - `components/server/internal/taskengine/forward_netlab_deployment_devices_node.go` now owns per-node classification/mapping and credential/device construction
-- [x] Split `internal/taskengine/clabernetes_task` by concern
-  - `components/server/internal/taskengine/clabernetes_task_types.go` now owns clabernetes task spec/run types and policy metadata helpers at `71` lines
-  - `components/server/internal/taskengine/clabernetes_task_dispatch.go` now owns task decode and dispatch wiring at `48` lines
-  - `components/server/internal/taskengine/clabernetes_task_run.go` now owns the coordinator action switch at `33` lines
-  - `components/server/internal/taskengine/clabernetes_task_run_deploy.go` now owns deploy orchestration and event sequencing at `73` lines
-  - `components/server/internal/taskengine/clabernetes_task_run_deploy_policy.go` now owns deploy policy normalization, preflight execution, and event helpers at `109` lines
-  - `components/server/internal/taskengine/clabernetes_task_run_deploy_payload.go` now owns deploy CR payload construction and file/resource aggregation at `167` lines
-  - `components/server/internal/taskengine/clabernetes_task_run_deploy_execute.go` now owns topology creation, readiness polling, native-mode verification, and summary/artifact recording at `145` lines
-  - `components/server/internal/taskengine/clabernetes_task_run_destroy.go` now owns destroy execution flow at `53` lines
-  - `components/server/internal/taskengine/clabernetes_topology_artifacts.go` now owns topology graph resolution, resource derivation, and artifact persistence at `138` lines
-- [x] Split `internal/taskengine/clabernetes_preflight` by concern
-  - `components/server/internal/taskengine/clabernetes_preflight_api.go` now owns the public preflight request/result API and deploy-fragment builder at `67` lines
-  - `components/server/internal/taskengine/clabernetes_preflight_quantities_types.go` now owns preflight request/capacity aggregate types
-  - `components/server/internal/taskengine/clabernetes_preflight_quantities_parse.go` now owns quantity parsing (`cpu`, `memory`, `split`, `number` helpers)
-  - `components/server/internal/taskengine/clabernetes_preflight_quantities_requests.go` now owns deployment request extraction and request/aggregate rollup helpers
-  - `components/server/internal/taskengine/clabernetes_preflight_quantities_math.go` now owns capacity reservation math, placement checks, and hostname filtering helpers
-  - `components/server/internal/taskengine/clabernetes_preflight_compatibility.go` now owns CRD/API compatibility checks at `137` lines
-  - `components/server/internal/taskengine/clabernetes_preflight_capacity.go` now owns cluster capacity checks and Kubernetes node/pod accounting at `283` lines
+- [x] Split `internal/taskengine/kne_task` by concern
+  - `components/server/internal/taskengine/kne_task_types.go` now owns kne task spec/run types and policy metadata helpers at `71` lines
+  - `components/server/internal/taskengine/kne_task_dispatch.go` now owns task decode and dispatch wiring at `48` lines
+  - `components/server/internal/taskengine/kne_task_run.go` now owns the coordinator action switch at `33` lines
+  - `components/server/internal/taskengine/kne_task_run_deploy.go` now owns deploy orchestration and event sequencing at `73` lines
+  - `components/server/internal/taskengine/kne_task_run_deploy_policy.go` now owns deploy policy normalization, preflight execution, and event helpers at `109` lines
+  - `components/server/internal/taskengine/kne_task_run_deploy_payload.go` now owns deploy CR payload construction and file/resource aggregation at `167` lines
+  - `components/server/internal/taskengine/kne_task_run_deploy_execute.go` now owns topology creation, readiness polling, native-mode verification, and summary/artifact recording at `145` lines
+  - `components/server/internal/taskengine/kne_task_run_destroy.go` now owns destroy execution flow at `53` lines
+  - `components/server/internal/taskengine/kne_topology_artifacts.go` now owns topology graph resolution, resource derivation, and artifact persistence at `138` lines
+- [x] Split `internal/taskengine/kne_preflight` by concern
+  - `components/server/internal/taskengine/kne_preflight_api.go` now owns the public preflight request/result API and deploy-fragment builder at `67` lines
+  - `components/server/internal/taskengine/kne_preflight_quantities_types.go` now owns preflight request/capacity aggregate types
+  - `components/server/internal/taskengine/kne_preflight_quantities_parse.go` now owns quantity parsing (`cpu`, `memory`, `split`, `number` helpers)
+  - `components/server/internal/taskengine/kne_preflight_quantities_requests.go` now owns deployment request extraction and request/aggregate rollup helpers
+  - `components/server/internal/taskengine/kne_preflight_quantities_math.go` now owns capacity reservation math, placement checks, and hostname filtering helpers
+  - `components/server/internal/taskengine/kne_preflight_compatibility.go` now owns CRD/API compatibility checks at `137` lines
+  - `components/server/internal/taskengine/kne_preflight_capacity.go` now owns cluster capacity checks and Kubernetes node/pod accounting at `283` lines
 - [x] Split `internal/taskengine/capacity_rollup_task` by concern
   - `components/server/internal/taskengine/capacity_rollup_types.go` now owns the Forward metric payload and rollup row structs at `84` lines
   - `components/server/internal/taskengine/capacity_rollup_run.go` now owns task decode/dispatch and the top-level run orchestration at `137` lines
@@ -172,19 +172,19 @@ Success gate:
   - `components/server/internal/taskengine/deployment_topology_state.go` now owns topology artifact-key persistence and cleanup paths at `96` lines
 - [x] Compile-confirm existing `servicenow` split and fix fallout
   - confirm `components/server/servicenow/api.go` replacement files build cleanly
-- [x] Split `internal/taskengine/netlab_c9s_task` by concern
-  - `components/server/internal/taskengine/netlab_c9s_types.go` now owns the task payload/request models at `75` lines
-  - `components/server/internal/taskengine/netlab_c9s_dispatch.go` now owns task decode/dispatch at `69` lines
-  - `components/server/internal/taskengine/netlab_c9s_run.go` now owns the primary task orchestration at `207` lines
-  - `components/server/internal/taskengine/netlab_c9s_run_policy.go` now owns deploy policy resolution and metadata persistence at `37` lines
-  - `components/server/internal/taskengine/netlab_c9s_destroy.go` now owns destroy orchestration at `30` lines
-  - `components/server/internal/taskengine/netlab_c9s_runtime_manifest.go` now owns runtime manifest loading and summary extraction at `80` lines
-  - `components/server/internal/taskengine/netlab_c9s_task_artifacts.go` now owns runtime artifact persistence flow at `66` lines
-  - `components/server/internal/taskengine/netlab_c9s_manifest_resolution.go` now owns manifest resolution and runtime mapping at `132` lines
-  - `components/server/internal/taskengine/netlab_c9s_topology_capture.go` now owns topology artifact capture helpers at `103` lines
-  - `components/server/internal/taskengine/netlab_c9s_apply_deploy.go` now owns deploy-job construction/execution at `211` lines
-  - `components/server/internal/taskengine/netlab_c9s_apply_destroy.go` now owns destroy-job construction/execution at `149` lines
-  - `components/server/internal/taskengine/netlab_c9s_apply_env.go` now owns runtime env filter/merge helpers at `20` lines
+- [x] Split `internal/taskengine/netlab_kne_task` by concern
+  - `components/server/internal/taskengine/netlab_kne_types.go` now owns the task payload/request models at `75` lines
+  - `components/server/internal/taskengine/netlab_kne_dispatch.go` now owns task decode/dispatch at `69` lines
+  - `components/server/internal/taskengine/netlab_kne_run.go` now owns the primary task orchestration at `207` lines
+  - `components/server/internal/taskengine/netlab_kne_run_policy.go` now owns deploy policy resolution and metadata persistence at `37` lines
+  - `components/server/internal/taskengine/netlab_kne_destroy.go` now owns destroy orchestration at `30` lines
+  - `components/server/internal/taskengine/netlab_kne_runtime_manifest.go` now owns runtime manifest loading and summary extraction at `80` lines
+  - `components/server/internal/taskengine/netlab_kne_task_artifacts.go` now owns runtime artifact persistence flow at `66` lines
+  - `components/server/internal/taskengine/netlab_kne_manifest_resolution.go` now owns manifest resolution and runtime mapping at `132` lines
+  - `components/server/internal/taskengine/netlab_kne_topology_capture.go` now owns topology artifact capture helpers at `103` lines
+  - `components/server/internal/taskengine/netlab_kne_apply_deploy.go` now owns deploy-job construction/execution at `211` lines
+  - `components/server/internal/taskengine/netlab_kne_apply_destroy.go` now owns destroy-job construction/execution at `149` lines
+  - `components/server/internal/taskengine/netlab_kne_apply_env.go` now owns runtime env filter/merge helpers at `20` lines
 - [x] Split `internal/taskengine/netlab_task.go` by concern
   - `components/server/internal/taskengine/netlab_task_types.go` now owns netlab task payload/run contract types
   - `components/server/internal/taskengine/netlab_task_dispatch.go` now owns task decode and dispatch wiring
@@ -406,7 +406,7 @@ Success gates:
   - `components/portal/src/lib/api-client-user-shared.ts` now owns shared user-scope types
   - `components/portal/src/lib/api-client-user-dashboard.ts` now owns dashboard and user-scope fetch APIs
   - `components/portal/src/lib/api-client-user-notifications.ts` now owns notification APIs
-  - `components/portal/src/lib/api-client-user-byos.ts` now owns BYOS/EVE/containerlab server APIs
+  - `components/portal/src/lib/api-client-user-byos.ts` now owns BYOS/EVE/kne server APIs
   - `components/portal/src/lib/api-client-user-integrations.ts` now owns user integration APIs for Forward, ServiceNow, Teams, and Infoblox
   - `components/portal/src/lib/api-client-user-settings.ts` now owns git/settings/AWS SSO/cloud credential APIs
 - [x] Split portal Forward client by domain
@@ -822,7 +822,7 @@ Success gates:
 
 Success gate:
 - [x] generated artifacts and source changes are consistent in same working slice
-  - `./scripts/check-generated-drift.sh` passes (OpenAPI + portal OpenAPI types + infra configs + netlab drift + c9s contract)
+  - `./scripts/check-generated-drift.sh` passes (OpenAPI + portal OpenAPI types + infra configs + netlab drift + kne contract)
 
 ## Phase 5: Final Pre-Deploy Gate (No Redeploy Yet)
 
@@ -931,17 +931,17 @@ Success gates:
     - `components/portal/src/hooks/use-admin-settings-auth-oidc.tsx` at `139` lines
     - `components/portal/src/hooks/use-admin-settings-auth-quick-deploy.tsx` at `167` lines
 
-- [x] Split clabernetes kubeutil monolith by concern
-  - source: `components/server/internal/kubeutil/clabernetes.go`
+- [x] Split kne kubeutil monolith by concern
+  - source: `components/server/internal/kubeutil/kne.go`
   - target split:
     - topology/resource helpers
     - object apply/delete helpers
     - status/wait/poll helpers
   - result:
-    - `components/server/internal/kubeutil/clabernetes.go` reduced to `29` lines
-    - `components/server/internal/kubeutil/clabernetes_topology_resource_helpers.go` at `415` lines
-    - `components/server/internal/kubeutil/clabernetes_object_apply_delete_helpers.go` at `288` lines
-    - `components/server/internal/kubeutil/clabernetes_status_wait_poll_helpers.go` at `117` lines
+    - `components/server/internal/kubeutil/kne.go` reduced to `29` lines
+    - `components/server/internal/kubeutil/kne_topology_resource_helpers.go` at `415` lines
+    - `components/server/internal/kubeutil/kne_object_apply_delete_helpers.go` at `288` lines
+    - `components/server/internal/kubeutil/kne_status_wait_poll_helpers.go` at `117` lines
 - [x] Split taskstore persistence layer by concern
   - sources:
     - `components/server/internal/taskstore/taskstore.go`
@@ -1029,21 +1029,21 @@ Success gates:
     - `components/server/internal/taskstore/queries_deployment_reads.go` added
     - `components/server/internal/taskstore/queries_task_reads.go` added
     - `components/server/internal/taskstore/queries_log_event_reads.go` added
-- [x] Split clabernetes topology helper module by data-shape vs transform logic
-  - source: `components/server/internal/kubeutil/clabernetes_topology_resource_helpers.go`
+- [x] Split kne topology helper module by data-shape vs transform logic
+  - source: `components/server/internal/kubeutil/kne_topology_resource_helpers.go`
   - result:
-    - `components/server/internal/kubeutil/clabernetes_topology_resource_data_helpers.go` added
-    - `components/server/internal/kubeutil/clabernetes_topology_resource_transform_helpers.go` added
-- [x] Split clabernetes topology transform helpers by concern
-  - source: `components/server/internal/kubeutil/clabernetes_topology_resource_transform_helpers.go`
+    - `components/server/internal/kubeutil/kne_topology_resource_data_helpers.go` added
+    - `components/server/internal/kubeutil/kne_topology_resource_transform_helpers.go` added
+- [x] Split kne topology transform helpers by concern
+  - source: `components/server/internal/kubeutil/kne_topology_resource_transform_helpers.go`
   - target split:
     - namespace bootstrap helpers
     - secret helpers
     - service-account image-pull-secret helpers
   - result:
-    - `components/server/internal/kubeutil/clabernetes_namespace_helpers.go` at `147` lines
-    - `components/server/internal/kubeutil/clabernetes_secret_helpers.go` at `76` lines
-    - `components/server/internal/kubeutil/clabernetes_serviceaccount_helpers.go` at `143` lines
+    - `components/server/internal/kubeutil/kne_namespace_helpers.go` at `147` lines
+    - `components/server/internal/kubeutil/kne_secret_helpers.go` at `76` lines
+    - `components/server/internal/kubeutil/kne_serviceaccount_helpers.go` at `143` lines
 - [x] Split Gitea integration client by auth/repo/content concerns
   - source: `components/server/integrations/gitea/gitea.go`
   - result:
@@ -1072,12 +1072,12 @@ Success gates:
     - `components/server/internal/taskengine/netlab_node_status_current_row_builder.go` added
     - `components/server/internal/taskengine/netlab_node_status_current_persistence.go` added
     - `components/server/internal/taskengine/netlab_node_status_current_graph.go` added
-- [x] Split `containerlab-yaml.ts` into library-focused modules
-  - `components/portal/src/lib/containerlab-yaml.ts` now re-exports the library contract
-  - `components/portal/src/lib/containerlab-yaml-types.ts` now owns design/link/interface types
-  - `components/portal/src/lib/containerlab-yaml-helpers.ts` now owns name/interface parsing helpers
-  - `components/portal/src/lib/containerlab-yaml-serialize.ts` now owns design -> containerlab YAML conversion
-  - `components/portal/src/lib/containerlab-yaml-parse.ts` now owns containerlab YAML -> design conversion
+- [x] Split `kne-yaml.ts` into library-focused modules
+  - `components/portal/src/lib/kne-yaml.ts` now re-exports the library contract
+  - `components/portal/src/lib/kne-yaml-types.ts` now owns design/link/interface types
+  - `components/portal/src/lib/kne-yaml-helpers.ts` now owns name/interface parsing helpers
+  - `components/portal/src/lib/kne-yaml-serialize.ts` now owns design -> kne YAML conversion
+  - `components/portal/src/lib/kne-yaml-parse.ts` now owns kne YAML -> design conversion
 - [x] Split `internal/taskengine/gitea_provision.go` by concern
   - source: `components/server/internal/taskengine/gitea_provision.go`
   - result:
@@ -1158,7 +1158,7 @@ Success gates:
     - `components/server/skyforge/deployment_preflight_response_test.go` covers compatibility/capacity/dependency/validation classification and typed response construction
   - [x] verify deterministic preflight output for identical input payloads
   - progress:
-    - [x] `components/server/internal/taskengine/clabernetes_preflight_api_test.go` added for deterministic and negative-path contract checks on preflight wiring
+    - [x] `components/server/internal/taskengine/kne_preflight_api_test.go` added for deterministic and negative-path contract checks on preflight wiring
     - [x] `components/server/skyforge/deployment_preflight_test.go` continues to verify deterministic summary output for identical input payloads
     - [x] `./scripts/gen-openapi.sh`
     - [x] `cd components/portal && pnpm gen:openapi && pnpm exec tsc --noEmit && pnpm build`
@@ -1214,7 +1214,7 @@ Success gates:
   5. docs/update pass
 - [x] Each commit must build at least the affected component
   - Docs slice commit: `components/docs` checklist update
-  - Script/runtime slice commit: `scripts/check-netlab-c9s-contract.sh` + submodule pointer
+  - Script/runtime slice commit: `scripts/check-netlab-kne-contract.sh` + submodule pointer
   - Validation run before/after slice:
     - `./scripts/check-generated-drift.sh`
     - `cd components/server && go build ./...`

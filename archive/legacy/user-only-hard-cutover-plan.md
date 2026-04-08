@@ -75,9 +75,9 @@ Move Skyforge to true user-only scope. Remove userScope/project/account architec
 - [x] Portal: replace dynamic account path interpolation in `skyforge-api.ts` with `/api/...`.
 - [x] Guardrail: reject dynamic `/api/accounts/${encodeURIComponent(...)}` paths in portal source.
 - [x] API hard-cut slice: migrated deployment/lab-designer/eve user flows to canonical `/api/...` routes (server + portal).
-- [x] Guardrail: reject legacy `/api/(deployments|deployments-designer|eve|containerlab/topologies)` in portal source.
+- [x] Guardrail: reject legacy `/api/(deployments|deployments-designer|eve|kne/topologies)` in portal source.
 - [x] Portal hard-cut slice: removed `accountId` from query-key identity tuples (cache keys now user-scope only).
-- [x] API hard-cut slice: migrated remaining `account_*` endpoints (forward, variable-groups, artifacts, netlab/containerlab/terraform templates, run triggers, members/settings/delete) to `/api/...` canonical routes.
+- [x] API hard-cut slice: migrated remaining `account_*` endpoints (forward, variable-groups, artifacts, netlab/kne/terraform templates, run triggers, members/settings/delete) to `/api/...` canonical routes.
 - [x] Portal hard-cut slice: rewired migrated runtime calls from `/api/...` to `/api/...` for forward/settings, artifacts, variable-groups, and template APIs.
 - [x] API hard-cut slice: migrated policy reports, governance, securetrack, forward-networks, and capacity endpoints to `/api/...`.
 - [x] Portal hard-cut slice: removed remaining `/api/...` API paths; runtime calls now target `/api/...`.

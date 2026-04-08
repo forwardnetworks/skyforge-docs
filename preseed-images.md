@@ -7,7 +7,7 @@ Skyforge labs are created as Kubernetes Pods. If a node has to pull an image tha
 - Skyforge’s `netlab` generator sets defaults so `kind: linux` nodes use a Skyforge-hosted image:
   - `ghcr.io/forwardnetworks/alpine:3.13`
 - This avoids Docker Hub pulls for Linux endpoints and ensures required tools exist for Forward’s `commandSets: ["UNIX"]` endpoint profile (see below).
-- Skyforge’s in-repo Containerlab blueprints also pin Linux nodes to the same image to avoid Docker Hub rate limits.
+- Skyforge’s in-repo KNE blueprints also pin Linux nodes to the same image to avoid Docker Hub rate limits.
 
 ## Forward `UNIX` Command Set Requirements
 
@@ -52,5 +52,7 @@ Manual `k0s ctr` example:
 ```sh
 sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/alpine:3.13
 sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/ceos:4.34.2F
-sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/skyforge-clabernetes-launcher:<tag>
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/cisco_iol:17.16.01a-kne-r27
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/ios-xr/xrd-control-plane:25.2.1
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/skyforge-kne-launcher:<tag>
 ```
