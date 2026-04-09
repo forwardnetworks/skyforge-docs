@@ -26,6 +26,20 @@ Notes:
   `skyforge-cli auth login` dependency).
 - For non-`deploy-forward` authenticated scopes, keep `SKYFORGE_SMOKE_FWD_PROFILE`.
 
+Per-NOS Forward auto-sync matrix, keeping deployments for visual inspection:
+
+```bash
+SKYFORGE_SMOKE_USERNAME="admin" \
+SKYFORGE_SMOKE_PASSWORD="<password>" \
+SKYFORGE_SMOKE_ACTION_SCOPE_ID="1774010192-user-craigjohnson" \
+./scripts/smoke-forward-nos-matrix.sh
+```
+
+Notes:
+- This uses the `_smoke/nos/<device>/topology.yml` templates in the blueprints repo.
+- `smokecheck` now waits for `/api/users/:id/deployments/:deploymentID/info` to report a `forwardNetworkId` before declaring the case successful.
+- The script keeps the created deployments in the selected user scope so they can be inspected in the UI.
+
 When credentials are provided, the script also records run results to:
 - `POST /api/admin/smoke-runs`
 

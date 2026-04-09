@@ -13,7 +13,7 @@ Use the helper script to produce a KNE-compatible runtime image:
 cd /home/captainpacket/src/skyforge
 ./scripts/build-kne-cisco-iol-image.sh \
   --base-image ghcr.io/<org>/cisco-iol-base:17.16.01a \
-  --dst-image ghcr.io/<org>/cisco-iol-kne:17.16.01a \
+  --dst-image ghcr.io/<org>/kne/cisco_iol:17.16.01a-kne-r1 \
   --iol-cmd '/iol/iol.bin "$IOL_PID" -e "$IOL_NUM_SLOTS_EFFECTIVE" -s 0 -c "$IOL_CONFIG_PATH" -n 1024' \
   --startup-target /iol/config.txt \
   --console-port 5000 \
@@ -24,9 +24,10 @@ For IOL-L2, use the same script with a layer-2 command line:
 
 ```bash
 ./scripts/build-kne-cisco-iol-image.sh \
-  --base-image ghcr.io/<org>/cisco-ioll2-base:17.16.01a \
-  --dst-image ghcr.io/<org>/cisco-ioll2-kne:17.16.01a \
+  --base-image ghcr.io/<org>/kne/cisco_iol:17.16.01a-kne-r27 \
+  --dst-image ghcr.io/<org>/kne/cisco_iol_l2:17.16.01a-kne-r2 \
   --iol-cmd '/iol/iol.bin "$IOL_PID" -e "$IOL_NUM_SLOTS_EFFECTIVE" -s 0 -c "$IOL_CONFIG_PATH" -n 1024' \
+  --replace-iol-binary ~/x86_64_crb_linux_l2-adventerprisek9-ms.iol \
   --startup-target /iol/config.txt \
   --console-port 5000 \
   --push

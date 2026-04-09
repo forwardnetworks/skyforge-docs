@@ -5,7 +5,7 @@ Skyforge labs are created as Kubernetes Pods. If a node has to pull an image tha
 ## Current Behavior
 
 - Skyforge’s `netlab` generator sets defaults so `kind: linux` nodes use a Skyforge-hosted image:
-  - `ghcr.io/forwardnetworks/alpine:3.13`
+  - `ghcr.io/forwardnetworks/kne/linux:20260323-ssh-traffic-r1`
 - This avoids Docker Hub pulls for Linux endpoints and ensures required tools exist for Forward’s `commandSets: ["UNIX"]` endpoint profile (see below).
 - Skyforge’s in-repo KNE blueprints also pin Linux nodes to the same image to avoid Docker Hub rate limits.
 
@@ -18,7 +18,8 @@ In Forward, the `UNIX` CLI endpoint profile runs a small baseline set of command
 - `hostname`
 - `uname -a`
 
-`ghcr.io/forwardnetworks/alpine:3.13` includes `net-tools` (for `ifconfig`/`netstat`), and BusyBox provides `hostname`/`uname`.
+`ghcr.io/forwardnetworks/kne/linux:20260323-ssh-traffic-r1` includes `net-tools`
+(for `ifconfig`/`netstat`), and BusyBox provides `hostname`/`uname`.
 
 ## If You Still Need Docker Hub Images
 
@@ -50,9 +51,11 @@ export SKYFORGE_REGISTRY_AUTH="USERNAME:GHCR_TOKEN"
 Manual `k0s ctr` example:
 
 ```sh
-sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/alpine:3.13
-sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/ceos:4.34.2F
-sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/cisco_iol:17.16.01a-kne-r27
-sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/ios-xr/xrd-control-plane:25.2.1
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kne/linux:20260323-ssh-traffic-r1
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kne/ceos:4.34.2F
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kne/cisco_iol:17.16.01a-kne-r27
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kne/cisco_iol_l2:17.16.01a-kne-r2
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kne/cisco_xrd:25.2.1
+sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/kubevirt/vr-ftosv:10.6.1.1.67V-kne-r1
 sudo k0s ctr -n k8s.io images pull ghcr.io/forwardnetworks/skyforge-kne-launcher:<tag>
 ```

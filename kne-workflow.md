@@ -125,9 +125,15 @@ No additional KNE vendor controller stacks are required for this set.
   - VM disk images should be published as KubeVirt-compatible `containerDisk`
     images (disk at `/disk/disk.qcow2`) instead of vrnetlab runtime images.
     - helper: `scripts/build-kubevirt-containerdisk-from-vrnetlab.sh`
+    - local qcow helper: `scripts/build-kubevirt-containerdisk-from-qcow2.sh`
+    - Dell OS10 ZIP helper: `scripts/build-kubevirt-dellos10-from-zip.sh`
     - example conversion:
       - source: `ghcr.io/forwardnetworks/vrnetlab/vr-n9kv:9.3.8`
       - destination: `ghcr.io/forwardnetworks/kubevirt/vr-n9kv:9.3.8`
+    - OS10 uses a three-disk KubeVirt contract from one image:
+      - `/disk/disk.qcow2`
+      - `/disk/hdb_OS10-installer.qcow2`
+      - `/disk/hdc_OS10-platform.qcow2`
   - VM runtime classification is kind-driven with image-based kubevirt hints.
     If a VM node resolves to a `vrnetlab/*` image path, the runtime contract
     should be treated as invalid and converted to a `kubevirt/*`
