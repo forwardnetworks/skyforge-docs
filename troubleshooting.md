@@ -49,6 +49,8 @@ kubectl -n skyforge rollout status deploy/skyforge-server --timeout=5m
 
 Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` runs this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
+- `scripts/deploy-skyforge-prod-safe.sh` now also hard-fails if any node is not `Ready` during pre/post Helm readiness gates.
+- `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if fewer than two `fwd-master` nodes are `Ready` and schedulable (not tainted `skyforge.forwardnetworks.com/disabled:NoSchedule`).
 - local single-node k3s installs should run `./scripts/verify-local-stack.sh` after `./scripts/deploy-skyforge-local.sh`.
 - `scripts/deploy-skyforge-prod-safe.sh` also enforces node kernel sysctl `fs.inotify.max_user_instances=64000` pre-Helm.
 - `scripts/deploy-skyforge-prod-safe.sh` now enforces Forward worker host prerequisites pre-Helm using `scripts/k8s-forward-worker-prereqs.sh`:
@@ -96,6 +98,7 @@ SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
 
 Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if Forward secret usernames drift from the `fwd_app`/`fwd_fdb` contract and validates DB role logins before finishing deploy.
+- `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
 
 ## Hoppscotch failures
 ### Helm upgrade failures due to immutable Jobs

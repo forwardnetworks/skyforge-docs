@@ -35,6 +35,10 @@ healthy worker nodes in `skyforge.forwardCluster.nodeRoleReconciler.nodeRoles.ma
 so `fwd-appserver` and `fwd-backend-master` can land on another node if the
 original Longhorn attachment comes back in a bad post-reboot state.
 
+Production deploy guard:
+- `scripts/deploy-skyforge-prod-safe.sh` enforces this at rollout time and fails
+  when fewer than two `fwd-master` nodes are `Ready` and schedulable.
+
 ## One-command recovery
 
 Run from repo root:
