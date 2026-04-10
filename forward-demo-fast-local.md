@@ -39,6 +39,10 @@ delta visually separated from the base Forward production-shaped overlay.
 Build and push the local BAML image first, then deploy Forward using either the
 single combined overlay or the explicit two-file stack.
 
+`SKYFORGE_FORWARD_AICHAT_BAML_IMAGE_TAG` is optional. If unset, the bootstrap
+flow now inherits the chart/release default BAML tag (recommended for normal
+release-aligned deploys). Set it only when pinning a specific custom tag.
+
 Single-file rollout:
 
 ```bash
