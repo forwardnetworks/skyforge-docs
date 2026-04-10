@@ -2,6 +2,10 @@
 
 Pragmatic backup plan for single-node k3s with `local-path` storage.
 
+For multi-node local-path clusters, prefer:
+- `skyforge.backups.localSpread` to replicate backup artifacts onto worker-node local disks.
+- `skyforge.backups.offsiteRaw` to rsync those artifacts to an external mounted path (for example Hetzner WireGuard volume).
+
 ## What to back up
 1. k3s datastore
 - sqlite: `/var/lib/rancher/k3s/server/db/state.db`

@@ -1,11 +1,10 @@
-# Install (single-node) – k3s + Longhorn + Skyforge
+# Install (single-node) – k3s + local-path + Skyforge
 
 This is the “curl a script” style path intended to be easy to repeat on fresh clusters.
 
 ## Prereqs
 - A single Linux host (preferably a fresh VM).
 - `sudo` access.
-- `open-iscsi` available (Longhorn requirement).
 - A secrets values file (kept out of git).
 
 ## Recommended: run on the host (no tunnels)
@@ -26,7 +25,7 @@ sudo -E ./scripts/install-on-host.sh
 Notes:
 - If your images are public, omit the `SKYFORGE_GHCR_*` vars.
 - If you’re iterating and need a clean slate, add `SKYFORGE_RESET=true` (danger: deletes the namespace + kne CRDs).
-- The script uses `deploy/longhorn-values-qa.yaml` defaults (replicas=1). For multi-node prod, override accordingly.
+- The install path is local-path-first (no Longhorn dependency).
 - Do **not** paste tokens into your shell history. Prefer: `read -s SKYFORGE_GHCR_TOKEN; export SKYFORGE_GHCR_TOKEN`
 
 ## Post-install

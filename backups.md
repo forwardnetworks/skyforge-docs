@@ -29,13 +29,15 @@ Skyforge state is split across:
 
 ## Forward backups via Skyforge
 - Skyforge admin API can configure Forward CBR to use in-cluster `s3gw` (`StorageType=S3`) and keep scheduled backups enabled.
-- Skyforge also includes an object-store mirror cron that copies all objects from in-cluster `s3gw` to AWS S3.
-- Configure mirror target with:
-  - `SKYFORGE_S3GW_AWS_BACKUP_BUCKET` (required)
-  - `SKYFORGE_AWS_ACCESS_KEY_ID` + `SKYFORGE_AWS_SECRET_ACCESS_KEY` (required)
-  - `SKYFORGE_S3GW_AWS_BACKUP_ENDPOINT` (optional, default `s3.us-west-2.amazonaws.com`)
-  - `SKYFORGE_S3GW_AWS_BACKUP_USE_SSL` (optional, default `true`)
-  - `SKYFORGE_S3GW_AWS_BACKUP_PREFIX` (optional key prefix)
+- For local-path deployments, use:
+  - `skyforge.backups.localSpread.enabled=true` to spread backup artifacts onto each worker node host disk.
+  - `skyforge.backups.offsiteRaw.enabled=true` to rsync those local artifacts to a mounted offsite path (for example a Hetzner WireGuard volume mount).
+- Optional object-store mirror is still available for S3-compatible offsite targets:
+  - `SKYFORGE_OBJECT_MIRROR_BUCKET`
+  - `SKYFORGE_OBJECT_MIRROR_ENDPOINT`
+  - `SKYFORGE_OBJECT_MIRROR_USE_SSL`
+  - `SKYFORGE_OBJECT_MIRROR_PREFIX`
+  - `SKYFORGE_OBJECT_MIRROR_ACCESS_KEY_ID` + `SKYFORGE_OBJECT_MIRROR_SECRET_ACCESS_KEY`
 
 ## Restore sequence
 1. Stop writes (scale API/worker down)
