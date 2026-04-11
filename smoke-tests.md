@@ -88,6 +88,8 @@ go run ./cmd/skyforge-cli --profile smoke --insecure \
 This exercises:
 - `/api/users/:id/deployments/:deploymentID/action`
 - `/api/users/:id/deployments/:deploymentID/forward/sync`
+  - supports `{ "mode": "metadata-only" }` when you want to create/update
+    Forward network/device sources without starting collection
 
 plus run diagnostics (`/api/runs/:id/output`, `/events`, `/lifecycle`), deployment artifacts,
 and optional `fwd-cli` checks for latest snapshot + device inventory.

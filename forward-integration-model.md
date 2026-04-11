@@ -40,6 +40,25 @@ The `Forward Org Access` page now shows both managed orgs separately:
 Saved external Forward credential sets remain separate from the managed-org
 credentials.
 
+## Deployment sync modes
+
+Deployment Forward sync now supports two explicit modes:
+
+- `full` (default)
+  - syncs topology devices into Forward
+  - starts collection and runs synthetic performance follow-up
+- `metadata-only`
+  - syncs topology devices into Forward
+  - does **not** start collection
+  - intended for unconfigured labs where operators want network/source objects
+    created first without device login assumptions
+
+API surface:
+
+- `POST /api/users/:id/deployments/:deploymentID/forward/sync`
+  - request body: `{ "mode": "full" | "metadata-only" }`
+  - omitting `mode` is equivalent to `"full"`
+
 ## Reset behavior
 
 Deployment-org resets preserve the existing managed behavior:
