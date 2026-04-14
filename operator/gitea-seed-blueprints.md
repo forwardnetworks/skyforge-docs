@@ -21,10 +21,16 @@ git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
 git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
+git lfs install
+git lfs push --all gitea main
 ```
 
 KNE DNS-1035 normalization is now plugin-native in netlab KNE generation;
 the catalog repo does not require a Gitea Action workflow for node-name fixes.
+
+If you seed a repo that contains Git LFS pointers without pushing the LFS
+objects, the blueprints repo looks healthy but demo reset replay will fail when
+it tries to fetch the seed archives.
 
 ## 3) Confirm Skyforge can list templates
 

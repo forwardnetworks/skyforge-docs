@@ -15,7 +15,13 @@ git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
 git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
+git lfs install
+git lfs push --all gitea main
 ```
+
+If the repo contains Git LFS pointers and you skip the `git lfs push`, Skyforge
+can still see the catalog and branch while demo-seed ZIP downloads fail later
+with `gitea lfs batch returned error (404): Not Found`.
 
 ## Verification
 
