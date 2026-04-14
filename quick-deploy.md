@@ -5,6 +5,23 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 ## Scope
 
 - Deployment family/engine: `kne` / `netlab` only.
+- Local cluster prerequisite: the Skyforge release must enable `skyforge.kne`,
+  which installs the in-cluster KNE API surface (`networkop.co.uk/v1beta1`)
+  used by quick-deploy preflight. On Cilium clusters, Multus must be present
+  and `kube-system/cilium-config` must set `cni-exclusive: "false"` so meshnet
+  remains in the pod CNI chain.
+- Container-lab host CNI contract: quick deploy container topologies rely on an
+  active `/etc/cni/net.d/00-meshnet.conflist` on the worker host. If that file
+  is absent, pods come up with only `eth0` and stall in `Connected 1 interfaces
+  out of N`.
+- Local install default: `scripts/install-single-node.sh` should include
+  `deploy/examples/values-local-k3s.yaml` unless the caller overrides
+  `SKYFORGE_ENV_VALUES`; that overlay turns on `skyforge.kne.enabled`.
+- Post-install host CNI contract: after the `meshnet` DaemonSet is up, rollout
+  guardrails must restore `/etc/cni/net.d/00-meshnet.conflist` if Cilium or a
+  prior repair renamed it away, and rewrite
+  `/etc/cni/net.d/multus.d/multus.kubeconfig` to a reachable control-plane
+  endpoint rather than an unreachable ClusterIP.
 - Template source: curated Netlab blueprints managed by an admin catalog.
   - Default catalog focuses on EOS technology demos (EVPN, MPLS, BGP, VRF).
   - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.

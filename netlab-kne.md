@@ -129,6 +129,7 @@ cd skyforge
        so `hosts.yml` and `netlab.snapshot.pickle` point at the real KNE service endpoints
      - derives per-node apply behavior from the generated netlab device catalog:
        - `startup-config` devices stay on topology startup-config
+       - designer inline startup config is materialized before save into deterministic `.designer-startup/<template-base>/<node>.cfg` files, then consumed through the same topology startup-config path
        - `sh`/`cp_sh` devices run generated day0 scripts through `netlab initial`
      - reconstructs `node_files/` locally from per-node ConfigMaps
      - runs netlab runtime apply (`netlab initial` and netlab-native config modules)
@@ -145,8 +146,13 @@ cd skyforge
     `00-meshnet.conflist.cilium_bak`, meshnet never enters the pod sandbox CNI
     chain, `Topology.status` stays empty, and multi-node links remain stuck at
     `Connected 1 interfaces out of 2`.
-  - Bootstrap/deploy guardrails should restore `00-meshnet.conflist` from the
-    `.cilium_bak` copy before restarting the `meshnet` DaemonSet.
+  - Bootstrap/deploy guardrails should restore active
+    `00-meshnet.conflist` after the `meshnet` DaemonSet finishes rolling out if
+    Cilium or a prior repair renamed it away. Without that active chained CNI
+    file, container labs only get `eth0` and stay stuck at
+    `Connected 1 interfaces out of N`.
+  - The host-level `multus.kubeconfig` must point at a reachable control-plane
+    endpoint, not a ClusterIP that is unreachable from the node host network.
 - KubeVirt FortiOS images should use the Skyforge-native image naming scheme
   `ghcr.io/forwardnetworks/kubevirt/fortios:<tag>` instead of `vr-*` image
   names. That keeps runtime metadata and UI labels aligned with the actual

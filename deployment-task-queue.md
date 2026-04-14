@@ -96,9 +96,31 @@ errors before enqueuing long-running jobs.
 Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
 
 - Queued tasks are re-published periodically so they aren't stranded if a publish fails.
-- Long-running tasks with no recent output can be marked failed to avoid indefinite `running` status after crashes.
+- Runtime-backed tasks can now persist a DB-first execution contract in `sf_task_runtime_contracts`:
+  - `runtime_kind`
+  - `runtime_handle`
+  - `execution_phase`
+  - `last_observed_state`
+  - `terminal_decision`
+  - `terminal_reason`
+- The worker persists runtime handles as soon as a backing runtime object is created. Kubernetes objects are then treated as probe evidence, not the sole source of truth.
+- Running-task reconciliation first probes persisted runtime handles and finalizes tasks deterministically before falling back to generic "stuck task" failure handling.
+- For KNE/netlab runtime Jobs, `Job NotFound`, `429`, `503`, and similar kube API failures are classified explicitly instead of being retried forever.
 
 These cron jobs are scheduled via Encore Cron and run in the Skyforge backend.
+
+## Async delete semantics
+
+Deployment delete is now DB-first and asynchronous:
+
+- `DELETE /api/users/:id/deployments/:deploymentID` tombstones the deployment and queues `deployment-runtime-cleanup`.
+- The request no longer blocks on live Kubernetes cleanup finishing successfully.
+- Cleanup state is stored separately in `sf_deployment_cleanup_state` and surfaced on deployment records:
+  - `cleanupState`
+  - `cleanupTaskId`
+  - `cleanupError`
+- Tombstoned deployments are hidden from normal deployment list views, but direct record lookup can still surface cleanup status while async cleanup is in flight.
+- The deployment row is hard-deleted only after runtime cleanup succeeds; if cleanup fails, the deployment remains tombstoned with failure details for operator follow-up.
 
 Manual admin repair endpoints:
 

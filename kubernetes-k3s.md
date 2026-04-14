@@ -11,6 +11,12 @@ Skyforge on k3s is now documented as a **Cilium-only** deployment.
 ## 1) Install k3s with Cilium
 Install k3s with flannel/traefik disabled, then install/upgrade Cilium with Gateway API enabled.
 
+Recommended Cilium host-network settings for this environment:
+- `bpf.datapathMode=netkit`
+- `bpf.masquerade=true`
+- `hostLegacyRouting=false`
+- `kubeProxyReplacement=true`
+
 Example k3s install flags:
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \

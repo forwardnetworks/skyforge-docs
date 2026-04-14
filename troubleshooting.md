@@ -100,6 +100,134 @@ Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if Forward secret usernames drift from the `fwd_app`/`fwd_fdb` contract and validates DB role logins before finishing deploy.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
 
+## Forward opens malformed URL (for example `https://forwardnetworks/.`)
+Symptom:
+- Clicking **Demo Org** (or other Forward SSO links) opens a broken URL or lands on a blank/malformed Forward host.
+
+Typical cause:
+- `fwd-appserver` is missing `-Dforward.baseurl=...` in `APPSERVER_SETTINGS`.
+- This can happen after a direct Forward Helm upgrade that replaces `app.appserver.custom_settings`.
+
+## Demo reset / backend sync time out against public VIP
+Symptom:
+- Demo org reset fails in `reprovisioning`.
+- Worker logs show timeouts to public hostnames such as:
+  - `https://skyforge-fwd.local.forwardnetworks.com`
+  - `https://skyforge.local.forwardnetworks.com/git/api/v1`
+- Errors include `i/o timeout`, `context deadline exceeded`, or `could not resolve host`.
+
+Typical cause:
+- Skyforge backend pods are using public Forward or Gitea hostnames for server-side workflows.
+- In some clusters the pods cannot resolve those names internally, or should not hairpin through the Gateway VIP.
+
+Recommended config:
+- `skyforge.forward.baseUrl: https://fwd-appserver.forward.svc:8443`
+- `skyforge.gitea.apiUrl: http://gitea.skyforge.svc.cluster.local:3000/api/v1`
+- `skyforge.gitea.url: /git`
+
+This is not only for API calls. Demo seed raw file reads and Git LFS object downloads are also derived from the configured server-side Gitea base, so leaving workers on the public `/git` host can still fail later with a timeout against the external VIP.
+
+Notes:
+- `skyforge.forwardCluster.hostname` can stay public for browser access.
+- `skyforge.gitea.url` can stay same-origin for browser links while `skyforge.gitea.apiUrl` stays internal for jobs and workers.
+
+Checks:
+```bash
+kubectl -n forward get deploy fwd-appserver \
+  -o jsonpath='{.spec.template.spec.containers[?(@.name=="appserver")].env[?(@.name=="APPSERVER_SETTINGS")].value}'; echo
+curl -ksI https://skyforge-fwd.local.forwardnetworks.com/ | head -n 8
+```
+
+Expected:
+- `APPSERVER_SETTINGS` contains `-Dforward.baseurl=https://skyforge-fwd.local.forwardnetworks.com`
+- Forward root responds with a normal auth redirect (`location: /login`) instead of a malformed external URL.
+
+Remediation:
+```bash
+kubectl -n forward set env deploy/fwd-appserver --containers=appserver \
+  APPSERVER_SETTINGS='-Drestore.dir=/cbr/restore -Dforward.baseurl=https://skyforge-fwd.local.forwardnetworks.com'
+kubectl -n forward rollout status deploy/fwd-appserver --timeout=10m
+```
+
+## Skyforge VIP answers ARP but VPN clients still time out on 443
+Symptom:
+- `skyforge.local.forwardnetworks.com` resolves to the reserved VIP (for example `10.128.16.80`).
+- ARP for the VIP works from the VPN side.
+- TCP `443` to the VIP still times out for VPN users, while some in-cluster or node-local checks keep working.
+
+Typical cause:
+- The current L2 lease holder node has a broken Cilium Gateway datapath for the Skyforge VIP.
+- In the observed failure mode, the node receives external SYNs for the VIP but does not redirect them into the current Envoy listener, so the connection never reaches the Gateway listener.
+
+Checks:
+```bash
+kubectl get lease -n kube-system cilium-l2announce-skyforge-cilium-gateway-skyforge -o yaml | grep holderIdentity
+kubectl -n kube-system exec ds/cilium -- cilium-dbg shell -- db/show l2-announce
+curl -skI --resolve skyforge.local.forwardnetworks.com:443:10.128.16.80 \
+  https://skyforge.local.forwardnetworks.com/
+```
+
+Repair:
+- On the broken holder node, remove stale `OLD_CILIUM_*` iptables backup chains.
+- Restart that node's `cilium` pod so the datapath rebuilds from clean state.
+- Re-test by forcing the L2 lease onto that node and verifying:
+  - `curl -skI --resolve skyforge.local.forwardnetworks.com:443:10.128.16.80 https://skyforge.local.forwardnetworks.com/`
+
+Temporary mitigation:
+- If the holder path must stay available during repair, temporarily pin the L2
+  announcement policy to known-good nodes by adding `spec.nodeSelector` to:
+  - `deploy/skyforge-gateway-vip-policy-local.yaml`
+- Remove that selector again after the broken node is repaired and verified.
+
+Persistence:
+- `scripts/install-single-node.sh` and `scripts/deploy-skyforge-prod-safe.sh`
+  apply `deploy/skyforge-gateway-vip-policy-local.yaml` after Helm so the local
+  environment keeps a repo-managed source of truth for the VIP announcement
+  policy.
+
+Persistence:
+- Keep `-Dforward.baseurl=...` in Forward Helm values under `app.appserver.custom_settings`.
+- Skyforge overlays include this in:
+  - `deploy/examples/values-forward-local-k3s.yaml`
+  - `deploy/examples/values-forward-prod.yaml`
+  - `deploy/examples/values-forward-prod-demo-fast.yaml`
+  - `deploy/examples/values-forward-demo-fast.yaml`
+- Skyforge bootstrap and prod-safe deploy automation also re-assert
+  `fwd-appserver` `MEMORY_PROFILE=SHARED_CLUSTER`,
+  `SHARED_CLUSTER_CONTAINER_MEMORY`, and
+  `SHARED_CLUSTER_HEAP_MEMORY_PCT` after upstream Forward reconciliation, since
+  the upstream `forward-local` release can drift back to `SINGLE_BOX`.
+- `./scripts/deploy/local/integration-repair.sh post-helm`,
+  `scripts/deploy-skyforge-prod-safe.sh`, and
+  `scripts/recover-prod-after-reboot.sh` now re-apply the upstream worker
+  runtime from `components/charts/skyforge/values-prod-skyforge-local.yaml` so
+  `fwd-compute-worker` and `fwd-search-worker` keep their configured
+  `MEMORY_PROFILE`, explicit heap caps, and pod memory request/limit settings
+  before any repair-triggered worker restart. For the current local profile,
+  both workers use `ISOLATED_WORKER` with explicit memory caps instead of the
+  previous `SHARED_CLUSTER` split.
+
+## Task queue scaling and `nsq` stability
+Symptoms:
+- queue depth grows during heavy deploy churn.
+- operator attempts to scale `nsq` replicas to improve throughput.
+
+Encore-native rule:
+- keep `nsq` as a singleton (`replicas: 1`).
+- do not scale standalone `nsqd` replicas behind one Service; that can partition queue delivery.
+
+Scale path that is safe:
+- increase `skyforge.worker.replicas`.
+- enable/tune `skyforge.worker.autoscaling`.
+- increase worker tuning (`interactiveConcurrency`, `backgroundConcurrency`, queue sizes).
+
+Checks:
+```bash
+kubectl -n skyforge get deploy nsq skyforge-server-worker
+kubectl -n skyforge get hpa skyforge-server-worker
+curl -k https://skyforge.local.forwardnetworks.com/api/admin/tasks/diag
+```
+
 ## Hoppscotch failures
 ### Helm upgrade failures due to immutable Jobs
 If a Helm upgrade fails trying to patch a `Job`, it’s usually because the `spec.template` is immutable.

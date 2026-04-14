@@ -7,6 +7,25 @@ This checklist is intended to quickly validate cluster wiring without relying on
 kubectl -n skyforge get pods
 ```
 
+## Automated gate suite (recommended)
+
+Run these from the repo root to enforce release-controlled health/exposure gates:
+
+```bash
+./scripts/preflight-upgrade.sh
+./scripts/post-upgrade-gates.sh
+```
+
+What these gates enforce:
+- required secrets/CRDs present before upgrade
+- node scheduling safety (no unintended cordons)
+- forward session bridge path (`/api/forward/session`, `/__skyforge/forward/session`) is not `5xx`
+- Gateway/HTTPRoute acceptance/programming health
+- Skyforge VIP holder verification: force the L2 lease across each eligible node
+  and confirm `GET /` succeeds for the announced VIP on every holder
+- exposure guardrail: only intended external service and hostnames
+- worker/dex spread across nodes
+
 ## Cilium Gateway API objects present
 ```bash
 kubectl -n skyforge get gateway,httproute
@@ -14,10 +33,20 @@ kubectl -n skyforge get gateway skyforge -o jsonpath='{range .status.conditions[
 kubectl -n skyforge get svc cilium-gateway-skyforge
 ```
 
-Note: in Cilium host-network mode (`gateway-api-hostnetwork-enabled=true`),
-Gateway `Programmed=False (AddressNotAssigned)` can still be expected; confirm
-readiness with route probes (`check-sidebar-links.sh`) rather than strict
-Programmed=True.
+Expected for the local Skyforge VIP path:
+- `Gateway` is `Programmed=True`
+- `cilium-gateway-skyforge` is exposed as a `LoadBalancer`
+- the reserved LB-IPAM / L2-announced VIP is assigned (for example `10.128.16.80`)
+- `kubectl -n kube-system get cm cilium-config -o yaml | grep enable-l2-announcements`
+  shows `"true"` for clusters that rely on the reserved VIP
+- `kubectl get lease -A | grep cilium-l2announce` shows an active L2 lease holder
+  for the announced VIP
+
+If `Programmed=False (AddressNotAssigned)`, treat that as a broken exposure
+path rather than an expected state.
+
+If the VIP is assigned but no node answers ARP for it, treat that as a broken
+Cilium L2 announcement state even if in-cluster requests still work.
 
 ## ConfigMap wiring
 ```bash
@@ -70,6 +99,16 @@ Expected at idle:
 - `running=0`
 - `publishFailures10m=0`
 - `stuckQueuedCandidates=0`
+
+Confirm queue topology + scale path:
+```bash
+kubectl -n skyforge get deploy nsq skyforge-server-worker
+kubectl -n skyforge get hpa skyforge-server-worker
+```
+
+Expected:
+- `nsq` stays singleton (`READY 1/1`).
+- worker deployment can scale (fixed replicas and/or HPA), depending on values.
 
 ## Forward capacity self-heal + stale signals
 Capacity rollups and Forward network insights now self-refresh through Encore cron jobs.

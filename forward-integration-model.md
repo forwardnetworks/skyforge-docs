@@ -74,8 +74,10 @@ Demo-org resets are isolated from deployment state:
 - they destroy and recreate the demo org when a curated or hard reset runs
 - they replay the admin-managed demo seed catalog into a single network named
   `Demo Network`
-- they attempt synthetic performance generation after the final seeded snapshot
-  is processed
+- manual resets wait for the final seeded snapshot to process, then attempt
+  synthetic performance generation
+- nightly resets run in upload-only mode: they submit every seed but do not
+  wait for Forward processing to finish before marking the reset complete
 - they rotate the demo-org credential whenever the org is recreated
 
 This separation is required so a demo-org reset cannot damage the active
@@ -132,14 +134,14 @@ workflow:
 1. destroys and recreates the demo org
 2. creates the configured demo network name (default `Demo Network`)
 3. uploads each enabled seed archive in order
-4. waits for the final snapshot to process
-5. attempts synthetic performance data generation
-6. forces the demo org back to stock feature flags with experimental features off
+4. records upload metrics and the last submitted snapshot id in reset metadata
+5. does not wait for Forward snapshot processing to finish
+6. does not trigger synthetic performance generation
+7. forces the demo org back to stock feature flags with experimental features off
 
-Snapshot replay is the hard requirement for demo readiness. If Forward snapshot
-processing succeeds but synthetic performance generation times out or fails, the
-reset still completes and records that warning in reset metadata instead of
-remaining stuck in `seeding-demo`.
+This keeps the nightly runner from getting stuck behind long-running Forward
+processing while still preserving reset telemetry. Manual resets can still use
+the stricter wait-for-processing path when that feedback is useful.
 
 In self-managed deployments, that nightly trigger is chart-managed as the
 Kubernetes CronJob `skyforge-forward-demo-reset`. The job uses a Skyforge API

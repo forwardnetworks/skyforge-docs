@@ -30,9 +30,35 @@ For production/stable environments, keep this invariant on every upgrade:
 - `secrets.create=false`
 - `secrets.validatePrecreated=true`
 - `--reset-values` with your tracked values files
+- `--atomic --timeout <bounded>` for rollback on failed revisions
 
 Avoid `--reuse-values` for production upgrades. Reusing historical values can
 silently restore older embedded TLS data (`proxy-tls`) and revert certificates.
+
+Run preflight + post-upgrade gates on every release:
+
+```bash
+./scripts/preflight-upgrade.sh
+helm upgrade --install skyforge ./components/charts/skyforge \
+  -n skyforge --create-namespace \
+  --atomic --timeout 20m \
+  -f <values.yaml> -f <env-values.yaml> -f <secrets.yaml>
+./scripts/post-upgrade-gates.sh
+```
+
+`preflight-upgrade.sh` now enforces an image contract for Netlab runtime drift:
+
+- `components/server/skyforge/config.cue` and `components/server/worker/config.cue` must agree on `Netlab.Image`.
+- merged Helm values (`-f values -f env -f secrets`) must set `skyforge.netlab.image` to that same `Netlab.Image`.
+
+If these diverge, preflight fails before rollout to prevent old runtime images
+from being reused during quick-deploy/KNE tasks.
+
+CI release-policy guardrail (chart/value drift check):
+
+```bash
+./scripts/check-release-policy-guardrails.sh
+```
 
 ## Recommended: GHCR (OCI) chart storage
 

@@ -4,6 +4,29 @@ Skyforge supports deploying labs into Kubernetes using **kne** (referred to as *
 
 This is intended to let Skyforge scale “lab compute” horizontally by running labs as pods inside the k3s cluster (instead of SSHing to an external KNE/Netlab host).
 
+## Designer authoring contract
+
+- The lab designer is KNE-native end to end.
+- Designer-authored topology YAML should not emit `runtime: containerlab` for normal container nodes.
+- Runtime is only preserved in designer YAML when it is a meaningful KNE runtime contract, such as VM-class KubeVirt nodes.
+- The left-side designer palette is catalog-only:
+  - enabled Registry & NOS Catalog rows appear in the palette
+  - uncataloged discovered repos do not appear there
+  - built-in preset NOS fallbacks are not used
+- External topology import uses preview-then-replace wizard semantics:
+  - upload topology file
+  - auto-detect source from filename/content with manual override
+  - convert to canonical KNE designer YAML on the backend
+  - review warnings/placeholders/image mappings
+  - explicitly replace the current canvas
+- Import is preserve-first:
+  - unsupported infra/helper nodes are kept as placeholder nodes when the graph is still usable
+  - missing image and similar mapping gaps are warnings, not blocking failures, unless the input is structurally unusable
+- Startup config is a first-class node contract:
+  - `path` mode preserves topology-backed startup config references
+  - `inline` mode is stored in the designer sidecar and materialized on save under `.designer-startup/<template-base>/<node>.cfg`
+  - saved topology YAML references those generated files through the normal KNE/netlab startup-config path
+
 ## How it works
 
 ### 1) KNE engine hard gate

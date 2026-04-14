@@ -54,6 +54,12 @@ Populate in `deploy/skyforge-secrets.yaml` under `secrets.items`:
 - `skyforge.objectStorage.endpoint`
 - `skyforge.objectStorage.useSsl`
 
+For Gitea, keep browser navigation and clone links on `skyforge.gitea.url`
+for the public `/git` path, but keep `skyforge.gitea.apiUrl` on the in-cluster
+service URL for server-side jobs and workers. Demo seed raw archive reads and
+Git LFS object downloads are derived from the server-side API base, so pointing
+workers at the public Gateway VIP can reintroduce timeout regressions.
+
 ## Object storage
 - In-cluster default: `skyforge.s3gw.enabled=true` and `skyforge.objectStorage.endpoint=s3gw:7480`.
 - External S3: set `skyforge.s3gw.enabled=false` and point `skyforge.objectStorage.endpoint` to external host:port.

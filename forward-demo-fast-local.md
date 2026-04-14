@@ -76,6 +76,30 @@ After rollout, verify:
 - appserver includes the demo Bedrock flags
 - chat latency improves on the same prompt set under light concurrency
 
+## Post-Helm self-heal guards
+
+The local repair flow now auto-handles two common Forward failure modes after
+chart upgrades:
+
+- DB role/secret drift for both `postgres` and `postgres_non_admin`
+- FDB Postgres PVC saturation from historical `pg_log/postgresql-*.csv` growth
+- Java IPv6-only listener drift that can break IPv4 service/gateway traffic
+
+Run:
+
+```bash
+SKYFORGE_NAMESPACE=skyforge \
+SKYFORGE_FORWARD_NAMESPACE=forward \
+./scripts/deploy/local/integration-repair.sh post-helm
+```
+
+Optional controls:
+
+- `SKYFORGE_FORWARD_RECONCILE_DB_AUTH=false` disables DB auth reconcile
+- `SKYFORGE_FORWARD_AUTOFIX_FDB_DISK_PRESSURE=false` disables disk-pressure cleanup
+- `SKYFORGE_FORWARD_FDB_DISK_PRESSURE_THRESHOLD=95` sets the usage threshold (percent)
+- `SKYFORGE_FORWARD_FORCE_IPV4_JAVA_STACK=false` disables `_JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true` enforcement
+
 ## Rollback
 
 Rollback by redeploying without the demo-fast overlay changes and restoring the
