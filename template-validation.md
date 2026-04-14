@@ -16,6 +16,26 @@ or Gitea workflows is no longer required.
 On `Dashboard → Deployments → Create`, select a Netlab template and click **Validate**.
 This runs `netlab create` inside the Netlab runtime image, without deploying anything.
 
+For `User repo` templates, the create flow also supports **Upload YAML/ZIP**:
+
+- upload a zip archive containing a template folder
+- Skyforge writes the extracted files into the user repo under `netlab/uploaded/<name>/...`
+- `topology.yml` or `topology.yaml` is required at the template root (or as the only YAML file in the uploaded folder)
+- referenced sidecar files such as `startup-config`, generated config snippets, and similar text artifacts must be present in the uploaded archive
+- binary payloads are rejected in this flow; keep template uploads to text files and config sidecars
+
+Validation is now a hard launch gate for Netlab-backed create/deploy flows:
+
+- invalid templates are rejected before a run is queued
+- the UI returns structured diagnostics with suggested fixes for common failure classes:
+  - missing `topology.yml`
+  - provider mismatch (`kne` vs non-`kne`)
+  - missing images
+  - missing sidecar files such as `startup-config`
+  - YAML/schema/attribute errors
+  - repo/path resolution failures
+  - temporary validator infrastructure failures
+
 ### CLI (bulk validate all Netlab templates)
 
 From `skyforge/`:

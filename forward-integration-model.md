@@ -46,7 +46,7 @@ Deployment Forward sync now supports two explicit modes:
 
 - `full` (default)
   - syncs topology devices into Forward
-  - starts collection and runs synthetic performance follow-up
+  - starts collection and records the latest processed snapshot for the deployment
 - `metadata-only`
   - syncs topology devices into Forward
   - does **not** start collection
@@ -85,7 +85,7 @@ deployment-backed org.
 
 ## Synthetic performance generation
 
-Skyforge exposes synthetic performance generation for both managed orgs.
+Skyforge exposes synthetic performance generation through explicit managed-org controls.
 
 For each managed org, the UI lists the visible Forward networks, resolves the
 latest processed snapshot when available, and calls the internal Forward API:
@@ -102,6 +102,7 @@ Managed-org API surfaces:
 - deployment org
   - `GET /api/forward/org/performance-networks`
   - `POST /api/forward/org/performance-networks/:networkID/generate`
+  - deployment sync does **not** auto-generate synthetic performance
 - demo org
   - `GET /api/forward/demo-org/performance-networks`
   - `POST /api/forward/demo-org/performance-networks/:networkID/generate`

@@ -34,6 +34,13 @@ Skyforge does not install Netlab templates onto BYOS hosts. Netlab API jobs run 
 - If you want to run a complex template that includes extra files (custom configs, `check.config`, etc), pre-stage it on the BYOS host and point the run at that directory (`workdir`).
 - For simple/self-contained labs, you can use `topologyUrl` to fetch a `topology.yml` from an HTTP(S) URL, but Netlab will not automatically fetch an entire template directory tree.
 
+For Skyforge-managed template selection in the create-deployment UI:
+
+- blueprint and user-repo templates are validated before launch
+- user-repo templates can be uploaded as a zip archive from the UI
+- the uploaded archive is expanded into the user's Git repo so the template and its sidecars become durable repo content instead of one-shot request payloads
+- launch is blocked until validation passes
+
 ## Netlab defaults on the runner
 
 Use Netlab’s system defaults (for example `/etc/netlab/defaults.yml`) to pin common images without editing every topology.
