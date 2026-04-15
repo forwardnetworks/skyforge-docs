@@ -185,6 +185,46 @@ Persistence:
   environment keeps a repo-managed source of truth for the VIP announcement
   policy.
 
+## Kubernetes API VIP is flaky on `10.128.16.82`
+Symptom:
+- `https://10.128.16.82:6443/version` intermittently times out or returns `000`
+  while direct control-plane node IPs still answer.
+
+Typical cause:
+- `kube-system/kubernetes-vip` has a stale hand-managed backend list.
+- The bad pattern is:
+  - `Service` external IP `10.128.16.82` is healthy and L2-announced by Cilium
+  - but `Endpoints` still includes a dead control-plane IP such as
+    `10.128.16.62`
+
+Checks:
+```bash
+kubectl -n kube-system get svc kubernetes-vip -o yaml
+kubectl -n kube-system get endpoints kubernetes-vip -o yaml
+kubectl -n default get endpoints kubernetes -o yaml
+curl -sk --max-time 2 -o /dev/null -w '%{http_code} %{time_total}\n' \
+  https://10.128.16.82:6443/version
+```
+
+Repair:
+- Re-sync `kube-system/kubernetes-vip` from `default/kubernetes`:
+```bash
+./scripts/sync-kubernetes-vip-endpoints.sh
+```
+- Re-apply the repo-managed API VIP resources if they drift:
+```bash
+kubectl apply -f deploy/skyforge-api-vip-local.yaml
+```
+
+Persistence:
+- `deploy/skyforge-api-vip-local.yaml` is the source of truth for:
+  - `Service/kubernetes-vip`
+  - `CiliumLoadBalancerIPPool/skyforge-api-vip`
+  - `CiliumL2AnnouncementPolicy/skyforge-api-vip`
+  - `CronJob/kubernetes-vip-endpoints-sync`
+- `scripts/install-single-node.sh` and `scripts/deploy-skyforge-prod-safe.sh`
+  both apply that manifest and force one immediate endpoint sync after Helm.
+
 Persistence:
 - Keep `-Dforward.baseurl=...` in Forward Helm values under `app.appserver.custom_settings`.
 - Skyforge overlays include this in:

@@ -23,6 +23,7 @@ For `User repo` templates, the create flow also supports **Upload YAML/ZIP**:
 - `topology.yml` or `topology.yaml` is required at the template root (or as the only YAML file in the uploaded folder)
 - referenced sidecar files such as `startup-config`, generated config snippets, and similar text artifacts must be present in the uploaded archive
 - binary payloads are rejected in this flow; keep template uploads to text files and config sidecars
+- for netlab KNE templates, use the canonical field `kne.startup_config` when referencing a startup sidecar file that should be materialized into the runtime startup-config
 
 Validation is now a hard launch gate for Netlab-backed create/deploy flows:
 

@@ -129,6 +129,24 @@ kubectl -n skyforge port-forward svc/skyforge-prometheus 9090:9090
 curl -sS 'http://127.0.0.1:9090/prometheus/api/v1/query?query=skyforge_forward_capacity_signal_stale_current'
 ```
 
+## Platform inventory snapshot + API pressure guardrails
+Platform overview and lab-capacity reads are backed by a Postgres inventory
+snapshot refreshed by the worker cron, not by request-time cluster-wide `pods`
+and `nodes` list calls.
+
+Verify the worker cron and the Prometheus-exported freshness metrics:
+
+```bash
+curl -k https://skyforge.local.forwardnetworks.com/api/admin/tasks/diag
+kubectl -n skyforge port-forward svc/skyforge-prometheus 9090:9090
+curl -sS 'http://127.0.0.1:9090/prometheus/api/v1/query?query=skyforge_platform_inventory_snapshot_age_seconds'
+curl -sS 'http://127.0.0.1:9090/prometheus/api/v1/query?query=skyforge_platform_inventory_control_plane_lab_pods_current'
+```
+
+Expected:
+- snapshot age stays low in steady state (typically under a few minutes)
+- control-plane lab pod count remains `0`
+
 ## Yaade sanity (optional)
 ```bash
 kubectl -n skyforge rollout status deploy/yaade

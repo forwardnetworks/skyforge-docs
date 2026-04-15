@@ -35,7 +35,6 @@ Skyforge supports minimal and full installs through Helm values.
 Related toggles:
 - `skyforge.syslog.enabled` (default `false`)
 - `skyforge.snmpTraps.enabled` (default `false`)
-- `skyforge.nodeMetrics.enabled` (default `false`)
 - `skyforge.keda.enabled` (default `false`)
 - `nsq.enabled` (default `true`)
 
@@ -49,7 +48,7 @@ Observability notes:
 - Grafana/Prometheus UI entries are gated by `skyforge.observability.enabled`.
 - Built-in Prometheus/Grafana workloads are gated by `skyforge.observability.managed.enabled`.
 - Dashboard provisioning pack is gated by `skyforge.observability.dashboards.enabled`.
-- `skyforge.nodeMetrics.enabled` uses Telegraf ingestion into Skyforge APIs/Postgres (not Prometheus scraping).
+- Node metrics are sourced from Prometheus/node-exporter rather than Telegraf ingestion into Skyforge APIs/Postgres.
 - Syslog ingestion uses Vector when `skyforge.syslog.enabled=true`.
 - `skyforge.keda.enabled` enables KEDA resources for configured blocks (`worker`, `jira`, `netbox`, `nautobot`, `rapid7`, `elkProxy`), with per-block triggers/limits still controlled by values.
 - Infoblox VM lifecycle control is handled by `skyforge.infoblox.lifecycle.*` (KubeVirt), not KEDA.

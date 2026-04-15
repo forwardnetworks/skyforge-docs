@@ -29,6 +29,15 @@ Skyforge state is split across:
 
 ## Forward backups via Skyforge
 - Skyforge admin API can configure Forward CBR to use in-cluster `s3gw` (`StorageType=S3`) and keep scheduled backups enabled.
+- When Forward native CBR/S3 backups are disabled in on-prem mode, back up the Forward local-path PVC data directly.
+- Enable `skyforge.backups.forwardRaw.enabled=true` to run a DaemonSet that rsyncs Forward PVC host-path data from `/opt/local-path-provisioner` to the mounted offsite destination (for example a Hetzner WireGuard volume mount) from every eligible node.
+- The default Forward raw backup set includes:
+  - `pvc-fwd-appserver`
+  - `pvc-fwd-backend-master`
+  - `pvc-fwd-collector`
+  - `pvc-fwd-efs`
+  - Forward Postgres PVCs
+  - Forward aggregated log PVCs
 - For local-path deployments, use:
   - `skyforge.backups.localSpread.enabled=true` to spread backup artifacts onto each worker node host disk.
   - `skyforge.backups.offsiteRaw.enabled=true` to rsync those local artifacts to a mounted offsite path (for example a Hetzner WireGuard volume mount).

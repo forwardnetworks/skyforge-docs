@@ -36,6 +36,14 @@ CPU manager note:
 - This guide reserves CPUs `0-1` for node/system workloads to avoid kubelet startup failure.
 - On existing nodes switching from `none` to `static`, delete `/var/lib/kubelet/cpu_manager_state` once during migration before restarting `k3s-agent`.
 
+Control-plane headroom note:
+- On multi-node Skyforge clusters, keep explicit kubelet headroom on every k3s server/control-plane node even when you do not hard-isolate lab workloads.
+- The application now prefers lower-priority, soft-placed lab scheduling over strict taints, so reserving headroom is the remaining protection against steady-state object churn and bursty lab create/delete activity.
+- Recommended additional kubelet reservations on each control-plane node:
+  - `--kubelet-arg=kube-reserved=cpu=750m,memory=1536Mi`
+  - `--kubelet-arg=system-reserved=cpu=250m,memory=512Mi`
+- Keep these settings consistent on all control-plane nodes so API-server and controller-manager behavior stays predictable during lab churn.
+
 Example checks:
 ```bash
 kubectl get nodes

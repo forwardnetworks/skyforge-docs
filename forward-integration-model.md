@@ -83,6 +83,28 @@ Demo-org resets are isolated from deployment state:
 This separation is required so a demo-org reset cannot damage the active
 deployment-backed org.
 
+## Demo-org bootstrap and repair
+
+Demo-org credential provisioning and demo snapshot seeding are intentionally
+separate operations:
+
+- first-login bootstrap ensures both managed-org credentials exist
+- demo seeding is still performed by the curated demo reset workflow
+
+To keep those paths aligned, Skyforge now auto-queues the curated demo reset
+when it detects that a user's demo org exists but does not yet have a processed
+snapshot in `Demo Network`.
+
+That repair path currently runs from:
+
+- the worker-backed `user-bootstrap` flow for new users
+- demo-org credential/reveal/reset access paths as a best-effort self-heal
+- a dedicated background repair cron for already-known users
+
+This means a user can receive demo credentials immediately, while Skyforge
+still converges the org onto the same seeded state used by manual and nightly
+demo rebuilds.
+
 ## Synthetic performance generation
 
 Skyforge exposes synthetic performance generation through explicit managed-org controls.
@@ -150,6 +172,11 @@ token against the in-cluster Skyforge API URL and queues the same
 platform-managed demo reset workflow used by the admin UI. The token is stored
 in the configured Kubernetes secret (default `skyforge-admin-shared` key
 `api-token`).
+
+Separate from the nightly rebuild, Skyforge also runs a lighter-weight
+demo-seed repair cron. That repair loop only queues curated demo resets for
+users whose demo orgs are missing the seeded `Demo Network` snapshot, which
+lets existing empty demo orgs converge without waiting for the nightly rebuild.
 
 For multi-user demo environments with replayed seed catalogs, the worker
 deployment should not stay at the smallest background defaults. The chart now

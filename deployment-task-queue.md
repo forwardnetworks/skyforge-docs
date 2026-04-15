@@ -106,6 +106,10 @@ Skyforge runs periodic reconciler cron jobs to keep tasks from getting stuck:
 - The worker persists runtime handles as soon as a backing runtime object is created. Kubernetes objects are then treated as probe evidence, not the sole source of truth.
 - Running-task reconciliation first probes persisted runtime handles and finalizes tasks deterministically before falling back to generic "stuck task" failure handling.
 - For KNE/netlab runtime Jobs, `Job NotFound`, `429`, `503`, and similar kube API failures are classified explicitly instead of being retried forever.
+- Running `forward-tenant-reset` tasks are reconciled separately from generic stuck-task handling:
+  - if the reset run is already terminal in `sf_forward_tenant_reset_runs`, the worker finishes the task to match
+  - for demo resets, if seed replay progress shows all seeds processed and the live demo network already has the expected processed snapshot, the worker recovers the run to `ready` and then finishes the task successfully
+  - unresolved forward reset tasks are left for a later pass instead of being force-failed by the generic runtime reconciler
 
 These cron jobs are scheduled via Encore Cron and run in the Skyforge backend.
 

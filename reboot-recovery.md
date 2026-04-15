@@ -31,9 +31,11 @@ because `fwd-appserver` has no endpoints.
 
 For the production profile in `components/charts/skyforge/values-prod-skyforge-local.yaml`,
 the `master` role should not be pinned to a single worker. Keep at least two
-healthy worker nodes in `skyforge.forwardCluster.nodeRoleReconciler.nodeRoles.master`
-so `fwd-appserver` and `fwd-backend-master` can land on another node if the
-original Longhorn attachment comes back in a bad post-reboot state.
+healthy worker nodes in `skyforge.forwardCluster.nodeRoleReconciler.nodeRoles.master`,
+and keep every node that owns critical Forward `local-path` PVs in that set.
+In the current local-path model, `fwd-appserver`, `fwd-backend-master`,
+`fwd-collector`, and the Forward Postgres volumes can only reattach on the node
+that owns their host-path PV unless you explicitly migrate storage.
 
 Production deploy guard:
 - `scripts/deploy-skyforge-prod-safe.sh` enforces this at rollout time and fails
@@ -87,22 +89,22 @@ PAUSE_INFOBLOX_DURING_FORWARD_RECOVERY=false ./scripts/recover-prod-after-reboot
 ## Forward scratch volume recovery
 
 If Forward core or workers come back with logs like `Read-only file system` on
-`/var/log/forward` or `/tmp`, and Longhorn shows the PVC as `attached` but not
-fully usable, treat it as a node-local attach/mount failure rather than an app
-configuration issue.
+`/var/log/forward` or `/tmp`, or a critical Forward pod becomes unschedulable
+after a reboot, treat it as a `local-path` node/label contract failure rather
+than an app configuration issue.
 
 Recovery steps:
 
 1. Confirm the affected pod is failing on writable paths such as
    `/var/log/forward` or `/tmp`.
-2. Confirm the corresponding Longhorn volume is `attached` but the workload is
-   still failing.
-3. Temporarily cordon the affected node.
-4. Delete the affected Forward pod so Kubernetes reschedules it and Longhorn
-   reattaches the RWO volume onto a different healthy worker.
-5. Wait for the replacement pod to become `Ready`.
-6. Uncordon the original node only after the replacement workload is healthy.
+2. Confirm which node owns the corresponding `local-path` PV.
+3. Confirm that node is still labeled as an eligible `fwd-master` node.
+4. If the node label drifted, restore the Forward node-role labels and let the
+   pod reschedule there.
+5. If the node itself is unhealthy, recover the node or restore from backup;
+   `local-path` data cannot automatically fail over to another worker.
 
 Do not patch around this by making the Forward containers writable on rootfs or
-by bypassing the scratch PVC mounts. The correct fix is to recover the volume
-attachment and keep `fwd-master` placement available on more than one worker.
+by bypassing the scratch PVC mounts. In this storage model, the correct fix is
+to recover the node/label contract and keep the stateful `fwd-master` set
+aligned with the actual Forward PV locations.
