@@ -44,6 +44,31 @@ Control-plane headroom note:
   - `--kubelet-arg=system-reserved=cpu=250m,memory=512Mi`
 - Keep these settings consistent on all control-plane nodes so API-server and controller-manager behavior stays predictable during lab churn.
 
+Recommended k3s drop-in on each control-plane node:
+```yaml
+# /etc/rancher/k3s/config.yaml.d/20-skyforge-control-plane-reservations.yaml
+kubelet-arg:
+  - kube-reserved=cpu=750m,memory=1536Mi
+  - system-reserved=cpu=250m,memory=512Mi
+```
+
+Apply + verify:
+```bash
+sudo install -d -m 0755 /etc/rancher/k3s/config.yaml.d
+sudo tee /etc/rancher/k3s/config.yaml.d/20-skyforge-control-plane-reservations.yaml >/dev/null <<'EOF'
+kubelet-arg:
+  - kube-reserved=cpu=750m,memory=1536Mi
+  - system-reserved=cpu=250m,memory=512Mi
+EOF
+sudo systemctl restart k3s
+kubectl get node "$(hostname)" -o jsonpath='{.status.allocatable.cpu}{" "}{.status.allocatable.memory}{"\n"}'
+```
+
+API Priority and Fairness note:
+- Enable `skyforge.apiPriorityAndFairness.create=true` in the chart on multi-node clusters that run churn-heavy lab controllers.
+- This does not reduce object churn by itself; it gives Skyforge platform service accounts guaranteed apiserver concurrency while pushing meshnet/KubeVirt/CDI/controller traffic into a lower-priority queue.
+- APF cannot distinguish lab orchestration requests from platform orchestration requests when both use the same Kubernetes client identity. If you need stronger separation later, split lab orchestration onto a dedicated service account/client path.
+
 Example checks:
 ```bash
 kubectl get nodes

@@ -91,12 +91,22 @@ workers at the public Gateway VIP can reintroduce timeout regressions.
   - `skyforge.priorityClasses.create`
   - `skyforge.priorityClasses.core.*`
   - `skyforge.priorityClasses.integrations.*`
+  - `skyforge.priorityClasses.labs.*`
 - Assign classes:
   - Core: `skyforge.corePriorityClassName`, `skyforge.server.priorityClassName`, `skyforge.worker.priorityClassName`
   - Heavy integrations: `skyforge.integrationsPriorityClassName`, `skyforge.rapid7.priorityClassName`, `skyforge.elk.priorityClassName`
+  - Labs: `skyforge.labPriorityClassName`
 - Core API disruption budget:
   - `skyforge.server.pdb.enabled`
   - `skyforge.server.pdb.minAvailable`
+- Kubernetes API Priority and Fairness (APF):
+  - `skyforge.apiPriorityAndFairness.create`
+  - `skyforge.apiPriorityAndFairness.priorityLevels.platform.*`
+  - `skyforge.apiPriorityAndFairness.priorityLevels.labControllers.*`
+  - `skyforge.apiPriorityAndFairness.flowSchemas.platform.*`
+  - `skyforge.apiPriorityAndFairness.flowSchemas.labControllers.*`
+  - Use this to keep `system:serviceaccounts:skyforge` responsive while pushing KNE/KubeVirt/meshnet controller traffic into a lower-priority queue.
+  - APF can only classify by request metadata. If lab orchestration and platform orchestration share the same Kubernetes client identity, APF cannot fully separate them; deeper separation requires a dedicated lab service account/client path.
 
 ## Integration auth modes (sidebar)
 - Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`, `API Testing`.

@@ -191,39 +191,49 @@ Symptom:
   while direct control-plane node IPs still answer.
 
 Typical cause:
-- `kube-system/kubernetes-vip` has a stale hand-managed backend list.
-- The bad pattern is:
-  - `Service` external IP `10.128.16.82` is healthy and L2-announced by Cilium
-  - but `Endpoints` still includes a dead control-plane IP such as
-    `10.128.16.62`
+- The API VIP is not running under the repo-managed `kube-vip` DaemonSet on all
+  control-plane nodes.
+- A legacy Cilium-backed API VIP path (`Service/kubernetes-vip`,
+  `CiliumLoadBalancerIPPool/skyforge-api-vip`,
+  `CiliumL2AnnouncementPolicy/skyforge-api-vip`) still exists and is stealing
+  ownership of `10.128.16.82`.
 
 Checks:
 ```bash
-kubectl -n kube-system get svc kubernetes-vip -o yaml
-kubectl -n kube-system get endpoints kubernetes-vip -o yaml
-kubectl -n default get endpoints kubernetes -o yaml
+kubectl -n kube-system get ds,pods -l app.kubernetes.io/name=kube-vip-api -o wide
+kubectl -n kube-system get svc kubernetes-vip endpoints kubernetes-vip
+kubectl get ciliuml2announcementpolicy.cilium.io skyforge-api-vip
+kubectl get ciliumloadbalancerippool.cilium.io skyforge-api-vip
 curl -sk --max-time 2 -o /dev/null -w '%{http_code} %{time_total}\n' \
   https://10.128.16.82:6443/version
 ```
 
 Repair:
-- Re-sync `kube-system/kubernetes-vip` from `default/kubernetes`:
+- Remove the legacy Cilium-backed API VIP resources if they are still present:
 ```bash
-./scripts/sync-kubernetes-vip-endpoints.sh
+kubectl -n kube-system delete service kubernetes-vip endpoints kubernetes-vip --ignore-not-found=true
+kubectl delete ciliuml2announcementpolicy.cilium.io skyforge-api-vip --ignore-not-found=true
+kubectl delete ciliumloadbalancerippool.cilium.io skyforge-api-vip --ignore-not-found=true
+kubectl -n kube-system delete cronjob kubernetes-vip-endpoints-sync \
+  configmap kubernetes-vip-endpoints-sync \
+  serviceaccount kubernetes-vip-endpoints-sync --ignore-not-found=true
+kubectl delete clusterrole kubernetes-vip-endpoints-sync \
+  clusterrolebinding kubernetes-vip-endpoints-sync --ignore-not-found=true
 ```
-- Re-apply the repo-managed API VIP resources if they drift:
+- Re-apply the repo-managed kube-vip manifest:
 ```bash
 kubectl apply -f deploy/skyforge-api-vip-local.yaml
 ```
 
 Persistence:
 - `deploy/skyforge-api-vip-local.yaml` is the source of truth for:
-  - `Service/kubernetes-vip`
-  - `CiliumLoadBalancerIPPool/skyforge-api-vip`
-  - `CiliumL2AnnouncementPolicy/skyforge-api-vip`
-  - `CronJob/kubernetes-vip-endpoints-sync`
+  - `ServiceAccount/kube-vip`
+  - `ClusterRole/system:kube-vip-role`
+  - `ClusterRoleBinding/system:kube-vip-binding`
+  - `DaemonSet/kube-vip-api`
 - `scripts/install-single-node.sh` and `scripts/deploy-skyforge-prod-safe.sh`
-  both apply that manifest and force one immediate endpoint sync after Helm.
+  both delete the legacy Cilium-backed API VIP resources before applying the
+  repo-managed kube-vip manifest after Helm.
 
 Persistence:
 - Keep `-Dforward.baseurl=...` in Forward Helm values under `app.appserver.custom_settings`.
