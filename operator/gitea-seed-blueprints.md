@@ -4,7 +4,7 @@ Skyforge loads templates by listing files from a shared template repository in G
 If your Gitea instance is brand new (or the repo was reset), seed the template catalog repo.
 
 This guide assumes:
-- You can reach Gitea via the Skyforge entrypoint `https://<hostname>/git/user/oauth2/oidc` (preferred), or directly at `/git/`
+- You can reach Gitea via the Skyforge bridge `https://<hostname>/api/git/sso?next=/git/` (preferred), or directly at `/git/`
 - You have the Skyforge admin user credentials for Gitea (or any user who can create repos)
 
 ## 1) Create (or verify) the template repo in Gitea

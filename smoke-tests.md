@@ -121,7 +121,7 @@ go run ./cmd/skyforge-cli --profile smoke --insecure \
 ```
 
 ## Optional integration checks
-- Git UI: `https://<hostname>/git/user/oauth2/oidc`
+- Git UI: `https://<hostname>/api/git/sso?next=/git/`
 - NetBox UI: `https://<hostname>/netbox/`
 - Nautobot UI: `https://<hostname>/nautobot/`
 - API docs (ReDoc): `https://<hostname>/redoc/`

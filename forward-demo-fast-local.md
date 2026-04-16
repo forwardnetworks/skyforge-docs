@@ -30,6 +30,25 @@ separate knowledge-tree layer. The current request flow already benefits from:
 - demo-fast overlay: `deploy/examples/values-forward-demo-fast.yaml`
 - prod-shaped combined example: `deploy/examples/values-forward-prod-demo-fast.yaml`
 
+Both the local default overlay and the prod-shaped Forward overlays now pin:
+
+- `app.patroni.synchronous_mode=false`
+- `app.patroni.synchronous_mode_strict=false`
+
+That keeps the local/demo app tier writable if the Postgres standby drifts or
+fails to reattach after a Patroni failover.
+
+When bumping the Forward release, update the upstream Forward `app.image_version`
+and the Skyforge-owned collector/worker tag together:
+
+```bash
+./scripts/set-forward-version.sh <forward-tag>
+```
+
+That keeps the Harbor `fwd_collector`, `fwd_compute_worker`, and
+`fwd_search_worker` references aligned with the main Forward release tag instead
+of drifting via ad hoc manual edits.
+
 The combined example is intended to render on its own. Use it when you want a
 single-file rollout. Use the two-file stack when you want to keep the demo-fast
 delta visually separated from the base Forward production-shaped overlay.

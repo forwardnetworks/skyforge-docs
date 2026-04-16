@@ -100,6 +100,44 @@ Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if Forward secret usernames drift from the `fwd_app`/`fwd_fdb` contract and validates DB role logins before finishing deploy.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
 
+## Forward login hangs and appserver requests stall for 60s
+Symptom:
+- `https://skyforge-fwd.../login` hangs or times out.
+- Skyforge-managed Forward actions such as token creation or network creation
+  fail with `context deadline exceeded`.
+- `fwd-appserver` access logs show repeated `lat_ms:60001` / `lat_ms:120002`
+  lines.
+
+Typical cause:
+- `fwd-pg-app` failed over, but the standby did not reattach cleanly.
+- Patroni is still in synchronous replication mode, so app commits block on
+  `SyncRep`.
+- `fwd-appserver` then exhausts its small JDBC pool and appears down even though
+  the pod stays `Ready`.
+
+Checks:
+```bash
+kubectl -n forward exec fwd-pg-app-2 -- psql -U postgres -d postgres -c \
+  "show synchronous_standby_names; select application_name, state, sync_state from pg_stat_replication;"
+kubectl -n forward exec fwd-pg-app-2 -- psql -U postgres -d postgres -c \
+  "select pid, wait_event_type, wait_event, now()-query_start as age, left(query,120) from pg_stat_activity where state='active' order by query_start asc limit 12;"
+kubectl -n forward exec fwd-appserver-<pod> -c appserver -- sh -lc \
+  'curl -sk --max-time 10 -o /dev/null -w "%{http_code} %{time_total}\n" https://localhost:8443/login'
+```
+
+Expected in the healthy local/demo profile:
+- `synchronous_standby_names` is empty
+- `pg_stat_replication` may be empty during standby repair, but commits should
+  still proceed
+- `/login` returns quickly instead of hanging behind blocked DB commits
+
+Guardrail:
+- The local Forward bootstrap overlays now set:
+  - `app.patroni.synchronous_mode=false`
+  - `app.patroni.synchronous_mode_strict=false`
+- That makes local/demo Forward prefer availability over synchronous durability
+  when a standby drifts or is recovering after failover.
+
 ## Forward opens malformed URL (for example `https://forwardnetworks/.`)
 Symptom:
 - Clicking **Demo Org** (or other Forward SSO links) opens a broken URL or lands on a blank/malformed Forward host.
@@ -256,6 +294,39 @@ Persistence:
   before any repair-triggered worker restart. For the current local profile,
   both workers use `ISOLATED_WORKER` with explicit memory caps instead of the
   previous `SHARED_CLUSTER` split.
+
+## Forward reprocess looks stuck or wildly overestimates ETA
+When a snapshot reprocess appears stuck, profile the actual worker, DB, and node
+behavior before changing cluster size. The UI ETA can stay pessimistic through a
+compute-heavy phase and then correct sharply later.
+
+Use the attach-first profiler:
+
+```bash
+python3 scripts/profile-forward-reprocess.py --sample-interval-seconds 30
+```
+
+See [forward-reprocess-profiling.md](forward-reprocess-profiling.md) for the
+artifact format, interpretation rules, and the supported JVM vector-module
+experiment path.
+
+## Quick deploy is slow before the deployment even exists
+Split quick deploy latency into two phases:
+
+- synchronous request latency for `POST /api/quick-deploy/deploy`
+- asynchronous run latency after the deployment record is created
+
+Use the API deployment logs for the request path:
+
+```bash
+kubectl -n skyforge logs deploy/skyforge-server --since=15m | rg "quick deploy request"
+```
+
+Then inspect the resulting run via `/api/runs/<taskID>/lifecycle` and
+`/api/runs/<taskID>/events` for the async half.
+
+See [quick-deploy-profiling.md](quick-deploy-profiling.md) for the phase names,
+interpretation, and the main optimization targets.
 
 ## Task queue scaling and `nsq` stability
 Symptoms:
