@@ -60,7 +60,10 @@ Netlab-on-KNE is a netlab-owned runtime flow where Skyforge orchestrates and per
      launches of the same blueprint do not collide on shared per-node topology
      CR names.
 4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
-5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
+5. `kne_cli create` is treated as a bounded topology creation phase, not the final readiness gate.
+   - Skyforge caps the native create wait separately from the overall deployment timeout.
+   - Pod `Running/Ready` state is the authoritative success signal for native KNE once device pods exist, even if the KNE topology CR never backfills every link/node status field.
+6. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
 
 ### 2.0) Supported NOS onboarding scope
 

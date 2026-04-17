@@ -78,6 +78,8 @@ Demo-org resets are isolated from deployment state:
   synthetic performance generation
 - nightly resets run in upload-only mode: they submit every seed but do not
   wait for Forward processing to finish before marking the reset complete
+- demo resets only transition to `ready` after Skyforge can verify that the
+  recreated demo org still has a processed snapshot in `Demo Network`
 - they rotate the demo-org credential whenever the org is recreated
 
 This separation is required so a demo-org reset cannot damage the active
