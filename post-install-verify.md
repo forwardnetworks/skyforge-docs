@@ -134,6 +134,10 @@ Platform overview and lab-capacity reads are backed by a Postgres inventory
 snapshot refreshed by the worker cron, not by request-time cluster-wide `pods`
 and `nodes` list calls.
 
+The worker also seeds the inventory snapshot once during startup so newly
+rolled clusters do not sit in an `inventory-snapshot-missing` state while
+waiting for the first scheduled cron tick.
+
 Verify the worker cron and the Prometheus-exported freshness metrics:
 
 ```bash

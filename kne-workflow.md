@@ -34,6 +34,9 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 - KNE is now **netlab-only** (`family=kne`, `engine=netlab`).
 - Direct KNE `kne` engine/task paths are retired.
 - Any remaining KNE records with non-netlab engine values fail closed at API preflight/action time.
+- The create-deployment flow now warms netlab validation and resource-estimate
+  preflight in the background through the normal Encore APIs so the eventual
+  create action can reuse cached results instead of recomputing the same checks.
 
 ### 2) Netlab → KNE (deployment family/engine: `kne` / `netlab`)
 
@@ -51,6 +54,11 @@ Netlab-on-KNE is a netlab-owned runtime flow where Skyforge orchestrates and per
    - `node_files/…`
    - recursive `config/**` startup configs (netlab-native output)
    - Skyforge does not post-process generated `node_files`; device bootstrap content comes from netlab output.
+   - For eligible container-backed runtimes, KNE now treats startup config as a read-only seed and materializes a deployment-local writable startup store per node so live CLI saves persist for the same deployment lifetime without changing topology source of truth.
+   - The native KNE provider now uses the deployment-scoped runtime topology
+     name when generating the KNE textproto and topology namespace, so multiple
+     launches of the same blueprint do not collide on shared per-node topology
+     CR names.
 4. Netlab runtime writes a versioned manifest consumed by taskengine for graph/status persistence.
 5. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
 
@@ -164,6 +172,14 @@ No additional KNE vendor controller stacks are required for this set.
   - Startup configuration ownership remains in KNE via the existing
     `config_data` / `config_path` / `config_file` contract. Netlab/Skyforge do
     not inject a separate Skyforge-only VM startup-config bridge.
+  - For eligible container runtimes with a dedicated startup directory,
+    KNE now separates:
+    - topology-backed seed startup config
+    - deployment-local writable active startup storage
+    - This allows standard live CLI save workflows on the running deployment
+      while still resetting to stock on delete/recreate.
+  - Runtime-local writable startup persistence does not write back to blueprint,
+    topology, or designer sidecar sources.
   - Cluster prerequisite for VM-class NOS in native mode: KubeVirt CRDs/API
     (`kubevirt.io/v1`) must be installed; VM runs fail fast when unavailable.
   - KNE now creates a per-node fabric contract ConfigMap

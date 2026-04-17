@@ -119,6 +119,10 @@ workers at the public Gateway VIP can reintroduce timeout regressions.
 - `Grafana` native OIDC keeps the browser redirect on `https://<hostname>/dex/auth`, but defaults the
   server-side token and userinfo exchange to in-cluster Dex (`http://dex:5556/dex/...`) so Grafana does not fail
   OAuth completion on internal TLS or ingress trust issues.
+- Managed observability dashboards are provisioned by explicit ConfigMap mounts in Grafana, not by dashboard sidecars.
+  - `skyforge.observability.dashboards.enabled` turns on the built-in dashboard pack.
+  - `skyforge.observability.dashboards.folder` controls the Grafana folder name.
+  - `skyforge.observability.dashboards.labelKey` / `labelValue` remain accepted only as deprecated no-op compatibility settings.
 - OIDC-gated at edge (Skyforge/Dex SSO proxy): `Prometheus`, `Jira`, `Rapid7`, `ELK`, `Infoblox`.
   - Gate controls (enabled by default when integration is enabled):
     - `skyforge.jira.oidc.enabled`

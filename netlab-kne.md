@@ -49,6 +49,10 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - waiting for topology readiness
   - running netlab apply (`netlab initial` and device-specific semantics)
   - defaulting `netlab initial` to `--fast` (Ansible free strategy) unless explicitly overridden
+- For deployment-scoped KNE runs, the native netlab KNE provider must honor
+  `NETLAB_KNE_TOPOLOGY_NAME` as the actual topology owner/namespace identity.
+  This keeps duplicate blueprint launches isolated from each other instead of
+  reusing the blueprint's static topology name.
 - Skyforge runs one Kubernetes runtime job for teardown (`netlab.py down`):
   - deletes the kne `Topology` CR
   - deletes kne runtime ConfigMaps labeled for that topology
@@ -90,6 +94,11 @@ cd skyforge
 Linux endpoints use a dedicated image (`skyforge-linux-host`) with `sshd` and a
 deterministic background activity loop (once per minute by default, configurable
 via `NETLAB_HOST_ACTIVITY_INTERVAL`).
+
+For KNE `HOST` pods specifically, the container command is overridden to
+`sleep ...`, so the image entrypoint is bypassed. SSH and the background
+activity loop therefore have to be bootstrapped from the generated initial
+config template, not assumed to come from the image entrypoint alone.
 
 ```bash
 cd skyforge
@@ -133,6 +142,23 @@ cd skyforge
        - `sh`/`cp_sh` devices run generated day0 scripts through `netlab initial`
      - reconstructs `node_files/` locally from per-node ConfigMaps
      - runs netlab runtime apply (`netlab initial` and netlab-native config modules)
+
+### Runtime-local writable startup persistence
+
+- Netlab remains the source of truth for initial bring-up mode selection. Skyforge does not rewrite startup-vs-shell behavior in `netlab.py`.
+- For eligible container-backed KNE runtimes, the generated startup config is treated as a **seed**:
+  - the seed file stays read-only and topology-backed
+  - KNE creates a per-node PVC in the deployment namespace
+  - an init container copies the seed into the writable runtime volume only when the active file does not already exist
+  - the live node then writes to that deployment-local startup location
+- This preserves traditional CLI workflows such as `write memory` / `copy run start` for the lifetime of the same deployment.
+- Delete/recreate still resets the node back to the stock netlab-generated seed because the namespace-scoped PVC is dropped with the runtime namespace.
+- No live CLI save writes back to topology YAML, blueprint repos, or designer sidecar files.
+- Current safe-path support is limited to container runtimes with a dedicated startup directory (`/mnt/flash`, `/config`, `/home/evo/configdisk`, `/etc/sonic`, `/config_load`).
+- Paths that do not have a safe writable directory contract yet (for example `/`, `/etc`, `/disk0:`) remain on direct seed mounts until they have a validated runtime-native persistence path.
+- cEOS uses a repo-owned CEOSLab operator fork for this behavior. Build/push with:
+  - `./scripts/build-push-ceoslab-operator.sh --tag <tag>`
+  - then set `skyforge.kne.controllers.ceoslab.image=<registry>/arista-ceoslab-operator:<tag>` in Helm values before rollout.
 
 ### KubeVirt multi-node contract
 
@@ -203,7 +229,7 @@ cd skyforge
    - Delete namespace on deployment destroy (with finalizer/owner refs)?
    - Skyforge now performs two cleanup paths:
      - normal destroy cleanup for active deployments
-     - periodic orphan cleanup for expired or inactive ephemeral runtime namespaces, including legacy `smoke-*`, `rt-*`, and `user-*` namespaces
+     - periodic orphan cleanup for expired or inactive ephemeral runtime namespaces, including namespaces left behind by failed, stopped, lease-stopped, or tombstoned deployments, plus legacy `smoke-*`, `rt-*`, and `user-*` namespaces
    - Stuck `Terminating` namespaces that are explicitly labeled `skyforge.forwardnetworks.com/ephemeral-runtime=true` now have a second-stage force-finalize path after the grace window passes.
 
 ## Implementation checklist (Skyforge)

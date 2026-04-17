@@ -22,7 +22,7 @@ Repository: `github.com/forwardnetworks/netlab`
 
 Netlab runtime is pinned through:
 
-- `vendor/netlab` submodule SHA (`forwardnetworks/netlab`, branch `skyforge-dev`)
+- `vendor/netlab` submodule SHA (`forwardnetworks/netlab`, branch `dev`)
 - Runtime image `ghcr.io/forwardnetworks/skyforge-netlab:<tag>`
 - Helm values:
   - `components/charts/skyforge/values.yaml`
@@ -39,7 +39,7 @@ cd skyforge
 
 This script performs the full atomic update:
 
-1) fast-forwards `vendor/netlab` (`skyforge-dev`) from `upstream/dev`
+1) merges `upstream/dev` into the fork branch used by `vendor/netlab`
 2) pushes the fork branch update
 3) regenerates `components/server/internal/taskengine/netlab_device_defaults.json`
 4) builds/pushes a new runtime image
@@ -48,7 +48,7 @@ This script performs the full atomic update:
 Automation:
 
 - Workflow: `.github/workflows/netlab-runtime-refresh.yml`
-- Trigger: weekly schedule + manual dispatch
+- Trigger: nightly schedule + manual dispatch
 - Output: PR with submodule pointer, regenerated defaults, and image pin bumps
 
 ## KNE fork

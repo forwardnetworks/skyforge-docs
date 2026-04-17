@@ -25,6 +25,34 @@ Notes:
 - Verify Dex is reachable and configured with valid upstream OIDC settings.
 - If TLS is custom, ensure trust bundles are mounted consistently across Skyforge and Dex.
 
+## Platform conditions show `inventory-snapshot-stale`
+Symptom:
+- Dashboard `Platform conditions` shows:
+  - `inventory-snapshot-stale`
+- Capacity and placement views lag the actual cluster even though workers are healthy.
+
+Typical cause:
+- The worker seeded the platform inventory snapshot at startup, but the recurring
+  refresh path did not continue running afterward.
+- The warning threshold is intentionally short (`2 minutes`), so a missed loop
+  becomes visible quickly.
+
+Checks:
+```bash
+kubectl -n skyforge logs deploy/skyforge-server-worker --since=2h | rg -n 'platform inventory snapshot|CronRefreshClusterInventorySnapshot'
+```
+
+Expected:
+- one startup line:
+  - `initial platform inventory snapshot refreshed`
+- and regular follow-up refresh executions after that
+
+Repair:
+- roll the `skyforge-server-worker` deployment onto a build that includes the
+  worker-local platform inventory refresh loop
+- after rollout, the warning should clear within a couple of minutes once the
+  next refresh updates `sf_platform_inventory_state.recorded_at`
+
 ## `no healthy upstream` after node reboot
 Symptom:
 - Gateway/Envoy returns `no healthy upstream` for Skyforge routes after host/node reboot.
@@ -137,6 +165,60 @@ Guardrail:
   - `app.patroni.synchronous_mode_strict=false`
 - That makes local/demo Forward prefer availability over synchronous durability
   when a standby drifts or is recovering after failover.
+
+## Forward snapshot reprocess fails with read-only FDB errors
+Symptoms:
+- Snapshot reprocess fails in Forward after making visible progress.
+- Appserver or backend logs show one or more of:
+  - `cannot assign OIDs during recovery`
+  - `cannot execute CREATE DATABASE in a read-only transaction`
+  - `The connection attempt failed`
+- In the worst case, `fwd-appserver` may restart-loop and the Gateway returns:
+  - `upstream connect error or disconnect/reset before headers`
+
+Typical cause:
+- A Patroni failover or reconciliation window temporarily moves the writable FDB
+  primary.
+- During that window, the `fwd-pg-fdb-*` primary and `-repl` services can lag
+  behind the current pod roles, or Forward consumers can keep stale JDBC pools
+  pinned to the old side.
+- Snapshot aggregation then attempts writes on a recovering replica and fails.
+
+Checks:
+```bash
+kubectl -n forward get svc,endpoints \
+  fwd-pg-fdb-0 fwd-pg-fdb-0-repl fwd-pg-fdb-1 fwd-pg-fdb-1-repl -o wide
+kubectl -n forward exec fwd-pg-fdb-0-1 -- psql -U postgres -tAc 'select inet_server_addr(), pg_is_in_recovery();'
+kubectl -n forward exec fwd-pg-fdb-0-2 -- psql -U postgres -tAc 'select inet_server_addr(), pg_is_in_recovery();'
+kubectl -n forward exec fwd-pg-fdb-1-1 -- psql -U postgres -tAc 'select inet_server_addr(), pg_is_in_recovery();'
+kubectl -n forward exec fwd-pg-fdb-1-2 -- psql -U postgres -tAc 'select inet_server_addr(), pg_is_in_recovery();'
+```
+
+Expected:
+- `fwd-pg-fdb-0` and `fwd-pg-fdb-1` point at the pods where
+  `pg_is_in_recovery() = false`
+- the corresponding `-repl` services point at the replica pods
+
+Repair:
+```bash
+SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
+  ./scripts/deploy/local/integration-repair.sh post-helm
+```
+
+What the repair now does:
+- verifies Patroni primary and replica service endpoints for:
+  - `fwd-pg-app`
+  - `fwd-pg-fdb-0`
+  - `fwd-pg-fdb-1`
+- deletes stale Endpoints objects if they no longer match current pod roles
+- waits for the Postgres operator to republish the correct primary/replica
+  routing
+- restarts `fwd-appserver`, `fwd-backend-master`, `fwd-compute-worker`, and
+  `fwd-search-worker` so stale DB sessions are dropped cleanly
+
+Relevant knobs:
+- `SKYFORGE_FORWARD_REPAIR_PATRONI_SERVICE_ROUTING` (default `true`)
+- `SKYFORGE_FORWARD_PATRONI_SERVICE_WAIT_SECONDS` (default `60`)
 
 ## Forward opens malformed URL (for example `https://forwardnetworks/.`)
 Symptom:
