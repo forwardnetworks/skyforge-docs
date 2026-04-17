@@ -516,6 +516,19 @@ echo "${GOTOOLCHAIN:-unset}"
 Symptom:
 - A deploy "succeeds" but the UI still reflects older routes/pages.
 
+Operational safety rule:
+- Do not leave Skyforge in a degraded public state during rollout work if a safe
+  restore is available.
+- Before a live Helm upgrade, Gateway API edit, or route reconcile that could
+  impact the public hostname, announce the risky action and identify the restore
+  path first.
+- If the public hostname starts returning `404`/`5xx` unexpectedly during live
+  work, pause feature changes and restore the public route/app path before
+  continuing.
+- If Helm is left in `pending-upgrade`, `pending-install`, or
+  `pending-rollback`, clear the stuck release state before attempting more live
+  changes.
+
 Critical chart-source rule:
 - Production deploys must use the canonical local chart source `components/charts/skyforge` synced to the remote temp path (`/tmp/skyforge-chart-sync/components/charts/skyforge`) by `scripts/deploy-skyforge-prod-safe.sh`.
 - Do not run ad-hoc Helm upgrades from legacy remote chart trees (for example `/home/arch/skyforge-deploy/skyforge`).
@@ -545,6 +558,10 @@ Guardrails:
   (for example a halted Infoblox VM) do not block platform rollouts.
   - Set `HELM_WAIT_FOR_ALL_RESOURCES=true` if you intentionally want strict
     full-release Helm wait behavior.
+- Verify the public site explicitly after Gateway/Helm changes:
+  - `curl -sk https://skyforge.local.forwardnetworks.com/api/health`
+  - `curl -sk -D - https://skyforge.local.forwardnetworks.com/ -o /tmp/skyforge-root.out`
+  - confirm `/` returns the SPA entrypoint instead of an Envoy `404`
 - Forward DB credential reconciliation now ships `scripts/lib/forward-db-auth.sh`
   from the local repo to a remote temp path at deploy time; remote `/opt/skyforge`
   copies are no longer required for this step.
