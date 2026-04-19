@@ -32,6 +32,11 @@ If you seed a repo that contains Git LFS pointers without pushing the LFS
 objects, the blueprints repo looks healthy but demo reset replay will fail when
 it tries to fetch the seed archives.
 
+For that reason, prefer `scripts/push-blueprints-to-gitea.sh` from an operator
+host with `git-lfs` installed. Do not rely on the in-cluster reseed fallback
+for LFS-backed assets unless you have replaced its image with one that includes
+`git-lfs`.
+
 ## 3) Confirm Skyforge can list templates
 
 In Skyforge UI:

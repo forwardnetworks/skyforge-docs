@@ -23,6 +23,11 @@ If the repo contains Git LFS pointers and you skip the `git lfs push`, Skyforge
 can still see the catalog and branch while demo-seed ZIP downloads fail later
 with `gitea lfs batch returned error (404): Not Found`.
 
+The in-cluster fallback helper is not suitable for LFS-backed demo seed assets
+unless its container image explicitly includes `git-lfs`. The stock Gitea image
+does not, so the supported repair path is `scripts/push-blueprints-to-gitea.sh`
+from a host with working `git-lfs`.
+
 ## Verification
 
 1. Open Skyforge deployment UI and select template source `Blueprints`.
