@@ -130,6 +130,15 @@ Manual admin repair endpoints:
 
 - `POST /api/admin/tasks/reconcile`
 - `POST /api/admin/tasks/reconcile-running`
+- `GET /api/admin/tasks/diag`
+  - returns queue-level diagnostics intended to separate real backlog from delivery/worker issues.
+  - includes:
+    - overall queued/running counts and oldest queued age
+    - recent enqueue publish failures
+    - stale queued task candidate count
+    - queued and running task counts grouped by task type
+    - top queued offenders with age, priority, latest task event, publish-failure count, and capacity-requeue count
+  - useful when a task appears stuck in `queued` even though cluster capacity looks healthy.
 - `POST /api/admin/tasks/workspace-pods/cleanup`
   - dry-run and execute mode for force-cleaning stale kne topology pods/resources in `ws-*` namespaces.
   - supports targeted cleanup by `userScopeId` or explicit namespace override.

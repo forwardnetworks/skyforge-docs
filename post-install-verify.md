@@ -100,6 +100,11 @@ Expected at idle:
 - `publishFailures10m=0`
 - `stuckQueuedCandidates=0`
 
+When diagnosing queue stalls, also inspect:
+- `queuedByType` / `runningByType` for skew by task class
+- `queuedOffenders` for the oldest/highest-noise queued tasks
+- `signals` for the backend's current explanation of why the queue is degraded
+
 Confirm queue topology + scale path:
 ```bash
 kubectl -n skyforge get deploy nsq skyforge-server-worker
