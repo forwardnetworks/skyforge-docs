@@ -46,6 +46,26 @@ helm upgrade --install skyforge ./components/charts/skyforge \
 ./scripts/post-upgrade-gates.sh
 ```
 
+For safer operator recovery, the production deploy helper now supports a
+two-phase rollout:
+
+```bash
+# Phase 1: record the Helm revision and roll the core API/worker images.
+SKYFORGE_DEPLOY_PHASE=upgrade-only \
+  SKYFORGE_SERVER_IMAGE=<server-image> \
+  SKYFORGE_SERVER_WORKER_IMAGE=<worker-image> \
+  ./scripts/deploy-skyforge-prod-safe.sh
+
+# Phase 2: run slower reconcile and platform-specific post-Helm steps only
+# after the new revision is healthy.
+SKYFORGE_DEPLOY_PHASE=reconcile-only \
+  ./scripts/deploy-skyforge-prod-safe.sh
+```
+
+Use `SKYFORGE_DEPLOY_PHASE=full` (the default) for the existing one-shot flow.
+The split phases are useful when Helm revisions are healthy but post-upgrade
+reconcile work is slow, risky, or still being debugged.
+
 `preflight-upgrade.sh` now enforces an image contract for Netlab runtime drift:
 
 - `components/server/skyforge/config.cue` and `components/server/worker/config.cue` must agree on `Netlab.Image`.

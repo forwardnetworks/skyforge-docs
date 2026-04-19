@@ -109,13 +109,23 @@ workers at the public Gateway VIP can reintroduce timeout regressions.
   - APF can only classify by request metadata. If lab orchestration and platform orchestration share the same Kubernetes client identity, APF cannot fully separate them; deeper separation requires a dedicated lab service account/client path.
 
 ## Integration auth modes (sidebar)
+- Sidebar and tool-catalog exposure are now fail-closed: integrations are
+  hidden until their minimum launch contract is valid, instead of being shown
+  as broken routes.
 - Native OIDC (no Skyforge SSO proxy hop): `Gitea`, `NetBox`, `Nautobot`, `Coder`, `API Testing`.
 - Native OIDC (no Skyforge SSO proxy hop): `Grafana` (via Dex static client `grafana`).
 - `Gitea` onboarding defaults are controlled by `skyforge.gitea.oidc.*`; the prod baseline should keep
   auto-registration enabled and account linking set to `auto` so first-time Dex users land directly in Gitea.
 - `Coder` onboarding defaults are controlled by `skyforge.coder.*`; the chart now bootstraps a first owner
-  account by default and keeps Dex-backed OIDC auto-login/signups enabled so users land directly in Coder instead
-  of the first-user setup flow.
+  account by default, keeps Dex-backed OIDC auto-login/signups enabled, and now manages a single persistent
+  personal VS Code workspace per user through `skyforge.coder.automation.*` and `skyforge.coder.personalWorkspace.*`.
+  The default sidebar launch path is `/api/coder/session`, which reconciles the user/workspace and redirects into
+  the user's `code-server` app instead of dropping them on the generic Coder dashboard. If the published Skyforge
+  hostname uses a private certificate chain, set `skyforge.coder.personalWorkspace.publicCA.*` so workspace agents
+  trust that ingress CA when downloading the Coder agent binary.
+- `Jira` and `Rapid7` are exposed only when the feature is enabled and the
+  routed launch base URL is configured. Leaving the feature on without a valid
+  upstream contract no longer publishes a broken sidebar entry.
 - `Grafana` native OIDC keeps the browser redirect on `https://<hostname>/dex/auth`, but defaults the
   server-side token and userinfo exchange to in-cluster Dex (`http://dex:5556/dex/...`) so Grafana does not fail
   OAuth completion on internal TLS or ingress trust issues.
