@@ -46,6 +46,24 @@ helm upgrade --install skyforge ./components/charts/skyforge \
 ./scripts/post-upgrade-gates.sh
 ```
 
+`check-helm-release-state.sh` is now the supported release-health probe used by
+both gate scripts:
+
+- preflight allows a missing release, but fails closed on `pending-*` and
+  `failed` release states before a new upgrade starts
+- post-upgrade requires the release to resolve to `deployed`
+- the helper also prints recent Helm history and the last known deployed
+  revision, so operators can see drift/recovery context without manually
+  running `helm status` and `helm history`
+
+Standalone usage:
+
+```bash
+./scripts/check-helm-release-state.sh
+SKYFORGE_EXPECT_STATUS=deployed ./scripts/check-helm-release-state.sh
+SKYFORGE_ALLOW_MISSING_RELEASE=true ./scripts/check-helm-release-state.sh
+```
+
 For safer operator recovery, the production deploy helper now supports a
 two-phase rollout:
 

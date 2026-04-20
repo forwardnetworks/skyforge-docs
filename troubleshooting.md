@@ -618,6 +618,12 @@ Operational safety rule:
 - If Helm is left in `pending-upgrade`, `pending-install`, or
   `pending-rollback`, clear the stuck release state before attempting more live
   changes.
+- Use `./scripts/check-helm-release-state.sh` as the supported first check for
+  release health. It reports the current status, recent Helm history, and the
+  last deployed revision, and it fails closed on stuck `pending-*` states.
+- `./scripts/preflight-upgrade.sh` now runs the release-state check before a new
+  upgrade, and `./scripts/post-upgrade-gates.sh` requires the release to finish
+  in `deployed`.
 
 Critical chart-source rule:
 - Production deploys must use the canonical local chart source `components/charts/skyforge` synced to the remote temp path (`/tmp/skyforge-chart-sync/components/charts/skyforge`) by `scripts/deploy-skyforge-prod-safe.sh`.
