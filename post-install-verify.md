@@ -20,6 +20,9 @@ What these gates enforce:
 - required secrets/CRDs present before upgrade
 - node scheduling safety (no unintended cordons)
 - forward session bridge path (`/api/forward/session`, `/__skyforge/forward/session`) is not `5xx`
+- authenticated tool-catalog contract is valid (`/api/tooling/catalog`)
+- admin queue diagnostics are reachable and shaped correctly (`/api/admin/tasks/diag`)
+- Coder session bridge either redirects into `/coder/...` or returns the pending workspace page
 - Gateway/HTTPRoute acceptance/programming health
 - Skyforge VIP holder verification: force the L2 lease across each eligible node
   and confirm `GET /` succeeds for the announced VIP on every holder
