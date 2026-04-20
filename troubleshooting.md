@@ -174,6 +174,11 @@ Symptom:
 
 Typical cause:
 - Forward DB credential secret drift (wrong usernames/passwords in `postgres.fwd-pg-*.credentials`) causes appserver/worker DB auth failures.
+- In the current local/prod-worker profile, Forward still runs with
+  `skyforge.forwardCluster.database.mode=external` and
+  `appHost/fdbHost=db.skyforge.svc.cluster.local`, so those secrets must stay on
+  the external usernames (`fwd_app`, `fwd_fdb`) even though `fwd-pg-*`
+  services also exist in the `forward` namespace.
 
 Checks:
 ```bash
@@ -186,6 +191,11 @@ Expected secret usernames:
 - `postgres.fwd-pg-app.credentials` -> `fwd_app`
 - `postgres.fwd-pg-fdb*.credentials` -> `fwd_fdb`
 
+Expected external DB role contract:
+- `fwd_app`, `fwd_app_non_admin`, `fwd_fdb`, and `fwd_fdb_non_admin` must exist in the external Skyforge Postgres.
+- The `*_non_admin` passwords are derived from the secret contract (`<secret password>_pass`).
+- Forward bootstrap expects the external `fwd_app` / `fwd_fdb` roles to retain `CREATEDB` and `CREATEROLE`, matching the chart `db-provision-job` contract.
+
 Remediation:
 ```bash
 SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
@@ -194,7 +204,8 @@ SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
 
 Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` now enforces `scripts/lib/forward-db-auth.sh::forward_enforce_pg_secret_source_of_truth` before Forward workload restarts.
-- That guard treats Kubernetes secrets as the source of truth, reconciles Postgres role passwords from those secrets, and fails closed if any service-level login check fails (`fwd-pg-app`, `fwd-pg-fdb-0`, `fwd-pg-fdb-1`).
+- That guard treats Kubernetes secrets as the source of truth, reconciles Postgres role passwords from those secrets, and now also reconciles the external Skyforge Postgres role grants for `fwd_app` / `fwd_fdb` when `database.mode=external`.
+- It fails closed if any service-level login check fails (`fwd-pg-app`, `fwd-pg-fdb-0`, `fwd-pg-fdb-1`) or if the external DB login contract cannot be re-established from the secret values.
 - Username contract is strict on both keys (`username` and `user`) for `postgres.fwd-pg-*.credentials`.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
 
@@ -453,10 +464,12 @@ Persistence:
 - Local bootstrap now defaults `app.aichats.baml.enabled=false` and scales
   `fwd-baml-server` to `0` unless explicitly enabled, to avoid local startup
   failures when the BAML image tag is unavailable in Harbor.
-- Local bootstrap now creates CBR scratch PVC contracts
-  (`pvc-fwd-cbr-agent`, `pvc-fwd-cbr-server`, `pvc-fwd-cbr-s3-agent`) and caps
-  auto CBR agent replicas to `1` when that claim is `ReadWriteOnce` to prevent
-  `Multi-Attach` collisions.
+- Local bootstrap, `./scripts/deploy/local/integration-repair.sh post-helm`,
+  and `scripts/deploy-skyforge-prod-safe.sh` now share the same CBR scratch PVC
+  contract handling (`pvc-fwd-cbr-agent`, `pvc-fwd-cbr-server`,
+  `pvc-fwd-cbr-s3-agent`) and cap auto `fwd-cbr-agent` replicas to `1` when
+  `pvc-fwd-cbr-agent` is `ReadWriteOnce`, preventing repeat `Multi-Attach`
+  collisions after upgrades or repair-triggered restarts.
 - `./scripts/deploy/local/integration-repair.sh post-helm`,
   `scripts/deploy-skyforge-prod-safe.sh`, and
   `scripts/recover-prod-after-reboot.sh` now re-apply the upstream worker
