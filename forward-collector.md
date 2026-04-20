@@ -24,7 +24,7 @@ Example (Harbor):
 ```bash
 skyforge:
   forwardCollector:
-    image: harbor.local.forwardnetworks.com/forward/fwd_collector:26.3.0-18
+    image: harbor.local.forwardnetworks.com/forward/fwd_collector:26.4.0-14
     pullPolicy: Always
     imagePullSecretName: ghcr-pull
     imagePullSecretNamespace: skyforge
