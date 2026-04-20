@@ -98,6 +98,74 @@ Forward worker prereq gate knobs:
 - `SKYFORGE_FORWARD_WORKER_SDG_TARGET` (default `/dev/sdb`)
 - `SKYFORGE_FORWARD_WORKER_PREREQS_NODE_TIMEOUT_SECONDS` (default `120`)
 
+## Netlab KNE runtime fails with `Operation not permitted` against `100.64.0.1:443`
+Symptom:
+- quick deploy or native KNE runs fail very early in the netlab runtime job
+- the job log shows Python Kubernetes client errors such as:
+  - `HTTPSConnectionPool(host='100.64.0.1', port=443)`
+  - `Failed to establish a new connection: [Errno 1] Operation not permitted`
+
+Typical cause:
+- pod-to-service access to the in-cluster `kubernetes` ClusterIP is broken
+- direct control-plane endpoints or a kube-vip API address still work
+- the netlab runtime pod uses in-cluster client defaults unless Skyforge injects an explicit API host override
+
+Checks:
+```bash
+kubectl -n skyforge run api-probe --restart=Never --image=busybox:1.36 --command -- sleep 10000
+kubectl -n skyforge wait --for=condition=Ready pod/api-probe --timeout=30s
+kubectl -n skyforge exec api-probe -- sh -lc 'nc -vz -w 3 100.64.0.1 443 2>&1 || true'
+kubectl -n skyforge exec api-probe -- sh -lc 'nc -vz -w 3 10.128.16.82 6443 2>&1 || true'
+```
+
+Expected for this failure mode:
+- `100.64.0.1:443` returns `Operation not permitted`
+- the control-plane VIP or endpoint on `:6443` is reachable
+
+Guardrail:
+- set these Helm values for the affected cluster profile:
+  - `skyforge.kubernetes.apiHostOverride`
+  - `skyforge.kubernetes.apiPortOverride`
+- Skyforge propagates those into netlab runtime jobs as:
+  - `SKYFORGE_KUBE_API_HOST`
+  - `SKYFORGE_KUBE_API_PORT`
+  - `KUBERNETES_SERVICE_HOST`
+  - `KUBERNETES_SERVICE_PORT`
+- This keeps native KNE/netlab jobs using the working API VIP without mutating topology data or adding non-native runtime shims.
+
+## Quick deploy stalls and then fails with native meshnet skipped links
+Symptom:
+- quick deploy reaches `kne topology create`
+- device pods stay in `Init:0/1`
+- task failure or logs mention native meshnet skipped links instead of a generic timeout
+
+Typical cause:
+- native meshnet or grpc wire reconciliation skipped one or more peer links
+- Skyforge now classifies this explicitly once the same missing-`GWireKObj`
+  skipped-link signature persists long enough
+
+Checks:
+```bash
+kubectl -n <topology-namespace> get pods -o wide
+kubectl -n <topology-namespace> get topology -o json | jq '.items[].status.skipped'
+kubectl -n <topology-namespace> get gwirekobj -o json | jq '.items[].status.grpcWireItems'
+./scripts/collect-kne-meshnet-evidence.sh --namespace <topology-namespace>
+```
+
+Guardrail:
+- keep the meshnet image pinned through Helm values instead of live patching:
+  - `skyforge.kne.meshnet.image`
+  - `skyforge.kne.meshnet.imagePullPolicy`
+- if you need to trial a native fix, change those values in the active overlay
+  and replay the full EVPN quick-deploy shape
+- if a native `linux/amd64` image build is needed and local arm64 or Colima
+  trips on toolchain or `cgo` issues, use the dedicated amd64 builder host
+  `captainpacket@192.168.1.167`
+  - example: `./scripts/build-push-meshnet.sh --tag <tag> --apply-local-patch --remote-host captainpacket@192.168.1.167`
+- Skyforge now treats meshnet collisions as diagnostic/runtime failures only.
+  It does not delete host `koko*` links as a remediation step; the durable fix
+  must come from the pinned meshnet image itself.
+
 ## Forward appserver 503 / collector auth drift
 Symptom:
 - `https://skyforge-fwd...` returns `503`.
@@ -125,8 +193,15 @@ SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
 ```
 
 Deployment guardrail:
-- `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if Forward secret usernames drift from the `fwd_app`/`fwd_fdb` contract and validates DB role logins before finishing deploy.
+- `scripts/deploy-skyforge-prod-safe.sh` now enforces `scripts/lib/forward-db-auth.sh::forward_enforce_pg_secret_source_of_truth` before Forward workload restarts.
+- That guard treats Kubernetes secrets as the source of truth, reconciles Postgres role passwords from those secrets, and fails closed if any service-level login check fails (`fwd-pg-app`, `fwd-pg-fdb-0`, `fwd-pg-fdb-1`).
+- Username contract is strict on both keys (`username` and `user`) for `postgres.fwd-pg-*.credentials`.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
+
+Manual guard run (no deploy):
+```bash
+FORWARD_NAMESPACE=forward ./scripts/forward-db-auth-guard.sh
+```
 
 ## Forward login hangs and appserver requests stall for 60s
 Symptom:
@@ -362,15 +437,30 @@ Persistence:
   - `deploy/examples/values-forward-prod.yaml`
   - `deploy/examples/values-forward-prod-demo-fast.yaml`
   - `deploy/examples/values-forward-demo-fast.yaml`
-- Skyforge bootstrap and prod-safe deploy automation also re-assert
-  `fwd-appserver` `MEMORY_PROFILE=SHARED_CLUSTER`,
-  `SHARED_CLUSTER_CONTAINER_MEMORY`, and
-  `SHARED_CLUSTER_HEAP_MEMORY_PCT` after upstream Forward reconciliation, since
-  the upstream `forward-local` release can drift back to `SINGLE_BOX`.
+- Skyforge bootstrap and prod-safe deploy automation re-assert appserver
+  runtime contract after upstream Forward reconciliation. Current local default
+  is `fwd-appserver MEMORY_PROFILE=SINGLE_BOX` with explicit heap-cap and
+  base-url enforcement.
+- Forward storage/DB size source of truth is now pinned in two places:
+  - `deploy/examples/values-forward-local-k3s.yaml` (`app.storageClassName=longhorn`,
+    `app.database.volume_size.app=8Gi`, `app.database.volume_size.fdb=8Gi`)
+  - `scripts/bootstrap-forward-local.sh` re-asserts those same values via
+    `--set` during each Helm run so existing releases converge even if older
+    overlays or prior release values drifted.
+- `scripts/forward-db-auth-guard.sh` is now fail-closed on kubeconfig
+  reachability and context safety before it declares the DB auth contract
+  healthy.
+- Local bootstrap now defaults `app.aichats.baml.enabled=false` and scales
+  `fwd-baml-server` to `0` unless explicitly enabled, to avoid local startup
+  failures when the BAML image tag is unavailable in Harbor.
+- Local bootstrap now creates CBR scratch PVC contracts
+  (`pvc-fwd-cbr-agent`, `pvc-fwd-cbr-server`, `pvc-fwd-cbr-s3-agent`) and caps
+  auto CBR agent replicas to `1` when that claim is `ReadWriteOnce` to prevent
+  `Multi-Attach` collisions.
 - `./scripts/deploy/local/integration-repair.sh post-helm`,
   `scripts/deploy-skyforge-prod-safe.sh`, and
   `scripts/recover-prod-after-reboot.sh` now re-apply the upstream worker
-  runtime from `components/charts/skyforge/values-prod-skyforge-local.yaml` so
+  runtime from `deploy/skyforge-values.yaml` so
   `fwd-compute-worker` and `fwd-search-worker` keep their configured
   `MEMORY_PROFILE`, explicit heap caps, and pod memory request/limit settings
   before any repair-triggered worker restart. For the current local profile,
@@ -565,6 +655,8 @@ Guardrails:
 - Forward DB credential reconciliation now ships `scripts/lib/forward-db-auth.sh`
   from the local repo to a remote temp path at deploy time; remote `/opt/skyforge`
   copies are no longer required for this step.
+- Manual one-shot reconciliation/verification is available with
+  `scripts/forward-db-auth-guard.sh`.
 
 Recommended production flow:
 ```bash

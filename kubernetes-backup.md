@@ -1,10 +1,19 @@
-# Kubernetes backup / restore (k3s single-node, local-path)
+# Kubernetes backup / restore (k3s)
 
-Pragmatic backup plan for single-node k3s with `local-path` storage.
+Pragmatic backup plan for Skyforge k3s clusters.
 
-For multi-node local-path clusters, prefer:
-- `skyforge.backups.localSpread` to replicate backup artifacts onto worker-node local disks.
-- `skyforge.backups.offsiteRaw` to rsync those artifacts to an external mounted path (for example Hetzner WireGuard volume).
+The old single-node `local-path` snapshot flow remains a useful break-glass path,
+but the intended multi-node posture is:
+
+- Longhorn for critical PVCs
+- local and off-cluster backup copies for stateful data
+- application-consistent exports for Postgres-backed services
+
+For multi-node clusters, prefer:
+
+- `skyforge.backups.localSpread` to replicate object backup artifacts onto worker-node local disks
+- `skyforge.backups.offsiteRaw` to mirror those local artifacts off-cluster from every eligible node
+- `skyforge.backups.forwardRaw` for raw Forward PVC coverage while migration is in progress
 
 ## What to back up
 1. k3s datastore

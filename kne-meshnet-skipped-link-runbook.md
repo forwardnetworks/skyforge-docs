@@ -28,6 +28,16 @@ Because of that, `status.skipped` alone is not enough to declare failure. The ac
 
 When that full signature is present, Skyforge has already handed the topology to KNE correctly. The failure is in native KNE or meshnet link reconciliation, not in Skyforge deployment state or manifest handling.
 
+Current Skyforge behavior:
+
+- netlab-KNE quick-deploy runs now fail this signature explicitly as
+  `meshnet-skipped-link` instead of waiting for a generic deploy timeout
+- the task event payload includes the topology namespace, skipped-link sample,
+  and a ready-to-run evidence collector command
+- Skyforge does not try to repair this by deleting host `koko*` links or
+  patching the live meshnet DaemonSet. The durable fix belongs in the pinned
+  meshnet image selected through Helm values.
+
 ## Observed Live Example
 
 Observed on April 9, 2026 in namespace `user-cr-71afa445` from quick deploy template [topology.yml](/home/captainpacket/src/skyforge/components/blueprints/netlab/EVPN/ebgp/topology.yml).
@@ -91,6 +101,18 @@ Then confirm the controller failure in this order:
    - confirm `skipping peer pod` for the same `link UID`
 
 If `status.skipped` is present but the pods are already `Running` and `GWireKObj` contains the link, treat that as transient bookkeeping, not as the target failure.
+
+## IaC Pinning
+
+Meshnet image selection is chart-driven.
+
+Use:
+
+- `skyforge.kne.meshnet.image`
+- `skyforge.kne.meshnet.imagePullPolicy`
+
+Do not patch the live meshnet DaemonSet image directly without back-porting the
+same pin into Helm values.
 
 ## Boundary
 

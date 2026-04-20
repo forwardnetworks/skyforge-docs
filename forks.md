@@ -26,7 +26,7 @@ Netlab runtime is pinned through:
 - Runtime image `ghcr.io/forwardnetworks/skyforge-netlab:<tag>`
 - Helm values:
   - `components/charts/skyforge/values.yaml`
-  - `components/charts/skyforge/values-prod-skyforge-local.yaml`
+  - `deploy/skyforge-values.yaml` (canonical local/prod values; mirrored into the chart tree for packaging and render checks)
 
 ### Updating netlab in Skyforge
 
@@ -108,7 +108,7 @@ We ship kne as images (manager + launcher). Helm values control the image tags:
 Update them in:
 
 - `components/charts/skyforge/values.yaml` (base/defaults)
-- `components/charts/skyforge/values-prod-skyforge-local.yaml` (prod override example)
+- `deploy/skyforge-values.yaml` (canonical local/prod override values)
 
 ### Building/pushing kne images
 

@@ -1,8 +1,8 @@
 # Longhorn Storage (HA PVCs) on Skyforge k3s
 
-Skyforge runs on a multi-node k3s cluster (`skyforge-1/2/3`). To avoid node-bound
-storage (k3s `local-path`), we use Longhorn as the default storage class for
-Skyforge PVCs.
+Skyforge should use Longhorn as the storage backend for all critical PVC-backed
+services. `local-path` stays installed only for disposable or intentionally
+node-local claims.
 
 ## Install / Upgrade
 
@@ -22,9 +22,20 @@ helm upgrade --install longhorn longhorn/longhorn \
 These values include:
 
 - `defaultSettings.taintToleration: node-role.kubernetes.io/control-plane:NoSchedule`
+- `defaultSettings.defaultReplicaCount: 3`
+- `defaultSettings.autoSalvage: true`
+- `defaultSettings.autoDeletePodWhenVolumeDetachedUnexpectedly: true`
+- `defaultSettings.disableSchedulingOnCordonedNode: true`
+- `defaultSettings.nodeDrainPolicy: block-if-contains-last-replica`
+- `defaultSettings.nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod`
 
 That keeps Longhorn CSI components schedulable on control-plane nodes so
 control-plane-pinned Skyforge pods can still mount PVCs.
+
+The node-down policy is important for reboot resilience: when a worker dies or
+stays down long enough to be treated as unavailable, Longhorn should allow the
+controller to delete the old pod and reattach the RWO volume on a healthy node
+instead of waiting indefinitely on the dead node.
 
 ## Host prerequisites
 
@@ -44,26 +55,27 @@ On each k3s node:
 
 ## Storage classes
 
-- `longhorn` is the cluster default StorageClass.
-- `local-path` is kept installed but is **not** default.
+- `longhorn` should become the cluster default StorageClass after migration.
+- `local-path` stays installed but is **not** default.
 
-## Important: RWX vs RWO for Skyforge
+## Important: Skyforge server PVC contract
 
-Some Skyforge services intentionally share PVCs across multiple pods:
+The current Skyforge runtime does **not** use shared RWX PVCs for the API
+server and workers.
 
-- `platform-data`: used by `healthwatch`, `skyforge-server`, `skyforge-server-worker`
-- `skyforge-server-data`: used by `skyforge-server` and `skyforge-server-worker`
+- `platform-data`: mounted by `skyforge-server`
+- `skyforge-server-data`: mounted by `skyforge-server`
+- `skyforge-server-worker` uses ephemeral `emptyDir` volumes for its local
+  working paths instead of mounting those server PVCs
 
-With k3s `local-path` (host directories), multiple pods could mount the same
-volume on the same node.
+With Longhorn, these server-side PVCs should remain **RWO**:
 
-With Longhorn, **RWO volumes are single-attach**, so shared volumes must be
-provisioned as **RWX** (Longhorn share-manager) to avoid `Multi-Attach` errors.
+- `platform-data` PVC: `ReadWriteOnce`
+- `skyforge-server-data` PVC: `ReadWriteOnce`
 
-The Skyforge chart sets:
-
-- `platform-data` PVC: `ReadWriteMany`
-- `skyforge-server-data` PVC: `ReadWriteMany`
+If Skyforge later moves back to a truly shared multi-pod storage contract for
+these paths, that should be implemented explicitly and then migrated to RWX in
+both chart values and the live PVCs together.
 
 Forward in-cluster storage currently includes PVC-backed workloads that are
 `ReadWriteOnce`. For this model, we enforce a rollout policy instead of hard
@@ -98,6 +110,20 @@ the Forward chart is configured for `longhorn` storage:
 
 If any of those checks fail, bootstrap exits with a concrete error instead of
 letting Forward drift into false low-space or read-only mode later.
+
+## Backup contract during migration
+
+Do not treat Longhorn replication as sufficient backup.
+
+Keep these enabled throughout the migration window:
+
+- `skyforge.backups.localSpread`
+- `skyforge.backups.offsiteRaw`
+- `skyforge.backups.forwardRaw`
+- `skyforge.backups.postgres`
+
+`backup-offsite-raw` should run as a DaemonSet so every eligible node mirrors
+its local backup root off-cluster, not just whichever node a CronJob lands on.
 
 ## PVC sizing
 

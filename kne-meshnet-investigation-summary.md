@@ -121,6 +121,7 @@ What is not established yet:
 
 1. the smallest direct-path deterministic reproducer
 2. a fork-ready meshnet patch target with regression coverage
+3. whether a vendored KNE or meshnet image bump clears the full quick-deploy EVPN failure without a fork
 
 ## Next Step
 
@@ -133,5 +134,7 @@ That means:
 2. preserve the first matching failure
 3. compare direct `kne_cli create` versus quick-deploy orchestration for the
    same topology shape
-4. only if the failure remains below Skyforge after that comparison, prepare an
+4. try the next vendored KNE or meshnet image pin through Helm values instead of
+   live DaemonSet mutation
+5. only if the failure remains below Skyforge after that comparison, prepare an
    upstream-ready or fork-ready packet against meshnet

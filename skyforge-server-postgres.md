@@ -26,7 +26,7 @@ To re-run explicitly, run a Helm upgrade (same values you use for deploy):
 ```bash
 helm upgrade --install skyforge components/charts/skyforge \
   -n skyforge \
-  -f components/charts/skyforge/values-prod-skyforge-local.yaml \
+  -f deploy/skyforge-values.yaml \
   -f deploy/examples/values-local-k3s.yaml \
   -f deploy/skyforge-secrets.yaml
 ```

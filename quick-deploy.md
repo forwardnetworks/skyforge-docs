@@ -14,6 +14,10 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   active `/etc/cni/net.d/00-meshnet.conflist` on the worker host. If that file
   is absent, pods come up with only `eth0` and stall in `Connected 1 interfaces
   out of N`.
+- K3s agent-node variant: on K3s worker nodes the active kubelet CNI path can be
+  `/var/lib/rancher/k3s/agent/etc/cni/net.d` instead of `/etc/cni/net.d`.
+  Guardrails and manual repairs must check both paths, or the host can look
+  healthy while new pods still come up with only `eth0`.
 - Local install default: `scripts/install-single-node.sh` should include
   `deploy/examples/values-local-k3s.yaml` unless the caller overrides
   `SKYFORGE_ENV_VALUES`; that overlay turns on `skyforge.kne.enabled`.

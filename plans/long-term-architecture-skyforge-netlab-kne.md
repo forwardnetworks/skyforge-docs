@@ -76,6 +76,18 @@ Native deploy path contract is:
 4. Skyforge records contract metadata + artifacts and updates deployment phases.
 5. Skyforge triggers Forward sync (if enabled).
 
+Implementation note:
+
+- For the supported `family=kne, engine=netlab` path, Skyforge should expose a
+  thin execution-backend adapter with four responsibilities:
+  - `Submit`
+  - `Observe`
+  - `Access`
+  - `Cleanup`
+- This adapter exists to keep Skyforge in the control-plane role while KNE
+  remains the execution backend. It must not become a second runtime
+  reconciler or topology mutator.
+
 Destroy path contract is:
 
 1. Skyforge schedules runtime job (`netlab.py down`).
@@ -163,4 +175,3 @@ Exit criteria:
 2. Keep IOL/IOLL2 runtime fixes in kne/netlab layers only; avoid Skyforge patches.
 3. Close deployment action race conditions (`create` vs `bring-up`) with strict idempotent guards.
 4. Validate EVPN and IOL/IOLL2 template runs against this contract before adding new features.
-

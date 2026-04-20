@@ -30,6 +30,9 @@ This is intentionally “side-by-side” with the existing Netlab runner (EVE ho
   - `clab.yml` + `node_files/` + `config/` (for kne deploy)
   - `hosts.yml` + `netlab.snapshot.pickle` + vars (for post-deploy `netlab initial`)
   - canonical node metadata (`deviceKey`, `forwardType`) in the manifest contract
+  - provider bootstrap overrides from `/etc/netlab/templates/<device>` when present (for example EOS bootstrap behavior)
+    so SNMP community comes from `snmp_config/<device>.j2` instead of provider bootstrap startup text
+  - `groups.all.config: [snmp_config]` in runtime defaults enables the shared SNMP configlet path by default
 
 ## Runtime modes
 
@@ -106,14 +109,13 @@ cd skyforge
 ```
 
 4) **Deploy via kne**
-   - Netlab runtime `up` creates a `Topology` custom resource embedding the KNE YAML (`spec.definition.kne`).
-   - Netlab runtime `up` mounts runtime-produced `node_files/` and `config/` artifacts into kne launcher pods via `spec.deployment.filesFromConfigMap`.
-   - For `deployPolicy.schedulingMode=spread`, Skyforge injects both pod anti-affinity preference and pod `topologySpreadConstraints` on hostname to improve multi-node distribution.
-   - The kne controller uses **clabverter** internally to translate the kne definition into Kubernetes resources.
+   - Netlab runtime `up` generates the KNE runtime manifest and KNE CLI topology input from the netlab output bundle.
+   - Skyforge hands that runtime-owned topology to `kne_cli create`; Skyforge does not post a custom `Topology.spec.deployment` contract or patch the stock KNE CRD.
+   - The KNE runtime then creates the topology resources and meshnet wiring from that CLI input.
 
 5) **Apply to Kubernetes**
    - Uses a per-user namespace (`ws-<userScopeSlug>`) to isolate resources.
-   - Netlab runtime `up` applies the `Topology` CR and waits for `status.topologyReady=true`.
+   - `kne_cli create` is the bounded creation phase; Skyforge then waits on pod/runtime readiness rather than treating CR status alone as final success.
    - Skyforge now marks KNE runtime namespaces as ephemeral runtime namespaces with:
      - label `skyforge.forwardnetworks.com/ephemeral-runtime=true`
      - purpose label `skyforge.forwardnetworks.com/runtime-purpose=<kne-runtime|kne-topology>`
@@ -177,6 +179,10 @@ cd skyforge
     Cilium or a prior repair renamed it away. Without that active chained CNI
     file, container labs only get `eth0` and stay stuck at
     `Connected 1 interfaces out of N`.
+  - On K3s agent nodes, kubelet may read CNI configs from
+    `/var/lib/rancher/k3s/agent/etc/cni/net.d` instead of `/etc/cni/net.d`.
+    Guardrails must validate and repair both directories when present; fixing
+    only `/etc/cni/net.d` can still leave new lab pods with just `eth0`.
   - The host-level `multus.kubeconfig` must point at a reachable control-plane
     endpoint, not a ClusterIP that is unreachable from the node host network.
 - KubeVirt FortiOS images should use the Skyforge-native image naming scheme

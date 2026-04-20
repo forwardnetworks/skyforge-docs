@@ -29,18 +29,26 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
 
 ## How it works
 
-### 1) KNE engine hard gate
+### 1) Control-plane vs execution backend
 
-- KNE is now **netlab-only** (`family=kne`, `engine=netlab`).
-- Direct KNE `kne` engine/task paths are retired.
-- Any remaining KNE records with non-netlab engine values fail closed at API preflight/action time.
+- The supported KNE workflow is **netlab-driven** (`family=kne`, `engine=netlab`).
+- In this path, Skyforge is the control plane:
+  - deployment requests and tenancy
+  - topology artifact storage and provenance
+  - backend selection, scheduling, lifecycle projection, and cleanup policy
+- KNE is the execution backend:
+  - topology CR reconciliation
+  - pod/service/configmap realization
+  - meshnet-backed link wiring and teardown
+- Skyforge may observe and project KNE state into user-facing deployment state, but it should not become a second orchestration authority for runtime topology behavior.
+- Legacy direct-KNE surfaces may still exist in the codebase, but they are outside this workflow and are not the target shape for current KNE/netlab development.
 - The create-deployment flow now warms netlab validation and resource-estimate
   preflight in the background through the normal Encore APIs so the eventual
   create action can reuse cached results instead of recomputing the same checks.
 
 ### 2) Netlab → KNE (deployment family/engine: `kne` / `netlab`)
 
-Netlab-on-KNE is a netlab-owned runtime flow where Skyforge orchestrates and persists state:
+Netlab-on-KNE is a backend-adapter flow where Skyforge orchestrates and persists control-plane state while KNE owns execution:
 
 1. Skyforge syncs the Netlab template folder and runs netlab in-cluster (`kne/netlab` native mode).
    BYOS Netlab server mode is not used for this path.
@@ -64,6 +72,11 @@ Netlab-on-KNE is a netlab-owned runtime flow where Skyforge orchestrates and per
    - Skyforge caps the native create wait separately from the overall deployment timeout.
    - Pod `Running/Ready` state is the authoritative success signal for native KNE once device pods exist, even if the KNE topology CR never backfills every link/node status field.
 6. Skyforge stores topology/artifact pointers and DB contracts used by inventory/Forward sync.
+7. Internal taskengine flow is intentionally split across backend-adapter responsibilities:
+   - `Submit`: create the runtime job / backend run handle
+   - `Observe`: wait for backend execution and classify failures
+   - `Access`: map backend runtime identity into Skyforge deployment/runtime views
+   - `Cleanup`: tear down backend runtime objects from persisted runtime handles
 
 ### 2.0) Supported NOS onboarding scope
 
@@ -144,10 +157,12 @@ No additional KNE vendor controller stacks are required for this set.
 - KNE apply step persists handoff checksum/provenance:
   - metadata key: `kneApplySummary`
   - task event: `kne.apply.summary`
+- The active deploy path does not submit a Skyforge-authored `Topology.spec.deployment`
+  contract to the cluster. Skyforge converts the requested topology into the KNE CLI
+  input format and executes `kne_cli create`; the stock KNE `Topology` CRD and the
+  runtime-created topology objects remain the execution source of truth.
 - Pure-k8s runtime contract is fail-closed at reconcile time:
   - `env-files` in resolved node definitions are rejected for k8s runtime.
-  - Node `binds` are allowed only when bind sources are artifact-backed via
-    `spec.deployment.filesFromConfigMap` mounts for that node.
   - IOL/IOLL2 runtime paths are supported in native mode using dedicated
     k8s-native image tags and image-owned runtime wiring.
   - VM-class NOS nodes now carry an explicit KNE runtime contract in the

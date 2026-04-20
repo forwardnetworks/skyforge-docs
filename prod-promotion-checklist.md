@@ -9,7 +9,7 @@ Run the production-readiness gate from the meta repo root:
 ```bash
 ./scripts/check-prod-promotion-readiness.py \
   components/charts/skyforge/values.yaml \
-  components/charts/skyforge/values-prod-skyforge-local.yaml \
+  deploy/skyforge-values.yaml \
   deploy/examples/values-local-k3s.yaml
 ```
 

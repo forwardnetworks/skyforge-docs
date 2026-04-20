@@ -19,6 +19,7 @@
     `00-meshnet.conflist.cilium_bak`, restore the active file before restarting
     the `meshnet` DaemonSet.
 - The lifecycle autostop path must ignore the VM while `license_pending=true`; otherwise the VM can be halted during bootstrap and the licensing workflow never converges.
+- The temp-license bootstrap must hold the serial console open long enough to observe a real `login:`/prompt before sending commands; piping a fixed input blob and closing stdin too early will falsely mark bootstrap as failed.
 - Lifecycle cronjobs (`*-vm-autostop`, `*-vm-reseed`, `*-vm-license`) are expected to stay unsuspended by default.
   - Chart values now expose explicit `suspend` booleans under each lifecycle lane and default them to `false`.
   - Treat `suspend=true` as a temporary operator action only.
