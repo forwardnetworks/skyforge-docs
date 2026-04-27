@@ -1,10 +1,19 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/server-portal-hard-cut-migration-checklist.md
+converted_at: 2026-04-27
+title: Skyforge Server + Portal Hard-Cut Migration Checklist
+current_truth: verify against current code and environment before execution
+---
+
 # Skyforge Server + Portal Hard-Cut Migration Checklist
 
 Last updated: 2026-03-12
 
 ## Goal
 
-Complete the server/portal hard-cut refactor migration before any next k3d redeploy.
+Complete the server/portal hard-cut refactor migration before any next environment redeploy.
 
 This checklist is the execution reference for:
 - monolith reduction already in-progress
@@ -1151,7 +1160,7 @@ Success gates:
 - [x] Deploy preflight hardening
   - [x] script-level gateway/route fail-fast checks added:
     - `scripts/check-sidebar-links.sh` (gateway Programmed + route health probes)
-    - `scripts/verify-k3d-local-stack.sh` (gateway readiness + route/prefix health fail-fast gates)
+    - `scripts/post-upgrade-gates.sh` (gateway readiness + route/prefix health fail-fast gates)
   - [x] enforce stable preflight error payloads consumed by portal UI
     - `components/server/skyforge/user_scope_deployments_preflight_api.go` now returns `preflightError` on expected operator-facing failures instead of only bubbling generic wrapper strings
   - [x] add negative-path coverage for compatibility/capacity failures and missing dependency states
@@ -1222,7 +1231,7 @@ Success gates:
 
 ## Do-Not-Do Until Checklist Complete
 
-- [x] Do not delete/recreate k3d cluster
+- [x] Do not delete/recreate the active environment cluster
 - [x] Do not run redeploy workflows
 - [x] Do not mix deployment-script edits into refactor commits unless directly required for compile/test
 

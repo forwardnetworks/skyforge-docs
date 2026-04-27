@@ -33,7 +33,7 @@ Verified environment capture with running image IDs:
 
 Key values:
 
-- Kubernetes server: `v1.35.3+k3s1`
+- Kubernetes server: `v1.35.3+k3s1` at the time of this evidence capture
 - meshnet spec image: `us-west1-docker.pkg.dev/kne-external/kne/networkop/meshnet:v0.3.2`
 - meshnet running digest: `sha256:bb752df44f956088a484d3b2f0499e9302a1d555b5e69263a125ba5f0a9d9e50`
 - CEOS operator manager image: `ghcr.io/aristanetworks/arista-ceoslab-operator:v2.1.2`

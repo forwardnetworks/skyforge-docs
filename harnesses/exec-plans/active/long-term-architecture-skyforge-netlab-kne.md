@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/long-term-architecture-skyforge-netlab-kne.md
+converted_at: 2026-04-27
+title: Long-Term Architecture: Skyforge + Netlab + KNE
+current_truth: verify against current code and environment before execution
+---
+
 # Long-Term Architecture: Skyforge + Netlab + KNE
 
 Date: 2026-03-04

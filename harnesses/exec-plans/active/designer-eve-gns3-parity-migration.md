@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/designer-eve-gns3-parity-migration.md
+converted_at: 2026-04-27
+title: Designer EVE-NG Parity Migration and Import Flexibility
+current_truth: verify against current code and environment before execution
+---
+
 # Designer EVE-NG Parity Migration and Import Flexibility
 
 Last updated: 2026-04-13

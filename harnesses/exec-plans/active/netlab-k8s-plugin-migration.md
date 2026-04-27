@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/netlab-k8s-plugin-migration.md
+converted_at: 2026-04-27
+title: Netlab K8s Plugin Migration (Cleanup + Hard-Cut)
+current_truth: verify against current code and environment before execution
+---
+
 # Netlab K8s Plugin Migration (Cleanup + Hard-Cut)
 
 Date: 2026-02-28

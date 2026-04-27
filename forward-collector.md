@@ -1,4 +1,4 @@
-# Forward Collector (In-Cluster)
+# Forward Collector (User Collectors in Cluster)
 
 Skyforge can run a **per-user Forward collector inside the Skyforge Kubernetes cluster**.
 
@@ -18,6 +18,9 @@ Skyforge creates the collector in Forward (SaaS or on-prem) and stores the retur
   - Set `skyforge.forwardCollector.image` (example Harbor tag below).
   - Optional: set `skyforge.forwardCollector.heapSizeGB` to control memory (maps to `COLLECTOR_HEAP_SIZE`).
   - Optional: set `skyforge.forwardCollector.imagePullSecretName` if your registry requires auth.
+  - This image contract is for Skyforge-managed user collectors only. The
+    native Skyforge Forward chart does not deploy a shared built-in
+    `fwd-collector` workload.
 
 Example (Harbor):
 

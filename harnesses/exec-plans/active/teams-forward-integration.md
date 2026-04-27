@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/teams-forward-integration.md
+converted_at: 2026-04-27
+title: Teams Forward Integration Checklist
+current_truth: verify against current code and environment before execution
+---
+
 # Teams Forward Integration Checklist
 
 ## Summary

@@ -52,6 +52,8 @@ Observability notes:
 - Node metrics are sourced from Prometheus/node-exporter rather than Telegraf ingestion into Skyforge APIs/Postgres.
 - Syslog ingestion uses Vector when `skyforge.syslog.enabled=true`.
 - `skyforge.keda.enabled` enables KEDA resources for configured blocks (`worker`, `jira`, `netbox`, `nautobot`, `rapid7`, `elkProxy`), with per-block triggers/limits still controlled by values.
+- `skyforge.keda.worker.labAware.enabled=true` enables the weighted task-and-reservation SQL scaler for `skyforge-server-worker` (or set `skyforge.keda.worker.query` explicitly to override it).
+- `skyforge.keda.forwardWorkers.enabled=true` enables optional KEDA `ScaledObject` resources for `fwd-compute-worker` and `fwd-search-worker` in the Forward namespace.
 - Infoblox VM lifecycle control is handled by `skyforge.infoblox.lifecycle.*` (KubeVirt), not KEDA.
 - Temp-license reconciliation for Infoblox is controlled by `skyforge.infoblox.lifecycle.license.*`.
 

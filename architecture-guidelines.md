@@ -235,8 +235,8 @@ When architecture changes:
 
 Use these categories:
 - active standards in `components/docs/`
-- implementation plans in `components/docs/plans/`
-- historical material only under `components/docs/archive/legacy/`
+- implementation plans in `components/docs/harnesses/exec-plans/active/`
+- historical material only under `components/docs/harnesses/archive/legacy/`
 
 ## 13. Anti-patterns
 

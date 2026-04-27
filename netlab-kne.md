@@ -3,7 +3,8 @@
 Goal: use `netlab` to generate a KNE topology + node artifacts, and run the resulting topology on Kubernetes using the **kne** controller (referred to as “kne” in Skyforge).
 
 Contract note:
-- Skyforge KNE uses top-level `provider: kne`.
+- Skyforge KNE uses top-level `provider: kne`, supplied by runtime defaults
+  when the selected topology omits `provider`.
 - Nested node/image metadata may still use upstream `clab` subtrees where netlab models container attributes that way.
 - Skyforge does not translate `provider: kne` into `provider: clab` at runtime.
 
@@ -61,6 +62,54 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - deletes kne runtime ConfigMaps labeled for that topology
   - then taskengine performs post-destroy DB/orphan cleanup
 
+### IOL/IOLL2 startup-mode contract
+
+IOL and IOL-L2 devices must use netlab startup configuration mode in KNE
+deployments. Do not edit individual training or quick-deploy topologies to
+force this behavior; keep topology files light and configure the shared behavior
+through netlab defaults and runtime contracts.
+
+Canonical source:
+
+- `components/server/netlab/runtime/defaults.yml`
+- IOL/IOL-L2 device defaults set `netlab_config_mode: startup`
+
+Mixed-NOS topology behavior:
+
+- Startup-config nodes stay on topology-backed startup config.
+- Generated day-0 nodes still run through `netlab initial`.
+- When both are present, runtime must call `netlab initial` with `--limit`
+  containing only generated-day0 nodes.
+- IOL/IOL-L2 nodes must not be sent through Ansible `deploy-config/ios.yml`.
+
+Worker log validation:
+
+```bash
+KUBECONFIG=/tmp/kubeconfig-prod-labpp \
+  kubectl -n skyforge logs deploy/skyforge-server-worker --since=60m | \
+  rg 'netlab initial args|deploy-config/ios.yml|operation requires privilege escalation'
+```
+
+Expected:
+
+- `netlab initial args` includes `--limit` when a mixed topology has generated
+  day-0 nodes.
+- The limit contains non-IOL generated-day0 nodes only.
+- IOL/IOL-L2 nodes are absent from `deploy-config/ios.yml` log lines.
+- No `operation requires privilege escalation` failures are present.
+
+Validated prod evidence from the 2026-04-27 repair:
+
+- Deployment: `ea88f8f6-9001-4957-958c-febd6c05c008`
+- Deploy task: `3209`
+- Log line: `netlab initial args: --fast --limit core1,core2,dist2`
+- Forward sync task: `3210`
+- Forward result: 6 devices uploaded for network `399`
+
+The runtime image that included the apply-limit repair was:
+
+- `ghcr.io/forwardnetworks/skyforge-netlab:20260427-iol-startup-limit-r1`
+
 ### Configuration knobs
 
 - Encore config (preferred): `ENCORE_CFG_SKYFORGE.Netlab`
@@ -80,6 +129,10 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - `skyforge.netlab.runtimePrepull.enabled` (cluster-level runtime image warm cache)
   - runtime-prepull DaemonSets are worker-only and must not schedule on
     tainted control-plane nodes
+- `ENCORE_CFG_*` secret payloads are base64url raw without padding after the
+  Kubernetes secret data layer is decoded. Do not patch these config blobs with
+  standard base64; server and worker pods can crash with config decode panics.
+  Prefer Helm values and `scripts/deploy-skyforge-env.sh` for routine changes.
 - SR OS license injection (required when deploying `sros`):
   - `SKYFORGE_SROS_LICENSE_PATH`: absolute path to a `.license` file on the server pod/host.
   - or `SKYFORGE_SROS_LICENSE_B64`: base64-encoded license text.
@@ -102,6 +155,24 @@ For KNE `HOST` pods specifically, the container command is overridden to
 `sleep ...`, so the image entrypoint is bypassed. SSH and the background
 activity loop therefore have to be bootstrapped from the generated initial
 config template, not assumed to come from the image entrypoint alone.
+
+Forward host visibility depends on network-device evidence, not endpoint
+collection alone. The Forward host computation uses MAC-table entries as
+candidate hosts, ARP tables to attach IP addresses to those MACs, and then
+keeps only candidates learned on edge ports. Endpoint collection can enrich an
+already detected host with endpoint metadata, but it does not create the
+`DeviceHost` by itself.
+
+The Skyforge Linux host runtime must therefore generate traffic that causes
+adjacent NOS devices to learn both data sources before Forward collection:
+
+- gratuitous ARP from the host IP, for generic L2/MAC learning
+- unicast ARP/ICMP to the netlab-provided gateway or attached router neighbor,
+  for gateway ARP-table learning
+- broadcast ping as a fallback L2 frame source when no gateway responds
+
+Keep this in the runtime Linux template/defaults layer. Do not edit individual
+training or quick-deploy topologies to force host activity.
 
 ```bash
 cd skyforge
@@ -202,7 +273,9 @@ cd skyforge
      - a Service per node (stable name, cluster IP), or
      - Pod IPs (not stable), or
      - a LoadBalancer/NodePort (unlikely in this environment)
-   - For the MVP, define a consistent “connection” strategy and document it (e.g. `ssh <node>.<ns>.svc` via a Service, or a bastion model).
+   - For the MVP, use the Skyforge-authenticated management access bridge
+     documented in `management-access.md` instead of exposing node services
+     directly outside the cluster.
 
 ## Notes
 
@@ -220,8 +293,10 @@ cd skyforge
    - Can it embed a raw kne YAML, or does it require a transformed schema?
 
 2) **Mgmt connectivity model**
-   - What hostname/IP should users and integrations use?
-   - Do we want per-node Services? A single jump service? Something else?
+   - V1 uses the authenticated management access bridge in
+     `management-access.md`.
+   - Future work can add a deployment-scoped bastion if non-SSH or multi-session
+     workflows require it.
 
 3) **Artifact persistence**
    - Do we store `clab.yml` + generated artifacts in S3 (like other runners), or keep them ephemeral?

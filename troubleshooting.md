@@ -79,7 +79,7 @@ Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` runs this resilience gate automatically (`pre-helm` + `post-helm`) in strict mode.
 - `scripts/deploy-skyforge-prod-safe.sh` now also hard-fails if any node is not `Ready` during pre/post Helm readiness gates.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if fewer than two `fwd-master` nodes are `Ready` and schedulable (not tainted `skyforge.forwardnetworks.com/disabled:NoSchedule`).
-- local single-node k3s installs should run `./scripts/verify-local-stack.sh` after `./scripts/deploy-skyforge-local.sh`.
+- environment deploys should run `./scripts/post-upgrade-gates.sh` after `./scripts/deploy-skyforge-env.sh qa`.
 - `scripts/deploy-skyforge-prod-safe.sh` also enforces node kernel sysctl `fs.inotify.max_user_instances=64000` pre-Helm.
 - `scripts/deploy-skyforge-prod-safe.sh` now enforces Forward worker host prerequisites pre-Helm using `scripts/k8s-forward-worker-prereqs.sh`:
   - ensures `/etc/rancher/k3s/registries.yaml` is present on nodes with Forward worker labels
@@ -355,6 +355,34 @@ kubectl -n forward set env deploy/fwd-appserver --containers=appserver \
 kubectl -n forward rollout status deploy/fwd-appserver --timeout=10m
 ```
 
+## Forward snapshot upload fails with `NoSuchFileException: tmp-zip...zip`
+Symptom:
+- Demo org reset fails in `seeding-demo`.
+- Worker logs show `forward snapshot upload failed` for `POST /api/networks/<id>/snapshots?async=true&note=Pre-Change`.
+- Forward appserver logs show `java.nio.file.NoSuchFileException: tmp-zip...zip`.
+
+Typical cause:
+- `fwd-appserver` is missing `-Duploads.tmpdir=/tmp` in `APPSERVER_SETTINGS`.
+- The appserver container root filesystem is read-only, while `/tmp` is the writable mounted upload scratch path.
+
+Checks:
+```bash
+kubectl -n forward get deploy fwd-appserver \
+  -o jsonpath='{.spec.template.spec.containers[?(@.name=="appserver")].env[?(@.name=="APPSERVER_SETTINGS")].value}'; echo
+kubectl -n forward exec deploy/fwd-appserver -c appserver -- sh -lc 'touch /tmp/upload-check && rm /tmp/upload-check'
+```
+
+Expected:
+- `APPSERVER_SETTINGS` contains `-Duploads.tmpdir=/tmp`.
+- The `/tmp` write check succeeds.
+
+Remediation:
+```bash
+kubectl -n forward set env deploy/fwd-appserver --containers=appserver \
+  APPSERVER_SETTINGS='-Dforward.baseurl=https://skyforge-fwd.local.forwardnetworks.com -Duploads.tmpdir=/tmp'
+kubectl -n forward rollout status deploy/fwd-appserver --timeout=10m
+```
+
 ## Skyforge VIP answers ARP but VPN clients still time out on 443
 Symptom:
 - `skyforge.local.forwardnetworks.com` resolves to the reserved VIP (for example `10.128.16.80`).
@@ -444,7 +472,7 @@ Persistence:
 Persistence:
 - Keep `-Dforward.baseurl=...` in Forward Helm values under `app.appserver.custom_settings`.
 - Skyforge overlays include this in:
-  - `deploy/examples/values-forward-local-k3s.yaml`
+  - `deploy/examples/values-forward-demo-fast.yaml`
   - `deploy/examples/values-forward-prod.yaml`
   - `deploy/examples/values-forward-prod-demo-fast.yaml`
   - `deploy/examples/values-forward-demo-fast.yaml`
@@ -453,9 +481,9 @@ Persistence:
   is `fwd-appserver MEMORY_PROFILE=SINGLE_BOX` with explicit heap-cap and
   base-url enforcement.
 - Forward storage/DB size source of truth is now pinned in two places:
-  - `deploy/examples/values-forward-local-k3s.yaml` (`app.storageClassName=longhorn`,
+  - `deploy/examples/values-forward-demo-fast.yaml` (`app.storageClassName=longhorn`,
     `app.database.volume_size.app=8Gi`, `app.database.volume_size.fdb=8Gi`)
-  - `scripts/bootstrap-forward-local.sh` re-asserts those same values via
+  - `scripts/deploy-skyforge-env.sh qa` re-asserts those same values via
     `--set` during each Helm run so existing releases converge even if older
     overlays or prior release values drifted.
 - `scripts/forward-db-auth-guard.sh` is now fail-closed on kubeconfig

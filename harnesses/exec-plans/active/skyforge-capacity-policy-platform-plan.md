@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/skyforge-capacity-policy-platform-plan.md
+converted_at: 2026-04-27
+title: Skyforge Capacity, Policy, and Platform Scale Plan
+current_truth: verify against current code and environment before execution
+---
+
 # Skyforge Capacity, Policy, and Platform Scale Plan
 
 ## Summary

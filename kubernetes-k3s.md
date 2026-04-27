@@ -11,6 +11,10 @@ Skyforge on k3s is now documented as a **Cilium-only** deployment.
 ## 1) Install k3s with Cilium
 Install k3s with flannel/traefik disabled, then install/upgrade Cilium with Gateway API enabled.
 
+Pinned versions for Skyforge installs:
+- k3s: `v1.35.4-rc2+k3s1`
+- Cilium chart: `1.20.0-pre.1`
+
 Recommended Cilium host-network settings for this environment:
 - `bpf.datapathMode=netkit`
 - `bpf.masquerade=true`
@@ -19,7 +23,7 @@ Recommended Cilium host-network settings for this environment:
 
 Example k3s install flags:
 ```bash
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.35.4-rc2+k3s1" INSTALL_K3S_EXEC="server \
   --disable traefik \
   --disable servicelb \
   --flannel-backend=none \
@@ -29,6 +33,15 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --kubelet-arg=cpu-manager-policy=static \
   --kubelet-arg=cpu-manager-reconcile-period=5s \
   --kubelet-arg=reserved-cpus=0-1" sh -
+```
+
+Example Cilium install/upgrade:
+```bash
+helm upgrade --install cilium cilium/cilium \
+  --version 1.20.0-pre.1 \
+  -n kube-system \
+  -f deploy/cilium-values.yaml \
+  --wait --timeout 10m
 ```
 
 CPU manager note:
@@ -42,6 +55,11 @@ Control-plane headroom note:
 - Recommended additional kubelet reservations on each control-plane node:
   - `--kubelet-arg=kube-reserved=cpu=750m,memory=1536Mi`
   - `--kubelet-arg=system-reserved=cpu=250m,memory=512Mi`
+- Single-node or shared app/lab clusters should also raise kubelet pod density
+  above the Kubernetes default of `110` pods. QA uses `maxPods: 220` with a
+  `/24` pod CIDR. Production single-node installs should use a larger per-node
+  pod CIDR, such as `/22`, before assigning pod CIDRs if they need materially
+  more than roughly 220 pods.
 - Keep these settings consistent on all control-plane nodes so API-server and controller-manager behavior stays predictable during lab churn.
 
 Recommended k3s drop-in on each control-plane node:
@@ -52,16 +70,18 @@ kubelet-arg:
   - system-reserved=cpu=250m,memory=512Mi
 ```
 
+Recommended kubelet config drop-in on each single-node/shared app-lab node:
+```yaml
+# <k3s data-dir>/agent/etc/kubelet.conf.d/10-skyforge-max-pods.conf
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+maxPods: 220
+```
+
 Apply + verify:
 ```bash
-sudo install -d -m 0755 /etc/rancher/k3s/config.yaml.d
-sudo tee /etc/rancher/k3s/config.yaml.d/20-skyforge-control-plane-reservations.yaml >/dev/null <<'EOF'
-kubelet-arg:
-  - kube-reserved=cpu=750m,memory=1536Mi
-  - system-reserved=cpu=250m,memory=512Mi
-EOF
-sudo systemctl restart k3s
-kubectl get node "$(hostname)" -o jsonpath='{.status.allocatable.cpu}{" "}{.status.allocatable.memory}{"\n"}'
+sudo MAX_PODS=220 RESTART=true ./scripts/configure-k3s-control-plane-reservations.sh
+kubectl get node "$(hostname)" -o jsonpath='{.status.allocatable.cpu}{" "}{.status.allocatable.memory}{" pods="}{.status.allocatable.pods}{"\n"}'
 ```
 
 API Priority and Fairness note:

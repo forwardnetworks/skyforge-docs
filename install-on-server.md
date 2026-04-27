@@ -62,7 +62,8 @@ generation. No Gitea Action automation is required in the catalog repo.
 
 `scripts/install-on-host.sh`:
 - Ensures `open-iscsi` (for Longhorn) when possible.
-- Installs k3s (unless `SKYFORGE_K3S_INSTALL=false`).
+- Installs k3s `v1.35.4-rc2+k3s1` by default (unless `SKYFORGE_K3S_INSTALL=false`).
+- Installs/upgrades Cilium chart `1.20.0-pre.1` by default through `scripts/install-single-node.sh`.
 - Uses kubelet CPU manager defaults for production-style scheduling:
   - `cpu-manager-policy=static`
   - `cpu-manager-reconcile-period=5s`
@@ -80,6 +81,14 @@ For reproducibility, pin the git ref:
 
 ```bash
 export SKYFORGE_GIT_REF="<tag-or-commit>"
+sudo -E ./scripts/install-on-host.sh
+```
+
+The installer also has version override knobs for controlled upgrade drills:
+
+```bash
+export INSTALL_K3S_VERSION="v1.35.4-rc2+k3s1"
+export CILIUM_CHART_VERSION="1.20.0-pre.1"
 sudo -E ./scripts/install-on-host.sh
 ```
 

@@ -1,11 +1,11 @@
-# Quickstart (single-node k3s)
+# Quickstart (QA/PROD Environments)
 
-This is the supported OSS and local deployment path.
+This is the supported environment-scoped deployment path.
 
 ## 1) Prereqs
-- single-node `k3s` installed and `kubectl` works
+- access to the target QA or PROD Kubernetes host/context
 - Cilium installed as the cluster CNI with Gateway API enabled
-- a DNS name for Skyforge, or a local `/etc/hosts` entry
+- a DNS name for Skyforge
 - TLS cert + key available for `proxy-tls`
 
 ## 2) Prepare values and secrets
@@ -19,7 +19,7 @@ Minimum values to update:
 - `skyforge.gateway.addresses`
 - `skyforge.gitea.url`
 - `skyforge.gitea.apiUrl`
-- `skyforge.auth.mode=local` for OSS/local, or `skyforge.auth.mode=oidc` for production
+- `skyforge.auth.mode=oidc` for QA/PROD
 
 Minimum secrets to populate:
 - `secrets.items.skyforge-session-secret.skyforge-session-secret`
@@ -29,23 +29,17 @@ Minimum secrets to populate:
 - `proxy-tls` (`tls.crt`, `tls.key`)
 
 ## 3) Install
-Preferred host-first flow:
+Preferred environment-scoped flow:
 
 ```bash
-export SKYFORGE_SECRETS_VALUES=./deploy/skyforge-secrets.yaml
-sudo -E ./scripts/install-on-host.sh
-```
-
-Repo-local helper for an existing single-node k3s cluster:
-
-```bash
-./scripts/deploy-skyforge-local.sh
+./scripts/set-skyforge-context.sh qa
+./scripts/deploy-skyforge-env.sh qa
 ```
 
 ## 4) Verify
 
 ```bash
-./scripts/verify-local-stack.sh
+./scripts/post-upgrade-gates.sh
 ```
 
 ## 5) Template catalog

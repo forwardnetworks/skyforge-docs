@@ -26,6 +26,10 @@ This is intended to let Skyforge scale “lab compute” horizontally by running
   - `path` mode preserves topology-backed startup config references
   - `inline` mode is stored in the designer sidecar and materialized on save under `.designer-startup/<template-base>/<node>.cfg`
   - saved topology YAML references those generated files through the normal KNE/netlab startup-config path
+- Designer save vs deploy is intentionally explicit:
+  - `Save topology` only writes the validated topology and designer sidecar into the user repo
+  - `Save and deploy` creates a deployment record from that saved template and queues bring-up
+  - an active saved topology in the designer should not be interpreted as a running deployment unless a deployment create/start action was also queued
 
 ## How it works
 
@@ -95,10 +99,15 @@ No additional KNE vendor controller stacks are required for this set.
 - No runtime toggle is exposed from Skyforge for docker fallback.
 - Netlab runtime emits a k8s-only manifest contract, and taskengine rejects non-k8s backend values.
 - KNE launcher/runtime paths in this deployment flow do not depend on Docker-in-Docker.
-- Top-level provider semantics are `provider: kne`.
+- Top-level provider semantics are `provider: kne`; quick-deploy candidates
+  should inherit that from runtime defaults instead of hard-coding it.
 - Nested upstream `clab` node/image attributes remain valid where netlab uses
   them for container-based node metadata; Skyforge does not mass-rewrite those
   subtrees.
+- IOL/IOL-L2 startup-mode behavior is configured through shared netlab defaults
+  and the runtime apply plan, not by editing individual topology files. See
+  [netlab-kne.md](netlab-kne.md) for the current IOL startup-mode validation
+  contract and prod evidence.
 
 ### Deploy policy + phased task events
 

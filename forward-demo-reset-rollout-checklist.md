@@ -8,7 +8,97 @@ This runbook covers the next rollout that includes:
 
 It is intentionally focused on proving that the nightly demo-org reset is no longer permanently blocked by abandoned reset rows.
 
-## Current known live issue
+## Current durable contract
+
+As of `2026-04-27`, the durable behavior is:
+
+- Nightly demo reset and seed repair default batch size is unbounded (`0`),
+  not capped at 10 users.
+- Demo reset tasks use a 6 hour queue TTL and 72 capacity retries so serialized
+  work can wait on the global Forward demo reset lock.
+- Task metadata records `queueTTLSeconds`, `queueExpiresAt`,
+  `capacityRetryMax`, `capacityRetryCount`, `capacityRetryAt`, and
+  `capacityRetryMode` for postmortem queries.
+- Queue retry logic honors per-task `capacityRetryMax`; Forward demo reset
+  lock/capacity errors fall back to the demo-reset retry budget.
+- Stale active reset runs are marked `failed` after the configured active
+  window, so a worker restart cannot block later cron attempts forever.
+- Seed repair validates the expected processed seed count instead of accepting
+  one latest processed snapshot as enough.
+- Service/non-shareable users return early from tenant bootstrap and must not
+  consume demo reset lock capacity.
+
+Root causes this contract prevents:
+
+- The cron can fire successfully while later users never acquire the global
+  reset lock before the generic 30 minute queue TTL expires.
+- Worker restarts can leave `requested`, `draining`, `deleting`,
+  `reprovisioning`, or `validating` rows active long enough to block future
+  runs.
+- Partially populated demo orgs can look seeded if only one processed snapshot
+  is checked.
+- Service users can accidentally enter the demo bootstrap path and consume the
+  same serialized reset capacity as real shareable users.
+
+## Prod cron verification
+
+Use the prod context from
+[`harnesses/environment-contracts.md`](harnesses/environment-contracts.md).
+
+```bash
+KUBECONFIG=/tmp/kubeconfig-prod-labpp \
+  kubectl -n skyforge get cronjob \
+  skyforge-forward-demo-reset \
+  skyforge-forward-demo-org-seed-repair
+```
+
+Manual rerun from the live cron spec:
+
+```bash
+JOB=skyforge-forward-demo-reset-manual-$(date +%Y%m%d%H%M%S)
+KUBECONFIG=/tmp/kubeconfig-prod-labpp \
+  kubectl -n skyforge create job --from=cronjob/skyforge-forward-demo-reset "$JOB"
+KUBECONFIG=/tmp/kubeconfig-prod-labpp \
+  kubectl -n skyforge wait --for=condition=complete --timeout=6h "job/$JOB"
+```
+
+Task/run queue readiness query:
+
+```bash
+KUBECONFIG=/tmp/kubeconfig-prod-labpp kubectl -n skyforge exec deploy/db -- \
+  psql -U skyforge_server -d skyforge_server -P pager=off -c "
+select
+  t.id as task_id,
+  t.status as task_status,
+  r.username,
+  r.status as run_status,
+  r.updated_at as run_updated_at,
+  t.started_at,
+  t.finished_at,
+  t.metadata->>'capacityRetryMax' as retry_max,
+  t.metadata->>'queueExpiresAt' as queue_expires,
+  t.metadata->>'capacityRetryCount' as retry_count,
+  t.metadata->>'capacityRetryAt' as retry_at,
+  r.metadata_json->>'lastStep' as last_step,
+  left(coalesce(t.error, r.metadata_json->>'lastError', ''), 160) as error
+from sf_tasks t
+left join sf_forward_tenant_reset_runs r
+  on r.id::text = t.metadata->'spec'->>'runId'
+where t.task_type='forward-tenant-reset'
+  and t.created_at > now() - interval '24 hours'
+order by t.created_at desc;"
+```
+
+Expected healthy result:
+
+- Every shareable user has a fresh demo reset run from the current cron/manual
+  window.
+- Fresh runs are either `ready` or have actionable non-ready metadata with
+  `lastStep` and `lastError`.
+- Uploaded and processed seed counts match the expected demo seed catalog.
+- No active row is older than the configured stale active window.
+
+## Historical baseline issue
 
 As of `2026-04-02`, the nightly cron is still firing, but some users have demo reset rows stuck in `reprovisioning` since `2026-03-31`. Those rows block later nightly/manual resets because the platform store currently treats them as active forever.
 
@@ -92,7 +182,6 @@ Keep the rollout package in this order so the risk is easier to reason about:
 2. `components/blueprints`
    - `forward/demo-seeds/catalog.yaml`
    - `forward/demo-seeds/assets/*.zip`
-   - `.gitattributes` for ZIP tracking
 3. local Skyforge rollout overlays/scripts
    - Forward compute/search worker override
    - demo-fast overlay cleanup
@@ -229,7 +318,9 @@ If the rollout includes the Git-backed catalog, verify:
 3. the replay order is correct
 4. duplicate entries are preserved if intentionally configured
 
-If the rollout includes the blueprints ZIPs, ensure the push path handles large files correctly. The repo now includes `.gitattributes` for LFS tracking, but the local shell used for staging did not have `git lfs` installed. Confirm the actual commit/push environment writes the ZIPs through your intended Git/LFS path.
+If the rollout includes the blueprints ZIPs, confirm the push path copies the
+seed archives as regular Git blobs so demo reset/reseed does not depend on
+separate LFS object uploads.
 
 ## Worker stabilization checks
 
@@ -260,8 +351,10 @@ The rollout is successful if all of the following are true:
 2. the old stale run is automatically marked `failed` with `lastStep=stale-clear`
 3. the new run reaches `ready` or, if it fails, records a clear `lastStep` and `lastError`
 4. the next nightly cron produces fresh demo reset runs instead of being blocked by March 31 rows
-5. if included, the new Git-backed demo seed catalog is visible and valid
-6. if included, Forward compute/search workers run as `Deployment` and stop flapping on RWO scratch PVC reattachment
+5. all shareable users have current-window demo reset status, not a stale March 31 row
+6. uploaded and processed demo seed counts match the expected catalog
+7. if included, the new Git-backed demo seed catalog is visible and valid
+8. if included, Forward compute/search workers run as `Deployment` and stop flapping on RWO scratch PVC reattachment
 
 ## Known remaining risks
 

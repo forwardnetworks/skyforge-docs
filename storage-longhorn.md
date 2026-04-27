@@ -19,23 +19,36 @@ helm upgrade --install longhorn longhorn/longhorn \
   --wait --timeout 10m
 ```
 
-These values include:
+The default checked-in values are for the supported local single-node profile.
+They include:
 
 - `defaultSettings.taintToleration: node-role.kubernetes.io/control-plane:NoSchedule`
-- `defaultSettings.defaultReplicaCount: 3`
+- `defaultSettings.defaultDataPath: /data/skyforge/longhorn`
+- `defaultSettings.defaultReplicaCount: 1`
+- `defaultSettings.concurrentReplicaRebuildPerNodeLimit: 1`
 - `defaultSettings.autoSalvage: true`
 - `defaultSettings.autoDeletePodWhenVolumeDetachedUnexpectedly: true`
 - `defaultSettings.disableSchedulingOnCordonedNode: true`
 - `defaultSettings.nodeDrainPolicy: block-if-contains-last-replica`
 - `defaultSettings.nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod`
 
-That keeps Longhorn CSI components schedulable on control-plane nodes so
-control-plane-pinned Skyforge pods can still mount PVCs.
+That keeps Longhorn CSI components schedulable on the single k3s
+control-plane/workload node so Skyforge pods can still mount PVCs.
+
+Do not use the single-node values as an HA storage contract. Before returning
+to a multi-node Longhorn layout, add an explicit HA overlay that sets
+`defaultReplicaCount: 3`, chooses the intended data path, and validates replica
+placement across the schedulable storage nodes.
 
 The node-down policy is important for reboot resilience: when a worker dies or
 stays down long enough to be treated as unavailable, Longhorn should allow the
 controller to delete the old pod and reattach the RWO volume on a healthy node
 instead of waiting indefinitely on the dead node.
+
+The rebuild concurrency limit is intentionally conservative. Skyforge app nodes
+can run Forward, lab devices, collectors, and Longhorn replicas at the same
+time; limiting rebuilds to one per node avoids recovery storms that compete with
+active workloads and trigger probe/API latency.
 
 ## Host prerequisites
 
@@ -46,7 +59,8 @@ On each k3s node:
   - `/etc/modules-load.d/iscsi.conf` contains `iscsi_tcp`
 - Ensure the big disk backs both Longhorn replicas and Forward's node-agent
   data path:
-  - Bind mount `/var/lib/rancher/k3s/storage/longhorn` -> `/var/lib/longhorn`
+  - Use `/data/skyforge/longhorn` as the Longhorn data path for the local
+    single-node profile.
   - Bind mount a directory on the same big disk -> `/mnt/forward/extended`
   - Do not leave `/mnt/forward/extended` on the root filesystem. Forward's
     `node-agent` reports that path as the `DATA` disk, and the platform enters
@@ -86,9 +100,12 @@ node pinning:
 - PVC-backed Forward Deployments with `replicas > 1` are rejected by deploy
   policy.
 - Forward shared scratch is hard-cut to `forward-scratch` (`ReadWriteOnce`).
-- Deploy/recovery scripts normalize legacy `*-rwx` claim references back to
-  `forward-scratch`, `forward-cbr-backups`, and `forward-cbr-restore`.
-- `scripts/bootstrap-forward-local.sh` creates those contract PVCs directly when
+- Deploy/recovery scripts still normalize a few legacy `*-rwx` claim names
+  during migration windows. The supported native Forward profile removes the
+  built-in collector but keeps the CBR server, internal CBR agent, and CBR S3
+  agent because Forward 26.4 snapshot upload and backup/restore paths depend on
+  them.
+- `scripts/deploy-skyforge-env.sh qa` creates those contract PVCs directly when
   the upstream Forward chart does not render them.
 - Forward spread/anti-affinity policy is always applied across
   Deployments/StatefulSets with `whenUnsatisfiable=DoNotSchedule`
@@ -99,7 +116,7 @@ the scheduler to place workloads across nodes.
 
 ## Bootstrap verification
 
-`scripts/bootstrap-forward-local.sh` now validates the big-disk contract when
+`scripts/deploy-skyforge-env.sh qa` now validates the big-disk contract when
 the Forward chart is configured for `longhorn` storage:
 
 - Longhorn's `default-data-path` must be `/var/lib/longhorn`
@@ -115,15 +132,22 @@ letting Forward drift into false low-space or read-only mode later.
 
 Do not treat Longhorn replication as sufficient backup.
 
-Keep these enabled throughout the migration window:
+The supported production contract is:
+
+- `skyforge.backups.forward.engine=longhorn`
+- `skyforge.backups.forward.bucket=forward-platform-backups`
+- `skyforge.backups.forward.targetNamespace=longhorn-system`
+- `skyforge.backups.postgres`
+- `skyforge.forwardCluster.core.cbr.s3Backup.enabled=true` points Forward CBR at
+  in-cluster `s3gw` using the same `forward-platform-backups` bucket; secret
+  material is synced from the existing Skyforge object-storage credentials into
+  `forward/fwd-s3-backup-settings`.
+
+Use these only as legacy adjuncts when migrating older node-local storage:
 
 - `skyforge.backups.localSpread`
 - `skyforge.backups.offsiteRaw`
 - `skyforge.backups.forwardRaw`
-- `skyforge.backups.postgres`
-
-`backup-offsite-raw` should run as a DaemonSet so every eligible node mirrors
-its local backup root off-cluster, not just whichever node a CronJob lands on.
 
 ## PVC sizing
 

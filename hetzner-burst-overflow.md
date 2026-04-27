@@ -115,6 +115,7 @@ Do not target the control-plane unless that node truly needs Hetzner reachabilit
 - keep `skyforge.burst.hetzner.enabled=true` with `skyforge.burst.hetzner.provisioningEnabled=false` for scaffold-only mode
 - set `skyforge.burst.hetzner.provisioningEnabled=true` only when you are ready for worker lifecycle automation to create burst capacity
 - admins can also flip the runtime override from the Admin Overview UI without editing Helm values; that override is stored in Skyforge settings and takes effect on the next reconcile
+- if you only need a transport tunnel (no Hetzner worker provisioning), keep `skyforge.burst.hetzner.enabled=false` and enable only `skyforge.burst.hetzner.wireguard.hub.enabled=true`
 
 3. Prepare the local WireGuard node
 - create the Secret with `private-key` and `peers.conf`

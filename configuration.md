@@ -60,6 +60,38 @@ service URL for server-side jobs and workers. Demo seed raw archive reads and
 Git LFS object downloads are derived from the server-side API base, so pointing
 workers at the public Gateway VIP can reintroduce timeout regressions.
 
+Gitea SSH is exposed on the same local Gateway VIP by the `gitea-ssh`
+LoadBalancer service. Use `git@skyforge.local.forwardnetworks.com:<owner>/<repo>.git`
+on port `22`; there is no separate `gitea.skyforge.forwardnetworks.com` SSH
+hostname in the local profile. `skyforge.gateway.ciliumLBIPAM.sharedIP` and
+`skyforge.gateway.addresses` should both stay set to the reserved VIP so HTTP,
+HTTPS, and Gitea SSH continue to share the same address.
+
+## Forward ownership
+- `skyforge.forwardCluster.enabled=true` enables the dedicated Forward hostname
+  and shared-cluster integration contract.
+- `deploy/skyforge-values.yaml` is the canonical Forward source of truth for the
+  supported local production profile.
+- `skyforge.forwardCluster.core.owner=skyforge` and
+  `skyforge.forwardCluster.workers.owner=skyforge` move the shared-cluster
+  Forward stack into the Skyforge chart as a single owner.
+- `skyforge.forwardCluster.core.adoptionAcknowledged=true` and
+  `skyforge.forwardCluster.workers.adoptionAcknowledged=true` are required
+  guards for that ownership transfer.
+- The native Skyforge Forward stack intentionally does not render a shared
+  built-in `fwd-collector`; `skyforge.forwardCollector.*` only controls the
+  image used for Skyforge-managed user collectors.
+- Forward 26.4 snapshot upload and backup/restore paths require
+  `skyforge.forwardCluster.core.cbr.enabled=true`,
+  `skyforge.forwardCluster.core.cbr.s3Agent.enabled=true`, and the chart-managed
+  `fwd-s3-backup-settings` sync to be enabled in the supported profiles.
+- `skyforge.forwardCluster.core.cbr.agent.replicas` and
+  `skyforge.forwardCluster.core.cbr.s3Agent.replicas` must stay `1` in the
+  supported profile because their scratch paths use single RWO PVCs.
+- The CBR S3 settings sync copies the existing Skyforge object-storage secret
+  values into the Forward namespace and points Forward at in-cluster `s3gw`
+  (`forward-platform-backups`) without storing secret material in values.
+
 ## Object storage
 - In-cluster default: `skyforge.s3gw.enabled=true` and `skyforge.objectStorage.endpoint=s3gw:7480`.
 - External S3: set `skyforge.s3gw.enabled=false` and point `skyforge.objectStorage.endpoint` to external host:port.

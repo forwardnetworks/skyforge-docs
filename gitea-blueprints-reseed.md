@@ -15,13 +15,17 @@ git clone https://github.com/ipspace/netlab-examples.git
 cd netlab-examples
 git remote add gitea https://<hostname>/git/skyforge/blueprints.git
 git push -u gitea main
+```
+
+If the repo contains Git LFS pointers, also push LFS objects:
+
+```bash
 git lfs install
 git lfs push --all gitea main
 ```
 
-If the repo contains Git LFS pointers and you skip the `git lfs push`, Skyforge
-can still see the catalog and branch while demo-seed ZIP downloads fail later
-with `gitea lfs batch returned error (404): Not Found`.
+Skyforge demo seed archives are now stored as regular Git blobs (not LFS), so
+demo reset/reseed no longer depends on Gitea LFS object integrity.
 
 The in-cluster fallback helper is not suitable for LFS-backed demo seed assets
 unless its container image explicitly includes `git-lfs`. The stock Gitea image

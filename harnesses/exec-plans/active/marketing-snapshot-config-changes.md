@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/marketing-snapshot-config-changes.md
+converted_at: 2026-04-27
+title: Marketing Snapshot Config Changes Plan
+current_truth: verify against current code and environment before execution
+---
+
 # Marketing Snapshot Config Changes Plan
 
 ## Summary

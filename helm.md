@@ -121,6 +121,30 @@ helm push /tmp/skyforge-<chart-version>.tgz oci://ghcr.io/forwardnetworks/charts
 This pushes to `oci://ghcr.io/forwardnetworks/charts/skyforge` using the chart
 `version:` from `components/charts/skyforge/Chart.yaml`.
 
+## Canonical prod render gate
+
+Before promoting the local/prod profile, run the fail-closed render gate that
+uses the canonical values file:
+
+```bash
+./scripts/check-chart-prod-render-contract.sh
+```
+
+This check renders `deploy/skyforge-values.yaml` with CI-only synthetic API
+capabilities for optional CRD-backed integrations and placeholder values for
+required secrets that are precreated in real environments. It is intended to
+prove that the supported production chart contract still renders end to end
+without requiring a live cluster or real credentials.
+
+The canonical Forward contract enforced by this gate is:
+
+- Skyforge-owned Forward core + workers
+- no built-in `fwd-collector`
+- `fwd-cbr-server`, `fwd-cbr-agent`, and `fwd-cbr-s3-agent` rendered as Forward runtime dependencies
+- six `fwd-compute-worker` replicas
+- six `fwd-search-worker` replicas
+- node-role reconciler rendered for the six-node app pool
+
 ### Deploy (k3s host)
 
 Ensure the host has `helm` and `gh` configured, then run from your local machine:
@@ -154,7 +178,9 @@ Populate the following before installing:
 - `skyforge.domain` (email suffix for default users)
 - `skyforge.gateway.addresses` (recommended for Cilium Gateway API node-IP ingress; example `[{type: IPAddress, value: "10.128.16.60"}]`)
 - `skyforge.auth.mode` (`local` for dev/OSS, `oidc` for prod)
-- When `skyforge.gateway.additionalHostnames` is set, the managed Dex config also registers those aliases as valid OIDC redirect hosts for Skyforge and the bundled tool clients.
+- `skyforge.gateway.additionalHostnames` exposes only the core Skyforge app/API route on alternate hostnames.
+- `skyforge.gateway.additionalToolHostnames` exposes bundled tool routes such as Gitea, Coder, observability, inventory, and integration UIs on alternate hostnames. Keep this empty for public aliases that should not publish internal tools.
+- When `skyforge.gateway.additionalHostnames` or `skyforge.gateway.additionalToolHostnames` is set, the managed Dex config also registers those aliases as valid OIDC redirect hosts for Skyforge and the bundled tool clients.
 - If you enable Hetzner burst workers: also create the WireGuard Secret referenced by `skyforge.burst.hetzner.wireguard.hub.privateKeySecretName` (private key plus optional `peers.conf`), and verify the selected hub node IP matches `skyforge.burst.hetzner.wireguard.gatewayNodeIP`.
 - If `skyforge.auth.mode=oidc`: `skyforge.dex.enabled=true`, `skyforge.dex.authMode=oidc`, and provider values under `skyforge.dex.oidc.*`
 - If `secrets.create=false` (recommended): pre-create required Kubernetes
@@ -162,6 +188,13 @@ Populate the following before installing:
   `skyforge-admin-shared`, database/object-storage/Dex secrets).
 - If `secrets.create=true` (local/dev compatibility): provide `secrets.items.*`
   values for passwords, TLS certs, and credentials from a local untracked file.
+- If `skyforge.forwardCluster.core.nqeAssist.enabled=true`: pre-create the
+  secret referenced by `skyforge.forwardCluster.core.nqeAssist.appCredentialsSecretName`
+  (default `fwd-app-creds-for-nqe-assist`). This secret is separate from
+  `appserver.ai_bedrock.secret_name` and should contain the Forward API
+  credentials and model runtime env expected by the Harbor `fwd_nqe_assist`
+  image, including `FWD_API_ACCESS_KEY`, `FWD_API_SECRET_KEY`,
+  `MODEL_INSTANCE_URL`, and `QUERY_ASSIST_ADAPTER_ID`.
 - If you use Netlab integrations: `secrets.items.netlab-runner-rsa` and server-pool secrets such as `secrets.items.skyforge-netlab-servers`. Server-pool values accept either a JSON array or `{"servers":[...]}`; see `deploy/skyforge-secrets.example.yaml`.
 
 Use `--set-file` for large values (TLS, SSH keys):
@@ -171,6 +204,20 @@ helm upgrade --install skyforge ./components/charts/skyforge -n skyforge \
   --set-file secrets.items.proxy-tls.tls\.crt=certs/tls.crt \
   --set-file secrets.items.proxy-tls.tls\.key=certs/tls.key
 ```
+
+## Public hostnames
+
+For public exposure, keep the hostname model narrow:
+
+- Use `skyforge.forwardCluster.additionalHostnames` for prospect-facing Forward/TestDrive hostnames.
+- Use `skyforge.gateway.additionalHostnames` for internal-user Skyforge aliases.
+- Do not put public aliases in `skyforge.gateway.additionalToolHostnames` unless the bundled tools are intentionally internet-facing and protected by an external access policy.
+
+The embedded Skyforge frontend sets browser hardening headers on SPA/static
+responses: HSTS, `nosniff`, same-origin referrer policy, camera/microphone/
+geolocation deny, and `frame-ancestors 'none'`. Configure Cloudflare Access or
+an equivalent identity-aware edge policy in front of public Skyforge aliases
+when users should be restricted to an internal identity group.
 
 If your TLS cert is signed by the Forward CA, install the Forward Root CA in your workstation trust store so browsers mark `https://skyforge.local.forwardnetworks.com` as secure.
 

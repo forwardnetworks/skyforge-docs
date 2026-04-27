@@ -40,6 +40,12 @@ Prod OIDC specific:
   `skyforge.auth.mode=oidc` / `skyforge.dex.authMode=oidc` (for example Okta).
 - `scripts/deploy-skyforge-prod-safe.sh` enforces this preflight. You can seed
   it for a deploy with `DEX_OIDC_CLIENT_SECRET='<secret>'`.
+- The effective Dex connector secret path is read from
+  `skyforge.dex.oidc.clientSecretSecretName` +
+  `skyforge.dex.oidc.clientSecretSecretKey` in the active values file.
+- Keep those two fields aligned across deploy profiles (`deploy/skyforge-values*.yaml`).
+  `scripts/check-release-policy-guardrails.sh` enforces this wiring parity to
+  prevent prod/QA drift.
 
 If you accidentally committed a secret:
 1. Rotate it immediately.

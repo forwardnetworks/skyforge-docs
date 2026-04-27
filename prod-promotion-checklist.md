@@ -1,6 +1,6 @@
 # Prod Promotion Checklist
 
-Use this checklist before promoting Skyforge changes validated on the supported single-node k3s workflow to pre-prod or prod.
+Use this checklist before promoting Skyforge changes validated on the QA workflow to prod.
 
 ## 1. Config and render gates
 
@@ -10,7 +10,7 @@ Run the production-readiness gate from the meta repo root:
 ./scripts/check-prod-promotion-readiness.py \
   components/charts/skyforge/values.yaml \
   deploy/skyforge-values.yaml \
-  deploy/examples/values-local-k3s.yaml
+  deploy/skyforge-values-qa.yaml
 ```
 
 Expected:
@@ -27,7 +27,7 @@ Before enabling staged integrations in prod values:
 
 ## 3. Forward DB/org automation rules
 
-Prod and local use the same default support/org behavior:
+Prod and QA use the same default support/org behavior:
 - on-prem org `ORG_TYPE=INTERNAL`
 - on-prem org `ENFORCE_LICENSING=false`
 - support user `forward` enabled by default

@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/netlab-sot-hardcut.md
+converted_at: 2026-04-27
+title: Netlab SoT Hard Cut
+current_truth: verify against current code and environment before execution
+---
+
 # Netlab SoT Hard Cut
 
 ## Scope

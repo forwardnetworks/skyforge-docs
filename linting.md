@@ -36,6 +36,7 @@ Additional repo-wide checks:
 
 - **meta-ci**: `actionlint`, `yamllint`, `shellcheck` + `shfmt`, `hadolint`, `helm lint`, `kubeconform`
 - **security-ci**: `gitleaks` (blocking) + `govulncheck`/`trivy`/`pnpm audit` (informational)
+- **chart prod render contract**: renders `deploy/skyforge-values.yaml` with CI-only synthetic API capabilities and placeholder secret values, then fails closed if the canonical prod chart no longer renders or if the native Forward contract drifts (missing core resources, built-in collector reappears, required CBR resources disappear, the six-node worker replica contract changes, or the node-role reconciler disappears).
 
 ## One-shot local check
 

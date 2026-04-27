@@ -5,7 +5,7 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 ## Scope
 
 - Deployment family/engine: `kne` / `netlab` only.
-- Local cluster prerequisite: the Skyforge release must enable `skyforge.kne`,
+- Cluster prerequisite: the Skyforge release must enable `skyforge.kne`,
   which installs the in-cluster KNE API surface (`networkop.co.uk/v1beta1`)
   used by quick-deploy preflight. On Cilium clusters, Multus must be present
   and `kube-system/cilium-config` must set `cni-exclusive: "false"` so meshnet
@@ -18,9 +18,8 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   `/var/lib/rancher/k3s/agent/etc/cni/net.d` instead of `/etc/cni/net.d`.
   Guardrails and manual repairs must check both paths, or the host can look
   healthy while new pods still come up with only `eth0`.
-- Local install default: `scripts/install-single-node.sh` should include
-  `deploy/examples/values-local-k3s.yaml` unless the caller overrides
-  `SKYFORGE_ENV_VALUES`; that overlay turns on `skyforge.kne.enabled`.
+- Environment install default: `scripts/deploy-skyforge-env.sh qa` should use
+  `deploy/skyforge-values-qa.yaml` unless the caller overrides `SKYFORGE_ENV_VALUES`.
 - Post-install host CNI contract: after the `meshnet` DaemonSet is up, rollout
   guardrails must restore `/etc/cni/net.d/00-meshnet.conflist` if Cilium or a
   prior repair renamed it away, and rewrite
@@ -30,6 +29,14 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - Default catalog focuses on EOS technology demos (EVPN, MPLS, BGP, VRF).
   - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.
   - Admin catalog saves are validated against live blueprint template index entries to prevent drift.
+  - Tags are stored on admin catalog entries and are exposed as Launch Lab
+    filters. Use technology tags (`bgp`, `evpn`, `mpls`, `vrf`, `vxlan`,
+    `ospf`, `vlan`), platform tags (`eos`), and level tags (`intro`,
+    `intermediate`, `advanced`) consistently.
+  - Quick-deploy candidate topologies should omit top-level `provider` and
+    EOS `defaults.device` so they inherit `provider: kne` and `device: eos`
+    from Skyforge runtime defaults. Explicit non-KNE providers and non-EOS
+    defaults should remain regular blueprints unless separately validated.
 - Forward: always uses in-app Forward (`https://fwd-appserver.forward.svc.cluster.local`)
   with per-user tenant credentials + API token.
   - Skyforge ensures the user has a Forward org user/password.
@@ -37,6 +44,51 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - Token `accessKey` + `secret` are stored as the managed in-cluster collector
     credential for that user.
 - Lease presets: `4h`, `8h`, `24h`, `72h` (default `24h`).
+
+## Catalog source contract
+
+Quick Deploy is intentionally tag/template driven. It must not expose a
+free-form Git repository picker in the launch flow.
+
+Eligible sources:
+
+- Stored/default admin catalog entries.
+- Public Skyforge Gitea repositories discovered by the server.
+- Public repository templates that are KNE-compatible and live under `netlab/`
+  or `labs/`.
+- Training labs from `craigjohnson/skyforge-training/labs`, tagged with
+  `training`, `public`, and `forward-sync`.
+
+Public Gitea entries carry source metadata so operators can trace them without
+turning the UI into a repo browser:
+
+- `templateSource=custom`
+- `templateRepo=<owner>/<repo>`
+- `templatesDir=labs` or `templatesDir=netlab`
+
+Individual users may deploy from private repositories through the regular
+deployment/source workflows. Private user repositories are not eligible for
+Quick Deploy.
+
+Catalog verification:
+
+```bash
+curl -fsS -H "Cookie: <skyforge session>" \
+  https://skyforge.dc.forwardnetworks.com/api/quick-deploy/catalog | \
+  python3 -m json.tool
+```
+
+Expected:
+
+- Stored/default labs are present.
+- Public Skyforge Gitea labs are present.
+- At least one `training` entry is sourced from
+  `craigjohnson/skyforge-training`.
+- Training and other public entries are filterable by topology tags, not by a
+  repo-selection UI.
+
+Before promotion, a candidate topology must pass the static audit, synchronous
+netlab validation, and real quick-deploy runtime certification.
 
 ## Flow
 
@@ -49,6 +101,10 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
    `PUT /api/users/:id/deployments/:deploymentID/lease`.
 5. Skyforge queues deployment create action directly (with short retry on
    transient duplicate/cooldown no-op responses).
+
+The create, lease, and enqueue stages run on a bounded server-side launch
+context. A browser navigation, retry, or closed tab must not cancel the
+in-cluster netlab validation job after the user has submitted the launch.
 
 ## Lease enforcement
 
@@ -80,3 +136,16 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
 - `PUT /api/admin/quick-deploy/catalog`
 - `GET /api/admin/quick-deploy/template-options`
 - `POST /internal/cron/deployments/leases` (private cron endpoint)
+
+## Blueprint audit
+
+Before promoting a topology, run the static audit against the blueprint source
+that the admin catalog uses:
+
+```bash
+./scripts/audit-netlab-quick-deploys.py components/blueprints/netlab --format markdown
+```
+
+The audit is read-only. A `true` candidate still needs synchronous netlab
+validation and a real quick-deploy runtime certification before it should be
+saved in the admin catalog.

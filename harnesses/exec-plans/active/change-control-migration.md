@@ -1,3 +1,12 @@
+---
+harness_kind: active-exec-plan
+status: active
+legacy_source: components/docs/plans/change-control-migration.md
+converted_at: 2026-04-27
+title: Change Control Migration
+current_truth: verify against current code and environment before execution
+---
+
 # Change Control Migration
 
 ## Summary

@@ -27,20 +27,23 @@ Skyforge state is split across:
 - CronJob or native replication: mirror object buckets
 - Keep retention policy (for example 14 days)
 
-## Forward backups via Skyforge
-- Skyforge admin API can configure Forward CBR to use in-cluster `s3gw` (`StorageType=S3`) and keep scheduled backups enabled.
-- When Forward native CBR/S3 backups are disabled in on-prem mode, back up the Forward PVC data directly.
-- Enable `skyforge.backups.forwardRaw.enabled=true` to run a DaemonSet that rsyncs Forward PVC host-path data from `/opt/local-path-provisioner` to the mounted offsite destination (for example a Hetzner WireGuard volume mount) from every eligible node.
-- The default Forward raw backup set includes:
-  - `pvc-fwd-appserver`
-  - `pvc-fwd-backend-master`
-  - `pvc-fwd-collector`
-  - `pvc-fwd-efs`
-  - Forward Postgres PVCs
-  - Forward aggregated log PVCs
-- For migration prep and any remaining node-local workloads, use:
-  - `skyforge.backups.localSpread.enabled=true` to spread backup artifacts onto each worker node host disk.
-  - `skyforge.backups.offsiteRaw.enabled=true` to run a per-node DaemonSet that continuously rsyncs those local artifacts to a mounted offsite path (for example a Hetzner WireGuard volume mount).
+## Forward platform backups via Skyforge
+- The supported backup contract is platform-managed Forward backups to
+  in-cluster `s3gw`; those backups remain the source of truth for platform
+  restore.
+- Forward 26.4 snapshot upload paths also require the in-cluster CBR server,
+  local CBR agent, and CBR S3 agent to be present. Treat `fwd-cbr-server`,
+  `fwd-cbr-agent`, and `fwd-cbr-s3-agent` as runtime dependencies for Forward
+  snapshot processing, not as the primary Skyforge backup strategy.
+- The canonical chart values live under `skyforge.backups.forward.*` and should point at the Longhorn-backed platform backup target:
+  - `engine: longhorn`
+  - bucket `forward-platform-backups`
+  - daily schedule / retention
+  - protected PVC list for the supported Forward stateful set
+- Built-in `fwd-collector` is not part of the supported production backup
+  contract.
+- `skyforge.backups.forwardRaw.enabled=true` remains available only as an opt-in legacy escape hatch while migrating older node-local storage contracts.
+- `skyforge.backups.localSpread.enabled=true` and `skyforge.backups.offsiteRaw.enabled=true` are likewise legacy adjuncts, not part of the default supported production backup signal.
 - Optional object-store mirror is still available for S3-compatible offsite targets:
   - `SKYFORGE_OBJECT_MIRROR_BUCKET`
   - `SKYFORGE_OBJECT_MIRROR_ENDPOINT`
@@ -59,8 +62,8 @@ Skyforge state is split across:
 
 Before any storage migration or reboot window, verify:
 
-- `backup-local-spread`, `backup-offsite-raw`, and `backup-forward-raw` are healthy on all expected nodes
 - `backup-postgres-s3` is still scheduled and unsuspended
+- if legacy raw backup DaemonSets are enabled, they are healthy on all expected nodes
 - local backup root: `/var/lib/skyforge/local-backups`
 - off-cluster mirror root: `/mnt/hetzner-wireguard/skyforge-backups`
 

@@ -169,10 +169,11 @@ processing while still preserving reset telemetry. Manual resets can still use
 the stricter wait-for-processing path when that feedback is useful.
 
 In self-managed deployments, that nightly trigger is chart-managed as the
-Kubernetes CronJob `skyforge-forward-demo-reset`. The job uses a Skyforge API
-token against the in-cluster Skyforge API URL and queues the same
-platform-managed demo reset workflow used by the admin UI. The token is stored
-in the configured Kubernetes secret (default `skyforge-admin-shared` key
+Kubernetes CronJob `skyforge-forward-demo-reset`. The job prefers a Skyforge API
+token against the in-cluster Skyforge API URL and falls back to the configured
+admin credentials when the token is not present. It queues the same
+platform-managed demo reset workflow used by the admin UI. The optional token is
+stored in the configured Kubernetes secret (default `skyforge-admin-shared` key
 `api-token`).
 
 Separate from the nightly rebuild, Skyforge also runs a lighter-weight
@@ -203,6 +204,22 @@ Forward AI is intentionally split across two runtime paths in this deployment:
 This means `appserver.ai_bedrock.*` is still required for NQE generation, but
 the live BAML bundle remains the source of truth for Sonnet-vs-Haiku routing in
 the chat flow.
+
+`fwd-nqe-assist` has its own runtime secret contract and should not be treated
+as a clone of `appserver.ai_bedrock.secret_name`. The Harbor `fwd_nqe_assist`
+image expects the mounted `fwd-app-creds-for-nqe-assist` secret to carry at
+least:
+
+- `FWD_API_ACCESS_KEY`
+- `FWD_API_SECRET_KEY`
+- `MODEL_INSTANCE_URL`
+- `QUERY_ASSIST_ADAPTER_ID`
+
+plus any additional model/runtime credentials required by the shipped image.
+Skyforge local bootstrap now treats that secret as a separate precreated input;
+operators may optionally sync it from another secret via
+`SKYFORGE_FORWARD_NQE_ASSIST_SOURCE_SECRET_NAME`, but it is no longer derived
+from `forward-aws-credentials` by default.
 
 Skyforge deployment automation now supports an explicit
 `skyforge.forwardCluster.appserverProfiles` value. In the local production
