@@ -103,6 +103,12 @@ patches, the deploy script may retry with `--force-conflicts`. Treat that as
 acceptable only when the final Helm release is `deployed` and rollout/image
 checks pass.
 
+For QA only, older chart history can leave resources that Kubernetes cannot
+patch in place, such as Forward volume mount `subPath` drift or immutable
+StatefulSet volume specs. Use `SKYFORGE_HELM_FORCE=true` with the QA deploy
+profile only when the rendered chart is correct and the failure is a
+replace-not-patch conflict. Do not use this as a default prod rollout mode.
+
 ## Local AI harness routing
 
 Use the local AI harness for token-saving read-only delegation, and verify all
