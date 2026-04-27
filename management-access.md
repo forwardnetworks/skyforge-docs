@@ -6,15 +6,27 @@ publishing every device port outside the cluster.
 ## V1 Contract
 
 - Scope is per deployment and per node.
-- Authentication is Skyforge API authentication; local automation should set
-  `SKYFORGE_API_TOKEN`.
-- Transport is an authenticated WebSocket TCP bridge from Skyforge to the
-  in-cluster KNE node Service.
+- Transport is standard OpenSSH `ProxyJump` through the Skyforge management SSH
+  endpoint.
+- Users authenticate to the Skyforge jump endpoint with either their saved
+  Skyforge SSH public key or their Skyforge API token as the jump-host password.
 - The only supported target port is SSH/TCP `22`.
-- No public NodePort, LoadBalancer, or long-lived external bastion is created.
+- Skyforge does not publish every lab device externally; the jump endpoint
+  validates access, then dials the selected node's in-cluster KNE Service.
 
-This keeps the public attack surface small while still supporting VS Code,
-Claude, Ansible, and direct SSH workflows through `ProxyCommand`.
+This keeps the public attack surface to one SSH listener while still supporting
+VS Code, Claude, Ansible, and direct `ssh` workflows without a custom client
+install.
+
+## Prod External Port Contract
+
+Prod Cato VPN access permits only one external SSH listener on TCP `22`.
+`skyforge-fwd.dc.forwardnetworks.com:22` is therefore reserved for deployment
+management access. Gitea remains available over HTTPS under `/git`; Git over SSH
+must stay disabled or move to a different allowed VIP.
+
+If a deployment tries to enable both Gitea SSH and management SSH on the same
+external port and shared VIP, the Helm chart fails before rollout.
 
 ## UI Workflow
 
@@ -22,36 +34,39 @@ Open a deployment and select **Management**. The page shows:
 
 - current KNE namespace and topology name
 - node management metadata from the captured topology artifact
-- a reusable SSH `ProxyCommand`
+- a direct `ssh -J` command
 - a complete `~/.ssh/config` snippet
 - Ansible `ansible_ssh_common_args`
-- direct tunnel command for smoke testing
+- the active jump host and generated target host pattern
 
 Click **Verify** to re-read the deployment runtime contract and confirm the
 management endpoint metadata is still available.
 
 ## CLI Workflow
 
-Use the helper as an SSH `ProxyCommand`:
+Use standard OpenSSH. The generated hostnames are not DNS records; Skyforge reads
+the target from the SSH `direct-tcpip` request after `ProxyJump` authentication.
 
 ```sshconfig
-Host skyforge-my-lab-*
-  HostName %h
+Host *.<deployment-id>.<user-scope>.skyforge.access
   User admin
-  ProxyCommand skyforge-access tunnel --base-url https://skyforge.dc.forwardnetworks.com --user <user-scope> --deployment <deployment-id> --node %h --port %p
+  ProxyJump <skyforge-username>@skyforge-fwd.dc.forwardnetworks.com
 ```
 
-For repo-local testing without installing a binary:
+Then connect to a lab node:
 
 ```bash
-export SKYFORGE_API_TOKEN='<api-token>'
-./scripts/skyforge-access-tunnel \
-  --base-url https://skyforge.dc.forwardnetworks.com \
-  --user <user-scope> \
-  --deployment <deployment-id> \
-  --node <node> \
-  --port 22
+ssh -J <skyforge-username>@skyforge-fwd.dc.forwardnetworks.com admin@<node>.<deployment-id>.<user-scope>.skyforge.access
 ```
+
+When prompted for the jump-host password, use a Skyforge API token. Target node
+credentials remain the device credentials from the lab image/template.
+
+## WebSocket Fallback
+
+The older `skyforge-access` WebSocket bridge remains in the API as a fallback
+for development and controlled troubleshooting, but it is not the primary prod
+workflow and should not be required for SE laptops.
 
 ## Why Not One Bastion Per User
 
@@ -60,20 +75,19 @@ deployment, lifecycle cleanup for idle sessions, and per-user namespace reach
 into labs owned by different user scopes. That expands both the trust boundary
 and the cleanup surface.
 
-The v1 bridge is narrower: it validates the Skyforge session or API token,
-checks access to the requested deployment, resolves the node through the KNE
-runtime identity already used by terminal/browser features, then dials only the
-node's in-cluster management Service.
+The v1 SSH jump endpoint is narrower: it validates the Skyforge user, checks
+access to the requested deployment, resolves the node through the KNE runtime
+identity already used by terminal/browser features, then dials only the node's
+in-cluster management Service.
 
 ## Why Not One Bastion Per Deployment
 
 A deployment-scoped bastion is a reasonable future option if workflows need
-rsync, Git, or long-lived multi-protocol sessions. It should still remain
-private to the cluster and be reached through the same Skyforge-authenticated
-entry point.
+multi-protocol services beyond SSH. It should still remain private to the
+cluster and be reached through the same Skyforge-authenticated entry point.
 
-For SSH automation, a server-side WebSocket TCP bridge is lighter than creating
-and reconciling a separate pod per deployment.
+For SSH automation, a single Skyforge-authenticated `direct-tcpip` jump service
+is lighter than creating and reconciling a separate pod per deployment.
 
 ## Forward Host Visibility Note
 
