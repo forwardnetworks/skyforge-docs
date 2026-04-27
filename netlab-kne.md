@@ -174,10 +174,10 @@ adjacent NOS devices to learn both data sources before Forward collection:
 Keep this in the runtime Linux template/defaults layer. Do not edit individual
 training or quick-deploy topologies to force host activity.
 
-EOS router nodes must boot with global IPv4 routing enabled before VRF
-interfaces are used. If a running cEOS lab shows host activity processes in the
-Linux endpoints but no host ARP/MAC state on the adjacent PE, check these EOS
-signals first:
+EOS router nodes need global IPv4 routing enabled before VRF interfaces can
+produce the ARP/MAC evidence Forward uses for host detection. If a running cEOS
+lab shows host activity processes in the Linux endpoints but no host ARP/MAC
+state on the adjacent PE, check these EOS signals first:
 
 - `show running-config | include ^no ip routing|^ip routing`
 - `show ip interface EthernetX` should report `IPv4 interface forwarding: enabled`
@@ -186,10 +186,13 @@ signals first:
 - `show ip arp vrf all` should include the Linux endpoint IP/MAC entries after
   the host activity loop has run
 
-The canonical fix belongs in the EOS runtime templates, including the KNE
-provider bootstrap/initial templates that seed cEOS startup config. Do not
-patch individual topology files, and do not depend on late runtime CLI mutation
-of cEOS VRF interfaces; startup ordering matters for this path.
+Keep this aligned with upstream netlab behavior. The upstream EOS initial
+template gates IPv4 routing on `af.ipv4|default(False) and role != 'host'`.
+KNE cEOS shell-mode config should mirror that in the provider EOS `initial.j2`
+template. Do not put routing or VRF state in `ceos-bootstrap.j2`; that file is
+the minimal startup shim for cEOS management access and shell-mode config
+execution. Do not patch individual topology files, and do not depend on late
+runtime CLI mutation of cEOS VRF interfaces.
 
 ```bash
 cd skyforge
