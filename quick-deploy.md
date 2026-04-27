@@ -30,9 +30,9 @@ This page documents the simplified deployment path at `/dashboard/deployments/qu
   - Default template files map to `netlab/*/topology.yml` from `skyforge/blueprints`.
   - Admin catalog saves are validated against live blueprint template index entries to prevent drift.
   - Tags are stored on admin catalog entries and are exposed as Launch Lab
-    filters. Use technology tags (`bgp`, `evpn`, `mpls`, `vrf`, `vxlan`,
-    `ospf`, `vlan`), platform tags (`eos`), and level tags (`intro`,
-    `intermediate`, `advanced`) consistently.
+    filters. Keep launch-facing tags sparse: known curated blueprint launchers
+    use `curated`, Skyforge training labs use `training`, and all other public
+    labs should remain untagged until an operator explicitly curates them.
   - Quick-deploy candidate topologies should omit top-level `provider` and
     EOS `defaults.device` so they inherit `provider: kne` and `device: eos`
     from Skyforge runtime defaults. Explicit non-KNE providers and non-EOS
@@ -56,8 +56,10 @@ Eligible sources:
 - Public Skyforge Gitea repositories discovered by the server.
 - Public repository templates that are KNE-compatible and live under `netlab/`
   or `labs/`.
-- Training labs from `craigjohnson/skyforge-training/labs`, tagged with
-  `training`, `public`, and `forward-sync`.
+- Training labs from `craigjohnson/skyforge-training/labs`, tagged only with
+  `training`.
+- The six known-good blueprint launchers are tagged only with `curated`.
+- Other public Gitea labs are eligible and visible but default to blank tags.
 
 Public Gitea entries carry source metadata so operators can trace them without
 turning the UI into a repo browser:
@@ -84,8 +86,8 @@ Expected:
 - Public Skyforge Gitea labs are present.
 - At least one `training` entry is sourced from
   `craigjohnson/skyforge-training`.
-- Training and other public entries are filterable by topology tags, not by a
-  repo-selection UI.
+- Training and curated entries are filterable by topology tags, not by launch
+  mode or a repo-selection UI.
 
 Before promotion, a candidate topology must pass the static audit, synchronous
 netlab validation, and real quick-deploy runtime certification.
@@ -97,6 +99,9 @@ netlab validation, and real quick-deploy runtime certification.
    for the current user from token `skyforge`.
 3. Skyforge creates a deployment with family/engine `kne` / `netlab` and
    `forwardEnabled=true`.
+   - Quick Deploy marks catalog-selected templates as prevalidated so the HTTP
+     request creates the deployment row and queues work promptly. Regular
+     deployment create/update paths still run synchronous template validation.
 4. Skyforge writes deployment lease metadata via
    `PUT /api/users/:id/deployments/:deploymentID/lease`.
 5. Skyforge queues deployment create action directly (with short retry on
