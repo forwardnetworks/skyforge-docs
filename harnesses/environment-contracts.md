@@ -103,11 +103,11 @@ patches, the deploy script may retry with `--force-conflicts`. Treat that as
 acceptable only when the final Helm release is `deployed` and rollout/image
 checks pass.
 
-For QA only, older chart history can leave resources that Kubernetes cannot
-patch in place, such as Forward volume mount `subPath` drift or immutable
-StatefulSet volume specs. Use `SKYFORGE_HELM_FORCE=true` with the QA deploy
-profile only when the rendered chart is correct and the failure is a
-replace-not-patch conflict. Do not use this as a default prod rollout mode.
+For QA only, older chart history can leave workload controllers that Kubernetes
+cannot patch in place, such as Forward volume mount `subPath` drift or immutable
+StatefulSet volume specs. Do not use release-wide Helm force replacement for
+Skyforge because the release owns bound PVCs. Replace only the stale workload
+controllers, preserve PVCs, and rerun the normal environment deploy.
 
 ## Local AI harness routing
 
