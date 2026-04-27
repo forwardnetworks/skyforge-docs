@@ -30,6 +30,12 @@ external port and shared VIP, the Helm chart fails before rollout.
 
 ## UI Workflow
 
+Open **Settings** and save **Your SSH public key** in the **SSH Keys** card.
+This is the user's workstation public key and is also the key they should use
+for their Gitea account SSH access. Skyforge keeps the generated deploy key
+separate because its private half is used only by Skyforge automation when
+cloning SSH template repos.
+
 Open a deployment and select **Management**. The page shows:
 
 - current KNE namespace and topology name
@@ -59,8 +65,9 @@ Then connect to a lab node:
 ssh -J <skyforge-username>@skyforge-fwd.dc.forwardnetworks.com admin@<node>.<deployment-id>.<user-scope>.skyforge.access
 ```
 
-When prompted for the jump-host password, use a Skyforge API token. Target node
-credentials remain the device credentials from the lab image/template.
+When prompted for the jump-host password, use a Skyforge API token if no
+personal SSH public key is saved. Target node credentials remain the device
+credentials from the lab image/template.
 
 ## WebSocket Fallback
 
