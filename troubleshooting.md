@@ -205,6 +205,7 @@ SKYFORGE_NAMESPACE=skyforge SKYFORGE_FORWARD_NAMESPACE=forward \
 Deployment guardrail:
 - `scripts/deploy-skyforge-prod-safe.sh` now enforces `scripts/lib/forward-db-auth.sh::forward_enforce_pg_secret_source_of_truth` before Forward workload restarts.
 - That guard treats Kubernetes secrets as the source of truth, reconciles Postgres role passwords from those secrets, and now also reconciles the external Skyforge Postgres role grants for `fwd_app` / `fwd_fdb` when `database.mode=external`.
+- DB role reconciliation is controlled by `FORWARD_RECONCILE_DB_USERS` and defaults to enabled. Do not tie it to `FORWARD_APPLY_SUPPORT_DEFAULTS`; QA may skip org/support seeding while still needing database roles repaired from the secret source of truth.
 - It fails closed if any service-level login check fails (`fwd-pg-app`, `fwd-pg-fdb-0`, `fwd-pg-fdb-1`) or if the external DB login contract cannot be re-established from the secret values.
 - Username contract is strict on both keys (`username` and `user`) for `postgres.fwd-pg-*.credentials`.
 - `scripts/deploy-skyforge-prod-safe.sh` now hard-fails if any Forward pod reports `ErrImagePull` or `ImagePullBackOff` after Forward reconciliation.
