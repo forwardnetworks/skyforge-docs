@@ -50,7 +50,7 @@ Netlab **(BYOS)** is a separate provider that runs on a user-supplied Netlab ser
   - writing manifest + node/shared/startup/license/output ConfigMaps
   - best-effort per-topology image warm-up (DaemonSet pre-pull in topology namespace)
   - creating/updating the kne `Topology` CR
-  - waiting for topology readiness
+  - waiting for topology readiness and realized KNE data interfaces
   - running netlab apply (`netlab initial` and device-specific semantics)
   - defaulting `netlab initial` to `--fast` (Ansible free strategy) unless explicitly overridden
 - For deployment-scoped KNE runs, the native netlab KNE provider must honor
@@ -207,6 +207,18 @@ cd skyforge
 5) **Apply to Kubernetes**
    - Uses a per-user namespace (`ws-<userScopeSlug>`) to isolate resources.
    - `kne_cli create` is the bounded creation phase; Skyforge then waits on pod/runtime readiness rather than treating CR status alone as final success.
+   - Successful pod readiness is not sufficient for task success. Runtime and
+     taskengine must also verify that each non-management
+     `Topology.spec.links[].local_intf` exists inside the corresponding node pod
+     before `netlab initial` runs and before a KNE deployment is marked
+     successful.
+   - If a link is skipped or only one side is realized, fail the deployment with
+     `meshnet-link-interface` instead of publishing a Forward collection-ready
+     deployment. The expected symptom is missing entries such as `h2:eth1` or
+     `pe2:eth2`.
+   - Do not fix this class by editing EOS or topology templates. Missing Linux
+     host interfaces or missing cEOS peer interfaces are KNE/meshnet realization
+     failures, not NOS configuration failures.
    - Skyforge now marks KNE runtime namespaces as ephemeral runtime namespaces with:
      - label `skyforge.forwardnetworks.com/ephemeral-runtime=true`
      - purpose label `skyforge.forwardnetworks.com/runtime-purpose=<kne-runtime|kne-topology>`
