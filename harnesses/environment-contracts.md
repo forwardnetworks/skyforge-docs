@@ -39,6 +39,8 @@ VALUES_FILE=deploy/skyforge-values-prod-labpp-sales-prod01.yaml ./scripts/show-s
 - Skyforge: `https://skyforge.local.forwardnetworks.com`
 - Forward: `https://skyforge-fwd.local.forwardnetworks.com`
 - Expected Skyforge DNS/VIP: `10.128.16.80`
+- Host: `arch@skyforge-worker-0`
+- Kubeconfig source on host: `/etc/rancher/k3s/k3s.yaml`
 - Deploy env: `deploy/environments/qa.env`
 - Deploy command: `SKYFORGE_ALLOW_PROD_DEPLOY=true ./scripts/deploy-skyforge-env.sh qa`
 
@@ -102,6 +104,29 @@ If a prod deploy hits server-side apply ownership conflicts from runtime
 patches, the deploy script may retry with `--force-conflicts`. Treat that as
 acceptable only when the final Helm release is `deployed` and rollout/image
 checks pass.
+
+## Stateful Backup Guard
+
+Existing QA/prod releases must not recreate stateful PVCs during deploy. The
+deploy script now fails closed before Helm if critical PVCs such as `db-data`,
+`platform-data`, `skyforge-server-data`, `redis-data`, `gitea-data`, or
+`s3gw-data` are missing or unbound. Use `SKYFORGE_ALLOW_STATEFUL_RECREATE=true`
+only as a single-command break-glass override after taking an explicit backup.
+
+Existing releases also require a fresh non-empty Postgres backup before Helm:
+
+```bash
+find /var/lib/skyforge/local-backups/skyforge-backups/postgres \
+  /mnt/hetzner-wireguard/skyforge-backups/skyforge-worker-0/skyforge-backups/postgres \
+  -maxdepth 1 -type f -name 'skyforge-postgres-*.sql.gz' \
+  -printf '%TY-%Tm-%Td %TT %s %p\n' | sort | tail
+```
+
+The `backup-postgres-s3` CronJob owns the dump and object-store upload. The
+`backup-local-spread` DaemonSet mirrors `s3gw` backups to node-local storage,
+and `backup-offsite-raw` mirrors that local root to the offsite mount. If a
+restore replaces `s3gw-data`, rerun the CronJob or a Helm upgrade so the
+`skyforge-backups` bucket is recreated before the next nightly backup.
 
 For QA only, older chart history can leave workload controllers that Kubernetes
 cannot patch in place, such as Forward volume mount `subPath` drift or immutable
