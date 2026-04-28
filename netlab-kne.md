@@ -194,19 +194,21 @@ the minimal startup shim for cEOS management access and shell-mode config
 execution. Do not patch individual topology files, and do not depend on late
 runtime CLI mutation of cEOS VRF interfaces.
 
-For KNE cEOS specifically, Linux-host-facing physical Ethernet interfaces can be
-placed directly into an EOS VRF. If the interface is up/up with an IP address but
-`show ip interface EthernetX` reports `IPv4 interface forwarding: disabled`,
-the failure is EOS config application order, not a topology-model problem.
-Skyforge keeps the direct routed Ethernet model from upstream netlab and fixes
-the KNE source template ordering in
-`vendor/netlab/netsim/templates/provider/kne/eos/initial.j2`: create VRF
-instances first, render the direct physical interfaces with addresses, then
-enable `ip routing vrf <vrf>`. Do not convert VRF stub links into access
-VLANs/SVIs, do not add `/etc/netlab/templates/eos/initial.j2` runtime overrides,
-and do not patch running cEOS config after deployment. `netlab create` renders
-KNE `node_files/*/initial` through the packaged provider-specific template, and
-Skyforge deploys those generated `node_files` with `netlab initial --fast`.
+For KNE cEOS specifically, VRF-bound Linux stub links are provider-rendered as
+untagged access VLANs with VRF SVIs. Live validation showed cEOS accepts a direct
+`vrf <name>` physical Ethernet config, but the interface does not attach to the
+VRF dataplane: `show vrf` omits the interface, `show ip interface EthernetX`
+reports `IPv4 interface forwarding: disabled`, and host ARP remains incomplete.
+The KNE EOS provider owns this cEOS-specific data-plane adaptation in
+`vendor/netlab/netsim/templates/provider/kne/eos/initial.j2`: stub physical
+interfaces become access ports, the gateway address moves to `Vlan<id>`, and
+the access port must not receive `platform tfa phy control-frame disabled`.
+Keep generic EOS runtime templates direct/upstream-aligned; do not add
+`/etc/netlab/templates/eos/initial.j2` runtime overrides, do not patch
+individual topologies, and do not mutate running cEOS config after deployment.
+`netlab create` renders KNE `node_files/*/initial` through the packaged
+provider-specific template, and Skyforge deploys those generated `node_files`
+with `netlab initial --fast`.
 
 ```bash
 cd skyforge
