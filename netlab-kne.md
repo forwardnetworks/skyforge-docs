@@ -194,15 +194,13 @@ the minimal startup shim for cEOS management access and shell-mode config
 execution. Do not patch individual topology files, and do not depend on late
 runtime CLI mutation of cEOS VRF interfaces.
 
-For KNE cEOS specifically, VRF-bound Linux stub links are provider-rendered as
-untagged access VLANs with VRF SVIs. Live validation showed cEOS accepts a direct
-`vrf <name>` physical Ethernet config, but the interface does not attach to the
-VRF dataplane: `show vrf` omits the interface, `show ip interface EthernetX`
-reports `IPv4 interface forwarding: disabled`, and host ARP remains incomplete.
-The KNE EOS provider owns this cEOS-specific data-plane adaptation in
-`vendor/netlab/netsim/templates/provider/kne/eos/initial.j2`: stub physical
-interfaces become access ports, the gateway address moves to `Vlan<id>`, and
-the access port must not receive `platform tfa phy control-frame disabled`.
+For KNE cEOS specifically, data-plane interface realization belongs to the
+CEOSLab operator, not to netlab topology rewrites or Skyforge taskengine
+patching. The operator must start cEOS with the same interface bootstrap used
+by validated containerlab runs: `CLAB_INTFS=1`, `MAPETH0=1`, and
+`MGMT_INTF=eth0`, alongside `INTFTYPE=eth`. With those runtime defaults, direct
+physical Ethernet VRF interfaces attach to the cEOS dataplane and learn host
+ARP/MAC state without provider-rendered access VLAN/SVI substitutions.
 Keep generic EOS runtime templates direct/upstream-aligned; do not add
 `/etc/netlab/templates/eos/initial.j2` runtime overrides, do not patch
 individual topologies, and do not mutate running cEOS config after deployment.
