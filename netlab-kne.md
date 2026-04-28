@@ -194,20 +194,19 @@ the minimal startup shim for cEOS management access and shell-mode config
 execution. Do not patch individual topology files, and do not depend on late
 runtime CLI mutation of cEOS VRF interfaces.
 
-For KNE cEOS specifically, do not place a Linux-host-facing physical Ethernet
-interface directly into an EOS VRF. On cEOSLab/KNE, that state can show the
-interface as up/up with an IP address while `show ip interface EthernetX`
-reports `IPv4 interface forwarding: disabled`; Linux endpoint ARP reaches the
-cEOS container but EOS does not answer, so Forward cannot learn the endpoint.
-The Skyforge runtime EOS initial template keeps the topology model unchanged but
-renders VRF `stub` links as an access VLAN plus `Vlan<ID>` SVI in the same VRF.
-That preserves VRF semantics and gives Forward both `show ip arp vrf all` and
-`show mac address-table` evidence for the endpoint. The durable override is
-`/etc/netlab/templates/eos/initial.j2`, not only
-`/etc/netlab/templates/initial/eos.j2`: `netlab create` renders KNE
-`node_files/*/initial` through the provider-specific `templates/eos/initial.j2`
-path before falling back to the packaged KNE provider template, and Skyforge
-deploys those generated `node_files` with `netlab initial --fast`.
+For KNE cEOS specifically, Linux-host-facing physical Ethernet interfaces can be
+placed directly into an EOS VRF. If the interface is up/up with an IP address but
+`show ip interface EthernetX` reports `IPv4 interface forwarding: disabled`,
+the failure is EOS config application order, not a topology-model problem.
+Skyforge keeps the direct routed Ethernet model from upstream netlab and fixes
+the KNE source template ordering in
+`vendor/netlab/netsim/templates/provider/kne/eos/initial.j2`: create VRF
+instances first, render the direct physical interfaces with addresses, then
+enable `ip routing vrf <vrf>`. Do not convert VRF stub links into access
+VLANs/SVIs, do not add `/etc/netlab/templates/eos/initial.j2` runtime overrides,
+and do not patch running cEOS config after deployment. `netlab create` renders
+KNE `node_files/*/initial` through the packaged provider-specific template, and
+Skyforge deploys those generated `node_files` with `netlab initial --fast`.
 
 ```bash
 cd skyforge
